@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Documind
 
-## Getting Started
+Documind is an end-to-end document intelligence application that allows users to upload documents, automatically extract knowledge, and interact with them using natural language queries. It combines semantic search (Qdrant), graph relationships (Neo4j), and LLM reasoning into a single unified experience.
 
-First, run the development server:
+## Application Workflow – Document Q&A with Graph + Vector Search
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 1. Uploading a Document
+- User uploads a document (PDF, DOCX, TXT, etc.) from the Next.js frontend.
+- The app backend (API route) does the following:
+  1. Stores the raw file in **Azure Blob Storage**.
+  2. Creates a **document record** in **MongoDB** with:
+     - docId
+     - filename
+     - blobUrl
+     - uploadedAt timestamp
+  3. Extracts the text from the file.
+  4. Splits text into smaller **chunks** (e.g., 500 tokens).
+  5. Generates embeddings for each chunk and stores them in **Qdrant**:
+     - vector
+     - chunk text
+     - docId reference
+  6. Runs entity & relationship extraction on text (via LLM or NLP).
+  7. Creates nodes and relationships in **Neo4j**:
+     - `(:Document)-[:CONTAINS]->(:Chunk)`
+     - `(:Chunk)-[:MENTIONS]->(:Entity)`
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 2. Asking Questions
+- User types a natural language question in the UI.
+- The backend flow:
+  1. Embed the query into a vector.
+  2. Search **Qdrant** for top-k similar chunks.
+  3. Fetch related entities & relationships from **Neo4j**.
+  4. Combine results into a **context package**.
+  5. Pass context + user query to **LLM**.
+  6. Return answer + supporting details.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+### 3. Viewing the Graph
+- User can open a graph visualization page in the app.
+- The backend queries **Neo4j** for:
+  - All nodes (documents, chunks, entities).
+  - All edges (CONTAINS, MENTIONS, RELATED_TO).
+- The frontend renders the graph (Cytoscape.js or D3.js).
+- Clicking on a node shows additional info:
+  - Document node → filename, metadata.
+  - Chunk node → original text passage.
+  - Entity node → name, relationships.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 4. Deleting a Document
+- User selects "Delete document".
+- Backend removes document from all systems:
+  1. **Azure Blob** → deletes raw file.
+  2. **MongoDB** → deletes metadata record.
+  3. **Qdrant** → deletes all vectors where `docId = ...`.
+  4. **Neo4j** → deletes document node and all connected relationships.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+### 5. System Components
+- **Next.js Frontend** → UI for upload, Q&A, graph view, delete.
+- **Azure Blob Storage** → Raw file storage.
+- **MongoDB** → Metadata management (doc info, user info).
+- **Qdrant** → Vector database for semantic similarity search.
+- **Neo4j** → Knowledge graph for entity/relationship storage + visualization.
+- **LLM (OpenAI / Gemini / Ollama)** → Embeddings + Q&A reasoning.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 6. Example Flow
+1. Upload `contract.pdf`.
+   - Stored in Blob → docId = `doc_123`.
+   - Text chunks embedded → stored in Qdrant.
+   - Entities extracted (e.g., `John Doe`, `Company X`) → stored in Neo4j.
+2. Ask: *"Who is the contract between?"*
+   - Query embedding → Qdrant finds relevant chunk.
+   - Neo4j shows entities linked to that chunk.
+   - LLM answers: *"The contract is between John Doe and Company X."*
+3. View graph:
+   - Document node connected to `Chunk1`.
+   - `Chunk1` connected to `Entity: John Doe` and `Entity: Company X`.
+4. Delete document:
+   - Removes from Blob, MongoDB, Qdrant, Neo4j.
+
+---
