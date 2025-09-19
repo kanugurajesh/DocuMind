@@ -2,6 +2,31 @@
 
 import React, { useState } from 'react';
 import { DocumentCardProps } from '@/types';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import {
+  FileText,
+  File,
+  MoreVertical,
+  Trash2,
+  Download,
+  Eye,
+  Calendar,
+  HardDrive,
+  FileType,
+  Loader2,
+  AlertCircle,
+  CheckCircle,
+  Clock
+} from 'lucide-react';
 
 export function DocumentCard({ document, onDelete, onClick }: DocumentCardProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -29,42 +54,44 @@ export function DocumentCard({ document, onDelete, onClick }: DocumentCardProps)
     }).format(new Date(date));
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusVariant = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-100 text-green-800';
+        return 'success';
       case 'processing':
-        return 'bg-blue-100 text-blue-800';
+        return 'processing';
       case 'failed':
-        return 'bg-red-100 text-red-800';
+        return 'destructive';
       case 'pending':
       default:
-        return 'bg-yellow-100 text-yellow-800';
+        return 'warning';
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return <CheckCircle className="h-3 w-3" />;
+      case 'processing':
+        return <Loader2 className="h-3 w-3 animate-spin" />;
+      case 'failed':
+        return <AlertCircle className="h-3 w-3" />;
+      case 'pending':
+      default:
+        return <Clock className="h-3 w-3" />;
     }
   };
 
   const getFileIcon = (fileType: string) => {
     if (fileType.includes('pdf')) {
-      return (
-        <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M4 18h12V6l-4-4H4v16zm8-14v4h4l-4-4z" />
-        </svg>
-      );
+      return <FileText className="w-6 h-6 text-red-500" />;
     }
 
     if (fileType.includes('word') || fileType.includes('document')) {
-      return (
-        <svg className="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M4 18h12V6l-4-4H4v16zm8-14v4h4l-4-4z" />
-        </svg>
-      );
+      return <FileText className="w-6 h-6 text-blue-500" />;
     }
 
-    return (
-      <svg className="w-6 h-6 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-        <path d="M4 18h12V6l-4-4H4v16zm8-14v4h4l-4-4z" />
-      </svg>
-    );
+    return <File className="w-6 h-6 text-muted-foreground" />;
   };
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -83,122 +110,120 @@ export function DocumentCard({ document, onDelete, onClick }: DocumentCardProps)
   };
 
   return (
-    <div
-      className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer"
-      onClick={onClick}
-    >
-      <div className="flex items-start justify-between">
-        <div className="flex items-start space-x-4 flex-1">
-          {/* File Icon */}
-          <div className="flex-shrink-0 mt-1">
-            {getFileIcon(document.fileType)}
-          </div>
-
-          {/* Document Info */}
-          <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-medium text-gray-900 truncate">
-              {document.filename}
-            </h3>
-
-            <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500">
-              <span>{formatFileSize(document.fileSize)}</span>
-              <span>•</span>
-              <span>{formatDate(document.uploadedAt)}</span>
+    <Card className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={onClick}>
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start space-x-4 flex-1">
+            {/* File Icon */}
+            <div className="flex-shrink-0 mt-1">
+              {getFileIcon(document.fileType)}
             </div>
 
-            {/* Metadata */}
-            {document.metadata && (
-              <div className="mt-2 text-sm text-gray-600">
-                {document.metadata.pageCount && (
-                  <span>{document.metadata.pageCount} pages</span>
-                )}
-                {document.metadata.wordCount && (
-                  <span>
-                    {document.metadata.pageCount ? ' • ' : ''}
-                    {document.metadata.wordCount.toLocaleString()} words
-                  </span>
-                )}
+            {/* Document Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="text-lg font-semibold truncate">
+                  {document.filename}
+                </h3>
+                <Badge variant={getStatusVariant(document.processingStatus)} className="ml-auto">
+                  {getStatusIcon(document.processingStatus)}
+                  <span className="ml-1 capitalize">{document.processingStatus}</span>
+                </Badge>
               </div>
-            )}
 
-            {/* Error Message */}
-            {document.processingStatus === 'failed' && document.errorMessage && (
-              <div className="mt-2 text-sm text-red-600">
-                Error: {document.errorMessage}
+              <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-3">
+                <div className="flex items-center gap-1">
+                  <HardDrive className="h-3 w-3" />
+                  <span>{formatFileSize(document.fileSize)}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  <span>{formatDate(document.uploadedAt)}</span>
+                </div>
               </div>
-            )}
+
+              {/* Metadata */}
+              {document.metadata && (
+                <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-2">
+                  {document.metadata.pageCount && (
+                    <div className="flex items-center gap-1">
+                      <FileType className="h-3 w-3" />
+                      <span>{document.metadata.pageCount} pages</span>
+                    </div>
+                  )}
+                  {document.metadata.wordCount && (
+                    <div className="flex items-center gap-1">
+                      <FileText className="h-3 w-3" />
+                      <span>{document.metadata.wordCount.toLocaleString()} words</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Error Message */}
+              {document.processingStatus === 'failed' && document.errorMessage && (
+                <div className="mt-2 p-2 bg-destructive/10 rounded-md">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-destructive" />
+                    <p className="text-sm text-destructive">
+                      {document.errorMessage}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Status and Actions */}
-        <div className="flex items-center space-x-3">
-          {/* Processing Status */}
-          <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-              document.processingStatus
-            )}`}
-          >
-            {document.processingStatus === 'processing' && (
-              <svg
-                className="animate-spin -ml-1 mr-1 h-3 w-3"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
+          {/* Actions Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => e.stopPropagation()}
               >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
-            )}
-            {document.processingStatus.charAt(0).toUpperCase() + document.processingStatus.slice(1)}
-          </span>
-
-          {/* Delete Button */}
-          <div className="flex items-center space-x-2">
-            {showDeleteConfirm ? (
-              <>
-                <button
+                <MoreVertical className="h-4 w-4" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick?.(); }}>
+                <Eye className="mr-2 h-4 w-4" />
+                View Details
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                <Download className="mr-2 h-4 w-4" />
+                Download
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              {showDeleteConfirm ? (
+                <>
+                  <DropdownMenuItem
+                    onClick={handleDelete}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <CheckCircle className="mr-2 h-4 w-4" />
+                    Confirm Delete
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleCancelDelete}>
+                    <X className="mr-2 h-4 w-4" />
+                    Cancel
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <DropdownMenuItem
                   onClick={handleDelete}
-                  className="text-red-600 hover:text-red-800 text-sm font-medium"
+                  className="text-destructive focus:text-destructive"
                 >
-                  Confirm
-                </button>
-                <button
-                  onClick={handleCancelDelete}
-                  className="text-gray-500 hover:text-gray-700 text-sm"
-                >
-                  Cancel
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={handleDelete}
-                className="text-gray-400 hover:text-red-500 p-1 rounded"
-                title="Delete document"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
-              </button>
-            )}
-          </div>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

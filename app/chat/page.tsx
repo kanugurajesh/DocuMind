@@ -3,9 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { ChatInterface } from '@/components/chat/ChatInterface';
+import { AppLayout } from '@/components/layout/app-layout';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { ChatMessage } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
+import Link from 'next/link';
+import { Trash2, ArrowLeft } from 'lucide-react';
 
 export default function ChatPage() {
   const { user, isLoaded } = useUser();
@@ -118,88 +123,86 @@ export default function ChatPage() {
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
+      <AppLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </AppLayout>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Sign In Required</h1>
-          <p className="text-gray-600 mb-6">Please sign in to access the chat interface.</p>
-          <a
-            href="/sign-in"
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Sign In
-          </a>
+      <AppLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="p-8 text-center max-w-md mx-auto">
+            <h1 className="text-2xl font-bold mb-4">Sign In Required</h1>
+            <p className="text-muted-foreground mb-6">
+              Please sign in to access the chat interface and interact with your documents.
+            </p>
+            <Button asChild>
+              <Link href="/sign-in">Sign In</Link>
+            </Button>
+          </Card>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <AppLayout>
+      <div className="container mx-auto px-4 py-6 h-[calc(100vh-4rem)]">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Document Chat</h1>
-            <p className="text-gray-600 mt-1">
-              Ask questions about your documents and get intelligent answers
+            <h1 className="text-3xl font-bold mb-2">Document Chat</h1>
+            <p className="text-muted-foreground">
+              Ask questions about your documents and get intelligent answers with sources
             </p>
           </div>
 
-          <div className="flex items-center space-x-4">
-            {/* Clear Chat */}
-            <button
+          <div className="flex items-center space-x-3">
+            <Button
+              variant="outline"
+              size="sm"
               onClick={clearChat}
-              className="text-gray-500 hover:text-gray-700 text-sm font-medium flex items-center space-x-1"
+              className="flex items-center gap-2"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-              <span>Clear Chat</span>
-            </button>
+              <Trash2 className="h-4 w-4" />
+              Clear Chat
+            </Button>
 
-            {/* Back to Dashboard */}
-            <a
-              href="/dashboard"
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-            >
-              Back to Dashboard
-            </a>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/dashboard" className="flex items-center gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                Dashboard
+              </Link>
+            </Button>
           </div>
         </div>
 
         {/* Error Alert */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
-            <div className="flex">
-              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">Chat Error</h3>
-                <p className="text-sm text-red-700 mt-1">{error}</p>
+          <Card className="mb-6 border-destructive/50 bg-destructive/5">
+            <div className="flex items-start gap-3 p-4">
+              <div className="flex-1">
+                <h3 className="font-medium text-destructive">Chat Error</h3>
+                <p className="text-sm text-destructive/80 mt-1">{error}</p>
               </div>
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setError(null)}
-                className="ml-auto flex-shrink-0 text-red-400 hover:text-red-600"
+                className="h-8 w-8 text-destructive hover:text-destructive/80"
               >
-                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
+                ×
+              </Button>
             </div>
-          </div>
+          </Card>
         )}
 
         {/* Chat Interface */}
-        <div style={{ height: 'calc(100vh - 240px)' }}>
+        <div className="h-[calc(100vh-240px)]">
           <ChatInterface
             onMessageSend={handleMessageSend}
             messages={messages}
@@ -208,6 +211,6 @@ export default function ChatPage() {
           />
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }

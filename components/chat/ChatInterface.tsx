@@ -4,6 +4,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChatInterfaceProps } from '@/types';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
+import { Card } from '@/components/ui/card';
+import { MessageSquare, Sparkles, Loader2 } from 'lucide-react';
 
 export function ChatInterface({
   onMessageSend,
@@ -19,36 +21,35 @@ export function ChatInterface({
   }, [messages]);
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg shadow-lg">
+    <Card className="flex flex-col h-full">
       {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {messages.length === 0 ? (
           <div className="text-center py-12">
-            <svg
-              className="mx-auto h-16 w-16 text-gray-300"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-              />
-            </svg>
-            <h3 className="mt-4 text-lg font-medium text-gray-900">
+            <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+              <MessageSquare className="h-8 w-8 text-primary" />
+            </div>
+            <h3 className="text-xl font-semibold mb-3">
               Start a conversation
             </h3>
-            <p className="mt-2 text-sm text-gray-500">
-              Ask questions about your uploaded documents and get intelligent answers with sources.
+            <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
+              Ask questions about your uploaded documents and get intelligent answers with precise source citations.
             </p>
-            <div className="mt-6 space-y-2 text-sm text-gray-600">
-              <p><strong>Try asking:</strong></p>
-              <div className="space-y-1">
-                <p>"What are the main topics covered in my documents?"</p>
-                <p>"Summarize the key points from [document name]"</p>
-                <p>"Find information about [specific topic]"</p>
+            <div className="space-y-4 text-sm">
+              <div className="flex items-center justify-center gap-2 text-primary font-medium">
+                <Sparkles className="h-4 w-4" />
+                <span>Try asking:</span>
+              </div>
+              <div className="space-y-3 max-w-md mx-auto">
+                <div className="bg-muted/50 rounded-lg p-3 text-left">
+                  "What are the main topics covered in my documents?"
+                </div>
+                <div className="bg-muted/50 rounded-lg p-3 text-left">
+                  "Summarize the key points from [document name]"
+                </div>
+                <div className="bg-muted/50 rounded-lg p-3 text-left">
+                  "Find information about [specific topic]"
+                </div>
               </div>
             </div>
           </div>
@@ -63,10 +64,12 @@ export function ChatInterface({
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-gray-100 rounded-lg p-4 max-w-3xl">
-                  <div className="flex items-center space-x-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                    <span className="text-sm text-gray-600">Thinking...</span>
+                <div className="bg-muted/50 rounded-2xl rounded-bl-sm p-4 max-w-3xl">
+                  <div className="flex items-center space-x-3">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    <span className="text-sm text-muted-foreground">
+                      Analyzing your documents...
+                    </span>
                   </div>
                 </div>
               </div>
@@ -77,7 +80,7 @@ export function ChatInterface({
       </div>
 
       {/* Chat Input */}
-      <div className="border-t border-gray-200 p-4">
+      <div className="border-t bg-muted/30 p-4">
         <ChatInput
           onSend={onMessageSend}
           disabled={disabled || loading}
@@ -88,6 +91,6 @@ export function ChatInterface({
           }
         />
       </div>
-    </div>
+    </Card>
   );
 }
