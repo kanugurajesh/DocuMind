@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { extractTextFromFile, chunkText, preprocessText } from './processing';
 import { generateEmbeddings } from './embeddings';
 import { processDocumentEntities } from './entities';
-import { insertVectors } from '../db/qdrant';
+import { insertVectors, initializeQdrantCollection } from '../db/qdrant';
 import { createDocumentNode, createChunkNode } from '../db/neo4j';
 import { getDocumentsCollection } from '../db/mongodb';
 import { Document } from '@/types';
@@ -53,23 +53,32 @@ export async function processDocument(
 
     // Step 4: Prepare vector data for Qdrant
     console.log('Step 4: Preparing vector data...');
-    const vectorData = chunks.map((chunk, index) => ({
-      id: `${docId}_${chunk.id}`,
-      vector: embeddings[index],
-      payload: {
-        docId,
-        userId,
-        chunkIndex: chunk.chunkIndex,
-        text: chunk.text,
-        startPosition: chunk.startPosition,
-        endPosition: chunk.endPosition,
-        filename,
-        createdAt: new Date().toISOString(),
-      },
-    }));
+    const vectorData = chunks.map((chunk, index) => {
+      // Generate a proper UUID for Qdrant point ID
+      const pointId = uuidv4();
+
+      return {
+        id: pointId,
+        vector: embeddings[index],
+        payload: {
+          pointId, // Store the UUID in payload for reference
+          docId,
+          userId,
+          chunkId: chunk.id, // Store original chunk ID in payload
+          chunkIndex: chunk.chunkIndex,
+          text: chunk.text,
+          startPosition: chunk.startPosition,
+          endPosition: chunk.endPosition,
+          filename,
+          createdAt: new Date().toISOString(),
+        },
+      };
+    });
 
     // Step 5: Store vectors in Qdrant
     console.log('Step 5: Storing vectors in Qdrant...');
+    // Ensure Qdrant collection exists before inserting vectors
+    await initializeQdrantCollection();
     await insertVectors(vectorData);
 
     // Step 6: Create graph nodes in Neo4j
@@ -79,10 +88,12 @@ export async function processDocument(
     await createDocumentNode(docId, userId, filename);
 
     // Create chunk nodes and relationships
-    for (const chunk of chunks) {
-      const chunkId = `${docId}_${chunk.id}`;
+    for (let i = 0; i < chunks.length; i++) {
+      const chunk = chunks[i];
+      const vectorPoint = vectorData[i];
+
       await createChunkNode(
-        chunkId,
+        vectorPoint.id, // Use the UUID point ID
         docId,
         userId,
         chunk.text,
@@ -150,10 +161,19 @@ async function updateDocumentStatus(
       updateData.$unset = { errorMessage: 1 };
     }
 
-    await documentsCollection.updateOne(
-      { docId },
-      status === 'completed' ? { $set: updateData, $unset: updateData.$unset || {} } : { $set: updateData }
-    );
+    if (status === 'completed' && updateData.$unset) {
+      // Handle completed status with $unset separately
+      const { $unset, ...setData } = updateData;
+      await documentsCollection.updateOne(
+        { docId },
+        { $set: setData, $unset }
+      );
+    } else {
+      await documentsCollection.updateOne(
+        { docId },
+        { $set: updateData }
+      );
+    }
   } catch (error) {
     console.error('Error updating document status:', error);
   }
