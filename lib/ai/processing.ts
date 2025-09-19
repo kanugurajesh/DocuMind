@@ -1,4 +1,3 @@
-import pdfParse from 'pdf-parse';
 import mammoth from 'mammoth';
 import { downloadFile } from '../storage/s3';
 
@@ -41,24 +40,52 @@ export async function extractTextFromFile(
   }
 }
 
-// Extract text from PDF
+// Extract text from PDF using LangChain
 async function extractTextFromPDF(buffer: Buffer): Promise<ExtractedContent> {
   try {
-    const data = await pdfParse(buffer);
+    // Ensure buffer is valid
+    if (!buffer || !Buffer.isBuffer(buffer)) {
+      throw new Error('Invalid buffer provided to PDF parser');
+    }
+
+    console.log(`Processing PDF buffer of size: ${buffer.length} bytes`);
+
+    // Use LangChain's PDF loader
+    const { PDFLoader } = await import('@langchain/community/document_loaders/fs/pdf');
+
+    // Create a Blob from the buffer for LangChain
+    const blob = new Blob([buffer], { type: 'application/pdf' });
+
+    // Create PDF loader instance
+    const loader = new PDFLoader(blob, {
+      splitPages: false, // We want all text in one document
+      parsedItemSeparator: '\n', // Separate items with newlines
+    });
+
+    // Load and parse the PDF
+    const docs = await loader.load();
+
+    // Combine all document content
+    const extractedText = docs.map(doc => doc.pageContent).join('\n\n');
+
+    // Extract metadata from the first document if available
+    const metadata = docs[0]?.metadata || {};
 
     return {
-      text: data.text,
+      text: extractedText,
       metadata: {
-        pageCount: data.numpages,
-        wordCount: data.text.split(/\s+/).length,
-        title: data.info?.Title || undefined,
-        author: data.info?.Author || undefined,
-        subject: data.info?.Subject || undefined,
+        pageCount: docs.length,
+        wordCount: extractedText.split(/\s+/).filter(word => word.length > 0).length,
+        title: metadata.title || undefined,
+        author: metadata.author || undefined,
+        subject: metadata.subject || undefined,
       },
     };
   } catch (error) {
-    console.error('Error parsing PDF:', error);
-    throw new Error('Failed to extract text from PDF');
+    console.error('Error parsing PDF with LangChain:', error);
+    console.error('Buffer info:', buffer ? `Buffer length: ${buffer.length}` : 'No buffer provided');
+
+    throw new Error(`Failed to extract text from PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 

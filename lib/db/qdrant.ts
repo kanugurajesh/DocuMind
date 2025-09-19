@@ -117,14 +117,43 @@ export async function insertVectors(vectors: any[]) {
   const client = getQdrantClient();
 
   try {
+    // Log vector data structure for debugging
+    console.log('Inserting vectors:', {
+      count: vectors.length,
+      sampleVector: vectors[0] ? {
+        id: vectors[0].id,
+        vectorLength: vectors[0].vector?.length,
+        payloadKeys: Object.keys(vectors[0].payload || {}),
+      } : 'No vectors to insert'
+    });
+
+    // Validate vector format
+    for (const vector of vectors) {
+      if (!vector.id) {
+        throw new Error('Vector missing required id field');
+      }
+      if (!vector.vector || !Array.isArray(vector.vector)) {
+        throw new Error(`Vector ${vector.id} missing or invalid vector field`);
+      }
+      if (vector.vector.length === 0) {
+        throw new Error(`Vector ${vector.id} has empty vector array`);
+      }
+    }
+
     const response = await client.upsert(COLLECTION_NAME, {
       wait: true,
       points: vectors,
     });
 
+    console.log('Successfully inserted vectors:', response);
     return response;
   } catch (error) {
     console.error('Error inserting vectors:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      status: (error as any)?.status,
+      data: (error as any)?.data,
+    });
     throw error;
   }
 }
