@@ -3,6 +3,10 @@
 import React from 'react';
 import { DocumentListProps } from '@/types';
 import { DocumentCard } from './DocumentCard';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { FileText, Upload } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export function DocumentList({
   documents,
@@ -14,15 +18,22 @@ export function DocumentList({
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-white rounded-lg shadow-md p-6 animate-pulse">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="h-4 bg-gray-300 rounded w-1/3"></div>
-                <div className="h-3 bg-gray-300 rounded w-1/4"></div>
+          <Card key={i}>
+            <CardContent className="p-6">
+              <div className="flex items-start space-x-4">
+                <Skeleton className="h-6 w-6 rounded" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-5 w-1/2" />
+                  <div className="flex space-x-4">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                  <Skeleton className="h-4 w-1/3" />
+                </div>
+                <Skeleton className="h-6 w-16 rounded-full" />
               </div>
-              <div className="h-4 bg-gray-300 rounded w-20"></div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
     );
@@ -30,24 +41,18 @@ export function DocumentList({
 
   if (documents.length === 0) {
     return (
-      <div className="text-center py-12">
-        <svg
-          className="mx-auto h-16 w-16 text-gray-300"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-          />
-        </svg>
-        <h3 className="mt-4 text-lg font-medium text-gray-900">No documents yet</h3>
-        <p className="mt-2 text-sm text-gray-500">
-          Upload your first document to get started with intelligent document analysis.
+      <div className="text-center py-16">
+        <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-muted flex items-center justify-center">
+          <FileText className="h-8 w-8 text-muted-foreground" />
+        </div>
+        <h3 className="text-xl font-semibold mb-3">No documents yet</h3>
+        <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+          Upload your first document to get started with intelligent document analysis and AI-powered insights.
         </p>
+        <Button className="gap-2">
+          <Upload className="h-4 w-4" />
+          Upload Documents
+        </Button>
       </div>
     );
   }

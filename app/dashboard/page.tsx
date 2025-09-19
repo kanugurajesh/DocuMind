@@ -4,8 +4,25 @@ import { useUser } from '@clerk/nextjs';
 import { useEffect, useState } from 'react';
 import { DocumentUpload } from '@/components/documents/DocumentUpload';
 import { DocumentList } from '@/components/documents/DocumentList';
+import { AppLayout } from '@/components/layout/app-layout';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Document } from '@/types';
 import axios from 'axios';
+import Link from 'next/link';
+import {
+  Upload,
+  MessageSquare,
+  BarChart3,
+  FileText,
+  TrendingUp,
+  Users,
+  RefreshCw,
+  Plus,
+  AlertCircle,
+  X
+} from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
@@ -61,147 +78,225 @@ export default function DashboardPage() {
 
   if (!isLoaded || !user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
+      <AppLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </AppLayout>
     );
   }
 
+  // Calculate statistics
+  const completedDocs = documents.filter(doc => doc.processingStatus === 'completed').length;
+  const processingDocs = documents.filter(doc => doc.processingStatus === 'processing').length;
+  const totalWords = documents.reduce((sum, doc) => sum + (doc.metadata?.wordCount || 0), 0);
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <AppLayout>
+      <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome to Documind, {user.firstName}!
+          <h1 className="text-3xl font-bold mb-2">
+            Welcome back, {user.firstName}!
           </h1>
-          <p className="text-gray-600 mt-2">
-            Upload documents, extract knowledge, and interact using natural language queries.
+          <p className="text-muted-foreground">
+            Manage your documents and explore your knowledge base with AI-powered insights.
           </p>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
-            <div className="flex">
-              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">Error</h3>
-                <p className="text-sm text-red-700 mt-1">{error}</p>
+          <Card className="mb-6 border-destructive/50 bg-destructive/5">
+            <CardContent className="flex items-start gap-3 p-4">
+              <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
+              <div className="flex-1">
+                <h3 className="font-medium text-destructive">Error</h3>
+                <p className="text-sm text-destructive/80 mt-1">{error}</p>
               </div>
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setError(null)}
-                className="ml-auto flex-shrink-0 text-red-400 hover:text-red-600"
+                className="h-8 w-8 text-destructive hover:text-destructive/80"
               >
-                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
-          </div>
+                <X className="h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
         )}
+
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Documents</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{documents.length}</div>
+              <p className="text-xs text-muted-foreground">
+                {completedDocs} processed
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Processing</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{processingDocs}</div>
+              <p className="text-xs text-muted-foreground">
+                Documents in queue
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Words</CardTitle>
+              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalWords.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">
+                Across all documents
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Account</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">Free</div>
+              <p className="text-xs text-muted-foreground">
+                Plan
+              </p>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <button
-            onClick={() => setShowUpload(!showUpload)}
-            className="bg-white rounded-lg shadow-md p-6 text-left hover:shadow-lg transition-shadow"
-          >
-            <div className="flex items-center space-x-3">
-              <div className="bg-blue-100 rounded-full p-2">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => setShowUpload(!showUpload)}>
+            <CardHeader>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                  <Upload className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Upload Documents</CardTitle>
+                  <CardDescription>Add new files to your knowledge base</CardDescription>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Upload Documents</h3>
-                <p className="text-sm text-gray-600">Add new files to your knowledge base</p>
-              </div>
-            </div>
-          </button>
+            </CardHeader>
+          </Card>
 
-          <a
-            href="/chat"
-            className="bg-white rounded-lg shadow-md p-6 text-left hover:shadow-lg transition-shadow block"
-          >
-            <div className="flex items-center space-x-3">
-              <div className="bg-green-100 rounded-full p-2">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Ask Questions</h3>
-                <p className="text-sm text-gray-600">Query your documents with natural language</p>
-              </div>
-            </div>
-          </a>
+          <Link href="/chat">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer group">
+              <CardHeader>
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center group-hover:bg-green-600 transition-colors">
+                    <MessageSquare className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">Ask Questions</CardTitle>
+                    <CardDescription>Query your documents with natural language</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          </Link>
 
-          <a
-            href="/graph"
-            className="bg-white rounded-lg shadow-md p-6 text-left hover:shadow-lg transition-shadow block"
-          >
-            <div className="flex items-center space-x-3">
-              <div className="bg-purple-100 rounded-full p-2">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Knowledge Graph</h3>
-                <p className="text-sm text-gray-600">Visualize document relationships</p>
-              </div>
-            </div>
-          </a>
+          <Link href="/graph">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer group">
+              <CardHeader>
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-lg bg-purple-500 flex items-center justify-center group-hover:bg-purple-600 transition-colors">
+                    <BarChart3 className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">Knowledge Graph</CardTitle>
+                    <CardDescription>Visualize document relationships</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          </Link>
         </div>
 
         {/* Document Upload */}
         {showUpload && (
-          <div className="mb-8">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">Upload Documents</h2>
-                <button
+          <Card className="mb-8">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Upload Documents</CardTitle>
+                  <CardDescription>
+                    Upload PDFs, Word documents, and text files to expand your knowledge base
+                  </CardDescription>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setShowUpload(false)}
-                  className="text-gray-400 hover:text-gray-600"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
+            </CardHeader>
+            <CardContent>
               <DocumentUpload
                 onUploadComplete={handleUploadComplete}
                 onUploadError={handleUploadError}
               />
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Documents Section */}
-        <div>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Your Documents</h2>
-            <button
-              onClick={fetchDocuments}
-              className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center space-x-1"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              <span>Refresh</span>
-            </button>
-          </div>
-
-          <DocumentList
-            documents={documents}
-            onDocumentDelete={handleDocumentDelete}
-            loading={loading}
-          />
-        </div>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Your Documents</CardTitle>
+                <CardDescription>
+                  Manage and organize your uploaded documents
+                </CardDescription>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={fetchDocuments}
+                  disabled={loading}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => setShowUpload(true)}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Upload
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <DocumentList
+              documents={documents}
+              onDocumentDelete={handleDocumentDelete}
+              loading={loading}
+            />
+          </CardContent>
+        </Card>
       </div>
-    </div>
+    </AppLayout>
   );
 }

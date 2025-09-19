@@ -1,6 +1,10 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { SignInButton, SignUpButton } from '@clerk/nextjs';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ArrowRight, FileText, MessageSquare, BarChart3, Upload, Sparkles, Shield, Zap } from 'lucide-react';
 
 export default async function Home() {
   const user = await currentUser();
@@ -11,92 +15,207 @@ export default async function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header */}
-        <header className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            <span className="text-blue-600">Documind</span>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      {/* Hero Section */}
+      <section className="relative">
+        <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
+        <div className="container px-4 py-24 mx-auto text-center">
+          <Badge variant="outline" className="mb-6 text-sm">
+            <Sparkles className="w-3 h-3 mr-1" />
+            AI-Powered Document Intelligence
+          </Badge>
+
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+            Transform documents into
+            <span className="text-primary"> intelligent knowledge</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-            The intelligent document platform that transforms your files into a searchable knowledge base.
-            Upload documents, extract insights, and interact using natural language queries powered by AI.
+
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8 leading-relaxed">
+            Upload documents, extract insights, and interact using natural language queries.
+            Documind turns your files into a searchable, intelligent knowledge base powered by AI.
           </p>
 
-          <div className="flex gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <SignUpButton mode="modal">
-              <button className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+              <Button size="lg" className="text-base px-8">
                 Get Started Free
-              </button>
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </SignUpButton>
             <SignInButton mode="modal">
-              <button className="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+              <Button variant="outline" size="lg" className="text-base px-8">
                 Sign In
-              </button>
+              </Button>
             </SignInButton>
           </div>
-        </header>
 
-        {/* Features */}
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
-          <div className="text-center p-6">
-            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Smart Upload</h3>
-            <p className="text-gray-600">Upload PDFs, Word docs, and text files. We automatically extract and process your content.</p>
-          </div>
-
-          <div className="text-center p-6">
-            <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold mb-2">AI Q&A</h3>
-            <p className="text-gray-600">Ask questions in natural language and get intelligent answers with source citations.</p>
-          </div>
-
-          <div className="text-center p-6">
-            <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Knowledge Graph</h3>
-            <p className="text-gray-600">Visualize relationships between entities and concepts across all your documents.</p>
+          <div className="text-sm text-muted-foreground">
+            No credit card required • Free tier available • Enterprise ready
           </div>
         </div>
+      </section>
 
-        {/* How it works */}
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-12">How Documind Works</h2>
+      {/* Features Grid */}
+      <section className="py-24 bg-muted/30">
+        <div className="container px-4 mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Powerful features for document intelligence
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Everything you need to turn your documents into actionable insights
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
+            <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/50 dark:to-blue-900/50">
+              <CardContent className="p-8">
+                <div className="w-12 h-12 rounded-lg bg-blue-500 flex items-center justify-center mb-6">
+                  <Upload className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-3">Smart Upload</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Upload PDFs, Word docs, and text files. Our AI automatically extracts,
+                  processes, and indexes your content for intelligent search.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/50 dark:to-green-900/50">
+              <CardContent className="p-8">
+                <div className="w-12 h-12 rounded-lg bg-green-500 flex items-center justify-center mb-6">
+                  <MessageSquare className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-3">AI Q&A</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Ask questions in natural language and get intelligent answers
+                  with precise source citations and relevant document excerpts.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-950/50 dark:to-purple-900/50">
+              <CardContent className="p-8">
+                <div className="w-12 h-12 rounded-lg bg-purple-500 flex items-center justify-center mb-6">
+                  <BarChart3 className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-3">Knowledge Graph</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Visualize relationships between entities and concepts across
+                  all your documents with interactive knowledge graphs.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <Card className="border-0 shadow-lg">
+              <CardContent className="p-8 text-center">
+                <div className="w-12 h-12 rounded-lg bg-orange-500 flex items-center justify-center mx-auto mb-6">
+                  <Zap className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-3">Lightning Fast</h3>
+                <p className="text-muted-foreground">
+                  Get instant results with our optimized search and AI processing pipeline.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-lg">
+              <CardContent className="p-8 text-center">
+                <div className="w-12 h-12 rounded-lg bg-red-500 flex items-center justify-center mx-auto mb-6">
+                  <Shield className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-3">Secure & Private</h3>
+                <p className="text-muted-foreground">
+                  Your documents are encrypted and stored securely with enterprise-grade security.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-lg">
+              <CardContent className="p-8 text-center">
+                <div className="w-12 h-12 rounded-lg bg-cyan-500 flex items-center justify-center mx-auto mb-6">
+                  <FileText className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-3">Multi-Format</h3>
+                <p className="text-muted-foreground">
+                  Support for PDF, Word, text files, and more with intelligent content extraction.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* How it Works */}
+      <section className="py-24">
+        <div className="container px-4 mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              How Documind Works
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Four simple steps to unlock the intelligence in your documents
+            </p>
+          </div>
+
           <div className="grid md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-4 font-bold">1</div>
-              <h4 className="font-semibold mb-2">Upload</h4>
-              <p className="text-sm text-gray-600">Upload your documents securely</p>
-            </div>
-            <div className="text-center">
-              <div className="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-4 font-bold">2</div>
-              <h4 className="font-semibold mb-2">Process</h4>
-              <p className="text-sm text-gray-600">AI extracts knowledge and entities</p>
-            </div>
-            <div className="text-center">
-              <div className="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-4 font-bold">3</div>
-              <h4 className="font-semibold mb-2">Query</h4>
-              <p className="text-sm text-gray-600">Ask questions naturally</p>
-            </div>
-            <div className="text-center">
-              <div className="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-4 font-bold">4</div>
-              <h4 className="font-semibold mb-2">Discover</h4>
-              <p className="text-sm text-gray-600">Get intelligent insights</p>
-            </div>
+            {[
+              {
+                step: "01",
+                title: "Upload",
+                description: "Securely upload your documents to our platform",
+                color: "bg-blue-500"
+              },
+              {
+                step: "02",
+                title: "Process",
+                description: "AI extracts knowledge and creates searchable indexes",
+                color: "bg-green-500"
+              },
+              {
+                step: "03",
+                title: "Query",
+                description: "Ask questions using natural language",
+                color: "bg-purple-500"
+              },
+              {
+                step: "04",
+                title: "Discover",
+                description: "Get intelligent insights and visualizations",
+                color: "bg-orange-500"
+              }
+            ].map((item, index) => (
+              <div key={index} className="text-center">
+                <div className={`w-16 h-16 ${item.color} text-white rounded-full flex items-center justify-center mx-auto mb-6 text-lg font-bold shadow-lg`}>
+                  {item.step}
+                </div>
+                <h3 className="text-lg font-semibold mb-3">{item.title}</h3>
+                <p className="text-muted-foreground">{item.description}</p>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 bg-muted/30">
+        <div className="container px-4 mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Ready to transform your documents?
+          </h2>
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Join thousands of users who have unlocked the power of their documents with Documind.
+          </p>
+          <SignUpButton mode="modal">
+            <Button size="lg" className="text-base px-8">
+              Start Your Free Trial
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </SignUpButton>
+        </div>
+      </section>
     </div>
   );
 }
