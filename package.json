@@ -4,11 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
     "start": "next start",
     "lint": "biome check",
     "format": "biome format --write",
-    "vercel-build": "npm install --legacy-peer-deps && next build --turbopack"
+    "build": "npm install --legacy-peer-deps && next build"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.892.0",
