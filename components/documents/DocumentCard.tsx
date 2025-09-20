@@ -22,6 +22,7 @@ import {
   Calendar,
   HardDrive,
   FileType,
+  X,
   Loader2,
   AlertCircle,
   CheckCircle,

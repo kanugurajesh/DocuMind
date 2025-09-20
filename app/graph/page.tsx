@@ -52,6 +52,63 @@ export default function GraphPage() {
     }
   };
 
+  const triggerEntityClustering = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.post('/api/graph/cluster');
+
+      if (response.data.success) {
+        // Refresh graph data after clustering
+        await fetchGraphData();
+      } else {
+        throw new Error(response.data.error || 'Failed to cluster entities');
+      }
+    } catch (error: any) {
+      console.error('Error clustering entities:', error);
+      setError(error.response?.data?.error || error.message || 'Failed to cluster entities');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const triggerDocumentSimilarity = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.post('/api/graph/similarity');
+
+      if (response.data.success) {
+        // Refresh graph data after similarity analysis
+        await fetchGraphData();
+      } else {
+        throw new Error(response.data.error || 'Failed to analyze document similarity');
+      }
+    } catch (error: any) {
+      console.error('Error analyzing document similarity:', error);
+      setError(error.response?.data?.error || error.message || 'Failed to analyze document similarity');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const triggerTopicModeling = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.post('/api/graph/topics');
+
+      if (response.data.success) {
+        // Refresh graph data after topic modeling
+        await fetchGraphData();
+      } else {
+        throw new Error(response.data.error || 'Failed to extract topics');
+      }
+    } catch (error: any) {
+      console.error('Error extracting topics:', error);
+      setError(error.response?.data?.error || error.message || 'Failed to extract topics');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleNodeClick = (nodeId: string, nodeType: string) => {
     if (graphData) {
       const node = graphData.nodes.find(n => n.id === nodeId);
@@ -110,6 +167,42 @@ export default function GraphPage() {
           </div>
 
           <div className="flex items-center space-x-4">
+            {/* Cluster Entities */}
+            <button
+              onClick={triggerEntityClustering}
+              disabled={loading}
+              className="text-purple-600 hover:text-purple-700 text-sm font-medium flex items-center space-x-1"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14-4l3 3-3 3M9 8l3 3-3 3" />
+              </svg>
+              <span>Cluster Entities</span>
+            </button>
+
+            {/* Document Similarity */}
+            <button
+              onClick={triggerDocumentSimilarity}
+              disabled={loading}
+              className="text-green-600 hover:text-green-700 text-sm font-medium flex items-center space-x-1"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span>Analyze Doc Similarity</span>
+            </button>
+
+            {/* Topic Modeling */}
+            <button
+              onClick={triggerTopicModeling}
+              disabled={loading}
+              className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center space-x-1"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              </svg>
+              <span>Extract Topics</span>
+            </button>
+
             {/* Refresh */}
             <button
               onClick={fetchGraphData}

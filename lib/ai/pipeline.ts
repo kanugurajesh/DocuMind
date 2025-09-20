@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { extractTextFromFile, chunkText, preprocessText } from './processing';
 import { generateEmbeddings } from './embeddings';
-import { processDocumentEntities } from './entities';
+import { processDocumentEntities, processCrossDocumentEntityResolution } from './entities';
 import { insertVectors, initializeQdrantCollection } from '../db/qdrant';
 import { createDocumentNode, createChunkNode } from '../db/neo4j';
 import { getDocumentsCollection } from '../db/mongodb';
@@ -110,8 +110,12 @@ export async function processDocument(
 
     const extractedEntities = await processDocumentEntities(docId, userId, chunkData);
 
-    // Step 8: Update document status to completed
-    console.log('Step 8: Updating document status...');
+    // Step 8: Process cross-document entity resolution
+    console.log('Step 8: Processing cross-document entity resolution...');
+    await processCrossDocumentEntityResolution(docId, userId, extractedEntities);
+
+    // Step 9: Update document status to completed
+    console.log('Step 9: Updating document status...');
     await updateDocumentStatus(docId, 'completed');
 
     console.log(`✅ Document processing completed successfully for ${docId}`);
