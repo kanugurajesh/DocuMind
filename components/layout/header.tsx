@@ -7,7 +7,6 @@ import {
   LogOut,
   Menu,
   MessageSquare,
-  Search,
   Settings,
 } from "lucide-react";
 import Link from "next/link";
@@ -72,23 +71,12 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
             href="/graph"
             className="hidden md:flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-violet-50 text-gray-700 hover:text-purple-700 font-semibold"
           >
-            <Search className="h-4 w-4 text-gray-600 hover:text-purple-600" />
+            <BarChart3 className="h-4 w-4 text-gray-600 hover:text-purple-600" />
             <span>Graph</span>
           </Link>
         </nav>
 
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          {/* Search */}
-          <div className="w-full flex-1 md:w-auto md:flex-none">
-            <Button
-              variant="outline"
-              className="relative h-8 w-full justify-start rounded-lg bg-white text-sm font-medium text-gray-600 border-gray-300 hover:border-blue-400 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-700 shadow-sm sm:pr-12 md:w-40 lg:w-64 transition-all duration-300"
-            >
-              <Search className="mr-2 h-4 w-4 text-gray-500 hover:text-blue-600" />
-              Search documents...
-            </Button>
-          </div>
-
           {/* User menu */}
           <div className="flex items-center space-x-2">
             {isLoaded && user ? (
@@ -137,7 +125,7 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/graph" className="flex items-center hover:bg-purple-50 transition-colors">
-                      <Search className="mr-2 h-4 w-4 icon-purple" />
+                      <BarChart3 className="mr-2 h-4 w-4 icon-purple" />
                       Knowledge Graph
                     </Link>
                   </DropdownMenuItem>

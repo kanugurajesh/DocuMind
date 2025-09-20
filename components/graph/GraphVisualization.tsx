@@ -84,6 +84,7 @@ export function GraphVisualization({
             "font-weight": "bold",
             "text-outline-width": 2,
             "text-outline-color": "#fff",
+            color: "#1f2937",
             width: "60px",
             height: "60px",
           },
@@ -173,8 +174,12 @@ export function GraphVisualization({
             "curve-style": "bezier",
             label: "data(label)",
             "font-size": "10px",
+            "font-weight": "bold",
             "text-rotation": "autorotate",
             "text-margin-y": -10,
+            "text-outline-width": 2,
+            "text-outline-color": "#fff",
+            color: "#374151",
           },
         },
         // CONTAINS relationships
@@ -412,13 +417,13 @@ export function GraphVisualization({
       />
 
       {/* Legend */}
-      <div className="mt-4 bg-white rounded-lg border border-gray-200 p-4">
-        <h4 className="text-sm font-medium text-gray-900 mb-3">Legend</h4>
+      <div className="mt-4 card-enhanced border-l-4 border-l-indigo-500 p-5">
+        <h4 className="text-lg font-bold text-gray-900 mb-4">Legend</h4>
 
         {/* Node Types */}
         <div className="mb-4">
-          <h5 className="text-xs font-medium text-gray-700 mb-2">Node Types</h5>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+          <h5 className="text-sm font-bold text-gray-800 mb-3">Node Types</h5>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm font-semibold text-gray-800">
             <div className="flex items-center space-x-2">
               <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
               <span>Documents</span>
@@ -450,10 +455,10 @@ export function GraphVisualization({
 
         {/* Relationship Types */}
         <div>
-          <h5 className="text-xs font-medium text-gray-700 mb-2">
+          <h5 className="text-sm font-bold text-gray-800 mb-3">
             Relationships
           </h5>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm font-semibold text-gray-800">
             <div className="flex items-center space-x-2">
               <div className="w-4 h-0.5 bg-blue-500"></div>
               <span>Contains</span>

@@ -17,8 +17,11 @@ import {
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { DocumentList } from "@/components/documents/DocumentList";
+import { DocumentSearch } from "@/components/documents/DocumentSearch";
 import { DocumentUpload } from "@/components/documents/DocumentUpload";
+import { SearchResultCard } from "@/components/documents/SearchResultCard";
 import { AppLayout } from "@/components/layout/app-layout";
+import { Pagination } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -28,7 +31,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { showToast } from "@/lib/toast";
-import type { Document } from "@/types";
+import type { Document, SearchResult } from "@/types";
 
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
@@ -36,6 +39,12 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [showUpload, setShowUpload] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   const fetchDocuments = useCallback(async () => {
     try {
@@ -96,6 +105,14 @@ export default function DashboardPage() {
     }
   };
 
+  const handleSearchResults = (results: SearchResult[], searching: boolean, query: string) => {
+    setSearchResults(results);
+    setIsSearching(searching);
+    setSearchQuery(query);
+    setIsSearchActive(query.length > 0);
+    setCurrentPage(1); // Reset to first page when search changes
+  };
+
   if (!isLoaded || !user) {
     return (
       <AppLayout>
@@ -117,6 +134,18 @@ export default function DashboardPage() {
     (sum, doc) => sum + (doc.metadata?.wordCount || 0),
     0,
   );
+
+  // Get current items to display (either search results or documents)
+  const currentItems = isSearchActive ? searchResults : documents;
+  const totalItems = currentItems.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPageItems = currentItems.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   return (
     <AppLayout>
@@ -313,7 +342,7 @@ export default function DashboardPage() {
               <div>
                 <CardTitle>Your Documents</CardTitle>
                 <CardDescription>
-                  Manage and organize your uploaded documents
+                  Search, manage and organize your uploaded documents
                 </CardDescription>
               </div>
               <div className="flex items-center space-x-2">
@@ -335,12 +364,78 @@ export default function DashboardPage() {
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <DocumentList
-              documents={documents}
-              onDocumentDelete={handleDocumentDelete}
-              loading={loading}
-            />
+          <CardContent className="space-y-6">
+            {/* Header with Search */}
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-800">
+                {isSearchActive
+                  ? `Search Results for "${searchQuery}" (${totalItems})`
+                  : `All Documents (${totalItems})`}
+              </h3>
+              <div className="w-80 relative">
+                <DocumentSearch
+                  documents={documents}
+                  onSearchResults={handleSearchResults}
+                />
+              </div>
+            </div>
+
+            {/* Loading State */}
+            {(loading || isSearching) && (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                <span className="ml-3 text-gray-600">
+                  {isSearching ? "Searching..." : "Loading documents..."}
+                </span>
+              </div>
+            )}
+
+            {/* Content */}
+            {!loading && !isSearching && (
+              <>
+                {/* Search Results */}
+                {isSearchActive && (
+                  <div className="space-y-4">
+                    {searchResults.length === 0 ? (
+                      <div className="text-center py-12">
+                        <div className="text-gray-500 mb-2">No documents found matching "{searchQuery}"</div>
+                        <div className="text-sm text-gray-400">Try different keywords or check your spelling</div>
+                      </div>
+                    ) : (
+                      currentPageItems.map((result, index) => (
+                        <SearchResultCard
+                          key={`${result.docId}-${result.chunkIndex}-${index}`}
+                          result={result}
+                          searchQuery={searchQuery}
+                        />
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {/* Document List */}
+                {!isSearchActive && (
+                  <DocumentList
+                    documents={currentPageItems as Document[]}
+                    onDocumentDelete={handleDocumentDelete}
+                    loading={false}
+                  />
+                )}
+
+                {/* Pagination */}
+                {totalItems > 0 && (
+                  <div className="mt-6">
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={handlePageChange}
+                      totalItems={totalItems}
+                      itemsPerPage={itemsPerPage}
+                    />
+                  </div>
+                )}
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
