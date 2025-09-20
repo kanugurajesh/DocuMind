@@ -123,10 +123,10 @@ export default function DashboardPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">
+          <h1 className="text-3xl font-bold mb-2 text-gray-800">
             Welcome back, {user.firstName}!
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-gray-600 text-lg">
             Manage your documents and explore your knowledge base with
             AI-powered insights.
           </p>
@@ -155,57 +155,65 @@ export default function DashboardPage() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
+          <Card className="card-enhanced border-l-4 border-l-blue-500 hover:border-l-blue-600 transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
+              <CardTitle className="text-sm font-medium text-enhanced">
                 Total Documents
               </CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
+              <div className="p-2 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100">
+                <FileText className="h-4 w-4 icon-blue" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{documents.length}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-2xl font-bold text-blue-700">{documents.length}</div>
+              <p className="text-xs text-muted-enhanced font-medium">
                 {completedDocs} processed
               </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="card-enhanced border-l-4 border-l-orange-500 hover:border-l-orange-600 transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Processing</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-enhanced">Processing</CardTitle>
+              <div className="p-2 rounded-lg bg-gradient-to-br from-orange-50 to-orange-100">
+                <TrendingUp className="h-4 w-4 icon-orange" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{processingDocs}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-2xl font-bold text-orange-700">{processingDocs}</div>
+              <p className="text-xs text-muted-enhanced font-medium">
                 Documents in queue
               </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="card-enhanced border-l-4 border-l-green-500 hover:border-l-green-600 transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Words</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-enhanced">Total Words</CardTitle>
+              <div className="p-2 rounded-lg bg-gradient-to-br from-green-50 to-green-100">
+                <BarChart3 className="h-4 w-4 icon-green" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-2xl font-bold text-green-700">
                 {totalWords.toLocaleString()}
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-enhanced font-medium">
                 Across all documents
               </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="card-enhanced border-l-4 border-l-purple-500 hover:border-l-purple-600 transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Account</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-enhanced">Account</CardTitle>
+              <div className="p-2 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100">
+                <Users className="h-4 w-4 icon-purple" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">Free</div>
-              <p className="text-xs text-muted-foreground">Plan</p>
+              <div className="text-2xl font-bold text-purple-700">Free</div>
+              <p className="text-xs text-muted-enhanced font-medium">Plan</p>
             </CardContent>
           </Card>
         </div>
@@ -213,17 +221,17 @@ export default function DashboardPage() {
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card
-            className="hover:shadow-lg transition-shadow cursor-pointer group"
+            className="card-enhanced hover:shadow-xl transition-all duration-300 cursor-pointer group border-l-4 border-l-blue-500 hover:border-l-blue-600"
             onClick={() => setShowUpload(!showUpload)}
           >
             <CardHeader>
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center group-hover:bg-blue-600 transition-colors">
-                  <Upload className="w-5 h-5 text-white" />
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center group-hover:from-blue-600 group-hover:to-blue-700 transition-all duration-300 shadow-lg">
+                  <Upload className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">Upload Documents</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-lg text-enhanced group-hover:text-blue-700 transition-colors">Upload Documents</CardTitle>
+                  <CardDescription className="text-muted-enhanced">
                     Add new files to your knowledge base
                   </CardDescription>
                 </div>
@@ -232,15 +240,15 @@ export default function DashboardPage() {
           </Card>
 
           <Link href="/chat">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer group">
+            <Card className="card-enhanced hover:shadow-xl transition-all duration-300 cursor-pointer group border-l-4 border-l-green-500 hover:border-l-green-600">
               <CardHeader>
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center group-hover:bg-green-600 transition-colors">
-                    <MessageSquare className="w-5 h-5 text-white" />
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center group-hover:from-green-600 group-hover:to-green-700 transition-all duration-300 shadow-lg">
+                    <MessageSquare className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">Ask Questions</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-lg text-enhanced group-hover:text-green-700 transition-colors">Ask Questions</CardTitle>
+                    <CardDescription className="text-muted-enhanced">
                       Query your documents with natural language
                     </CardDescription>
                   </div>
@@ -250,15 +258,15 @@ export default function DashboardPage() {
           </Link>
 
           <Link href="/graph">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer group">
+            <Card className="card-enhanced hover:shadow-xl transition-all duration-300 cursor-pointer group border-l-4 border-l-purple-500 hover:border-l-purple-600">
               <CardHeader>
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-lg bg-purple-500 flex items-center justify-center group-hover:bg-purple-600 transition-colors">
-                    <BarChart3 className="w-5 h-5 text-white" />
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center group-hover:from-purple-600 group-hover:to-purple-700 transition-all duration-300 shadow-lg">
+                    <BarChart3 className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">Knowledge Graph</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-lg text-enhanced group-hover:text-purple-700 transition-colors">Knowledge Graph</CardTitle>
+                    <CardDescription className="text-muted-enhanced">
                       Visualize document relationships
                     </CardDescription>
                   </div>
