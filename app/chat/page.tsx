@@ -156,65 +156,69 @@ export default function ChatPage() {
 
   return (
     <AppLayout>
-      <div className="container mx-auto px-4 py-6 h-[calc(100vh-4rem)]">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Document Chat</h1>
-            <p className="text-muted-foreground">
-              Ask questions about your documents and get intelligent answers
-              with sources
-            </p>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/50 to-purple-50/30">
+        <div className="container mx-auto px-4 py-4 h-[calc(100vh-4rem)]">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Document Chat
+              </h1>
+              <p className="text-gray-600 text-lg font-medium">
+                Ask questions about your documents and get intelligent answers
+                with sources
+              </p>
+            </div>
 
-          <div className="flex items-center space-x-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearChat}
-              className="flex items-center gap-2"
-            >
-              <Trash2 className="h-4 w-4" />
-              Clear Chat
-            </Button>
-
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/dashboard" className="flex items-center gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Dashboard
-              </Link>
-            </Button>
-          </div>
-        </div>
-
-        {/* Error Alert */}
-        {error && (
-          <Card className="mb-6 border-destructive/50 bg-destructive/5">
-            <div className="flex items-start gap-3 p-4">
-              <div className="flex-1">
-                <h3 className="font-medium text-destructive">Chat Error</h3>
-                <p className="text-sm text-destructive/80 mt-1">{error}</p>
-              </div>
+            <div className="flex items-center space-x-3">
               <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setError(null)}
-                className="h-8 w-8 text-destructive hover:text-destructive/80"
+                variant="outline"
+                size="sm"
+                onClick={clearChat}
+                className="flex items-center gap-2 bg-white border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-all duration-300 shadow-sm hover:shadow-md font-medium"
               >
-                ×
+                <Trash2 className="h-4 w-4" />
+                Clear Chat
+              </Button>
+
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/dashboard" className="flex items-center gap-2 bg-white border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-all duration-300 shadow-sm hover:shadow-md font-medium">
+                  <ArrowLeft className="h-4 w-4" />
+                  Dashboard
+                </Link>
               </Button>
             </div>
-          </Card>
-        )}
+          </div>
 
-        {/* Chat Interface */}
-        <div className="h-[calc(100vh-240px)]">
-          <ChatInterface
-            onMessageSend={handleMessageSend}
-            messages={messages}
-            loading={loading}
-            disabled={loading}
-          />
+          {/* Error Alert */}
+          {error && (
+            <Card className="mb-6 card-enhanced border-l-4 border-l-red-500 bg-gradient-to-r from-red-50 to-pink-50 border-red-200 shadow-lg">
+              <div className="flex items-start gap-3 p-4">
+                <div className="flex-1">
+                  <h3 className="font-medium text-red-700">Chat Error</h3>
+                  <p className="text-sm text-red-600 mt-1">{error}</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setError(null)}
+                  className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-100 transition-colors"
+                >
+                  ×
+                </Button>
+              </div>
+            </Card>
+          )}
+
+          {/* Chat Interface */}
+          <div className="h-[calc(100vh-180px)]">
+            <ChatInterface
+              onMessageSend={handleMessageSend}
+              messages={messages}
+              loading={loading}
+              disabled={loading}
+            />
+          </div>
         </div>
       </div>
     </AppLayout>

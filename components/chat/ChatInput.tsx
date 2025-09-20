@@ -1,5 +1,6 @@
 "use client";
 
+import { Paperclip, Send, X } from "lucide-react";
 import type React from "react";
 import { type KeyboardEvent, useRef, useState } from "react";
 import { showToast } from "@/lib/toast";
@@ -40,89 +41,81 @@ export function ChatInput({
     // Auto-resize textarea
     const textarea = e.target;
     textarea.style.height = "auto";
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 100)}px`;
   };
 
   return (
-    <div className="flex items-end space-x-3">
+    <div className="flex items-end space-x-4">
       <div className="flex-1 relative">
-        <textarea
-          ref={textareaRef}
-          value={message}
-          onChange={handleInputChange}
-          onKeyPress={handleKeyPress}
-          placeholder={placeholder}
-          disabled={disabled}
-          rows={1}
-          className={`
-            w-full resize-none rounded-lg border border-gray-300 px-4 py-3 pr-12
-            focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none
-            disabled:bg-gray-100 disabled:cursor-not-allowed
-            transition-colors duration-200
-          `}
-          style={{ maxHeight: "120px" }}
-        />
+        <div className="relative bg-white rounded-2xl border-2 border-blue-200 focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-100 transition-all duration-300 shadow-lg hover:shadow-xl">
+          <textarea
+            ref={textareaRef}
+            value={message}
+            onChange={handleInputChange}
+            onKeyPress={handleKeyPress}
+            placeholder={placeholder}
+            disabled={disabled}
+            rows={1}
+            className={`
+              w-full resize-none bg-transparent px-3 py-2 pr-20 text-gray-800 placeholder-gray-500
+              focus:outline-none disabled:cursor-not-allowed disabled:opacity-50
+              text-sm leading-normal font-medium min-h-[36px]
+            `}
+            style={{ maxHeight: "100px" }}
+          />
 
-        {/* Send Button */}
-        <button
-          onClick={handleSubmit}
-          disabled={!message.trim() || disabled}
-          className={`
-            absolute right-2 bottom-2 p-2 rounded-lg transition-all duration-200
-            ${
-              !message.trim() || disabled
-                ? "text-gray-400 cursor-not-allowed"
-                : "text-blue-600 hover:bg-blue-50 hover:text-blue-700"
-            }
-          `}
-          title="Send message (Enter)"
-        >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-            />
-          </svg>
-        </button>
-      </div>
+          {/* Input Actions */}
+          <div className="absolute right-2 bottom-2 flex items-center space-x-1">
+            {/* Attachment Button */}
+            <button
+              type="button"
+              className="p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-700 transition-all duration-200 hover:scale-105"
+              title="Attach file (coming soon)"
+              disabled
+            >
+              <Paperclip className="w-3.5 h-3.5" />
+            </button>
 
-      {/* Quick Actions */}
-      <div className="flex items-center space-x-2">
-        {/* Clear Chat Button */}
-        <button
-          onClick={() => setMessage("")}
-          disabled={!message || disabled}
-          className={`
-            p-2 rounded-lg transition-colors duration-200
-            ${
-              !message || disabled
-                ? "text-gray-300 cursor-not-allowed"
-                : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-            }
-          `}
-          title="Clear input"
-        >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
+            {/* Clear Button */}
+            {message && (
+              <button
+                onClick={() => setMessage("")}
+                disabled={disabled}
+                className="p-1.5 rounded-lg bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-600 transition-all duration-200 hover:scale-105"
+                title="Clear input"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+
+            {/* Send Button */}
+            <button
+              onClick={handleSubmit}
+              disabled={!message.trim() || disabled}
+              className={`
+                p-1.5 rounded-lg transition-all duration-300 hover:scale-105
+                ${
+                  !message.trim() || disabled
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl"
+                }
+              `}
+              title={disabled ? "Please wait..." : "Send message (Enter)"}
+            >
+              <Send className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Input hint */}
+        <div className="flex items-center justify-between mt-2 px-1">
+          <span className="text-xs text-gray-500 font-medium">
+            Press Enter to send, Shift+Enter for new line
+          </span>
+          <span className="text-xs text-gray-400 font-medium">
+            {message.length}/2000
+          </span>
+        </div>
       </div>
     </div>
   );
