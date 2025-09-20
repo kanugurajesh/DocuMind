@@ -75,26 +75,33 @@ export function DocumentCard({
 
   return (
     <Card
-      className="hover:shadow-lg transition-shadow cursor-pointer group"
+      className="card-enhanced hover:shadow-xl transition-all duration-300 cursor-pointer group border-l-4 border-l-blue-500"
       onClick={onClick}
     >
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
           <div className="flex items-start space-x-4 flex-1">
             {/* File Icon */}
-            <div className="flex-shrink-0 mt-1">
-              <FileIconComponent className={`w-6 h-6 ${fileIconClass}`} />
+            <div className="flex-shrink-0 mt-1 p-2 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-100 group-hover:from-blue-100 group-hover:to-indigo-200 transition-all duration-300">
+              <FileIconComponent className={`w-6 h-6 ${fileIconClass} icon-blue`} />
             </div>
 
             {/* Document Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
-                <h3 className="text-lg font-semibold truncate">
+                <h3 className="text-lg font-semibold truncate text-enhanced group-hover:text-blue-700 transition-colors">
                   {document.filename}
                 </h3>
                 <Badge
-                  variant={getStatusVariant(document.processingStatus)}
-                  className="ml-auto"
+                  className={`ml-auto font-medium px-3 py-1 ${
+                    document.processingStatus === "completed"
+                      ? "badge-success"
+                      : document.processingStatus === "processing"
+                      ? "badge-processing"
+                      : document.processingStatus === "failed"
+                      ? "badge-failed"
+                      : "badge-warning"
+                  }`}
                 >
                   {renderStatusIcon()}
                   <span className="ml-1 capitalize">
@@ -103,30 +110,30 @@ export function DocumentCard({
                 </Badge>
               </div>
 
-              <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-3">
-                <div className="flex items-center gap-1">
-                  <HardDrive className="h-3 w-3" />
-                  <span>{formatFileSize(document.fileSize)}</span>
+              <div className="flex items-center space-x-4 text-sm text-muted-enhanced mb-3">
+                <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-gray-50 group-hover:bg-gray-100 transition-colors">
+                  <HardDrive className="h-3 w-3 icon-green" />
+                  <span className="font-medium">{formatFileSize(document.fileSize)}</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  <span>{formatDate(document.uploadedAt)}</span>
+                <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-gray-50 group-hover:bg-gray-100 transition-colors">
+                  <Calendar className="h-3 w-3 icon-purple" />
+                  <span className="font-medium">{formatDate(document.uploadedAt)}</span>
                 </div>
               </div>
 
               {/* Metadata */}
               {document.metadata && (
-                <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-2">
+                <div className="flex items-center space-x-4 text-sm text-muted-enhanced mb-2">
                   {document.metadata.pageCount && (
-                    <div className="flex items-center gap-1">
-                      <FileType className="h-3 w-3" />
-                      <span>{document.metadata.pageCount} pages</span>
+                    <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-orange-50 group-hover:bg-orange-100 transition-colors">
+                      <FileType className="h-3 w-3 icon-orange" />
+                      <span className="font-medium">{document.metadata.pageCount} pages</span>
                     </div>
                   )}
                   {document.metadata.wordCount && (
-                    <div className="flex items-center gap-1">
-                      <FileText className="h-3 w-3" />
-                      <span>
+                    <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-indigo-50 group-hover:bg-indigo-100 transition-colors">
+                      <FileText className="h-3 w-3 icon-indigo" />
+                      <span className="font-medium">
                         {document.metadata.wordCount.toLocaleString()} words
                       </span>
                     </div>
@@ -137,10 +144,10 @@ export function DocumentCard({
               {/* Error Message */}
               {document.processingStatus === "failed" &&
                 document.errorMessage && (
-                  <div className="mt-2 p-2 bg-destructive/10 rounded-md">
+                  <div className="mt-2 p-3 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg">
                     <div className="flex items-center gap-2">
-                      <AlertCircle className="h-4 w-4 text-destructive" />
-                      <p className="text-sm text-destructive">
+                      <AlertCircle className="h-4 w-4 text-red-600" />
+                      <p className="text-sm text-red-700 font-medium">
                         {document.errorMessage}
                       </p>
                     </div>

@@ -5,42 +5,66 @@
   --font-mono: var(--font-geist-mono);
   --radius: 0.625rem;
 
-  /* Colors */
-  --color-background: white;
-  --color-foreground: #0a0a0a;
-  --color-card: white;
-  --color-card-foreground: #0a0a0a;
-  --color-popover: white;
-  --color-popover-foreground: #0a0a0a;
-  --color-primary: #171717;
-  --color-primary-foreground: #fafafa;
-  --color-secondary: #f5f5f5;
-  --color-secondary-foreground: #171717;
-  --color-muted: #f5f5f5;
-  --color-muted-foreground: #737373;
-  --color-accent: #f5f5f5;
-  --color-accent-foreground: #171717;
+  /* Enhanced Colors with Better Contrast */
+  --color-background: #ffffff;
+  --color-foreground: #1f2937;
+  --color-card: #ffffff;
+  --color-card-foreground: #1f2937;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1f2937;
+  --color-primary: #3b82f6;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #f8fafc;
+  --color-secondary-foreground: #334155;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #475569;
+  --color-accent: #e0e7ff;
+  --color-accent-foreground: #3730a3;
   --color-destructive: #ef4444;
-  --color-destructive-foreground: #fafafa;
-  --color-border: #e5e5e5;
-  --color-input: #e5e5e5;
-  --color-ring: #171717;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #e2e8f0;
+  --color-input: #e2e8f0;
+  --color-ring: #3b82f6;
 
-  /* Success, Warning, Processing variants for badges */
-  --color-success: #22c55e;
-  --color-warning: #eab308;
+  /* Enhanced Status Colors */
+  --color-success: #10b981;
+  --color-success-foreground: #ffffff;
+  --color-warning: #f59e0b;
+  --color-warning-foreground: #ffffff;
   --color-processing: #3b82f6;
+  --color-processing-foreground: #ffffff;
+
+  /* Feature Colors */
+  --color-blue: #3b82f6;
+  --color-blue-light: #dbeafe;
+  --color-green: #10b981;
+  --color-green-light: #d1fae5;
+  --color-purple: #8b5cf6;
+  --color-purple-light: #ede9fe;
+  --color-orange: #f59e0b;
+  --color-orange-light: #fef3c7;
+  --color-indigo: #6366f1;
+  --color-indigo-light: #e0e7ff;
+  --color-pink: #ec4899;
+  --color-pink-light: #fce7f3;
+
+  /* Gradient Colors */
+  --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  --gradient-secondary: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --gradient-tertiary: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  --gradient-card: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  --gradient-accent: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
 }
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1f2937;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0f172a;
+    --foreground: #f1f5f9;
   }
 }
 
@@ -48,4 +72,78 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Custom Gradient Utilities */
+.gradient-primary {
+  background: var(--gradient-primary);
+}
+
+.gradient-secondary {
+  background: var(--gradient-secondary);
+}
+
+.gradient-tertiary {
+  background: var(--gradient-tertiary);
+}
+
+.gradient-card {
+  background: var(--gradient-card);
+}
+
+.gradient-accent {
+  background: var(--gradient-accent);
+}
+
+/* Enhanced Card Styles */
+.card-enhanced {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.card-enhanced:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Status Badge Enhancements */
+.badge-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.badge-warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+}
+
+.badge-processing {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+.badge-failed {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+}
+
+/* Icon Color Classes */
+.icon-blue { color: #3b82f6; }
+.icon-green { color: #10b981; }
+.icon-purple { color: #8b5cf6; }
+.icon-orange { color: #f59e0b; }
+.icon-indigo { color: #6366f1; }
+.icon-pink { color: #ec4899; }
+
+/* Text Enhancement */
+.text-enhanced {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.text-muted-enhanced {
+  color: #4b5563;
+  font-weight: 500;
 }

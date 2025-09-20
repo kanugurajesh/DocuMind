@@ -17,17 +17,19 @@ export function DocumentList({
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
-          <Card key={i}>
+          <Card key={i} className="card-enhanced border-l-4 border-l-gray-300">
             <CardContent className="p-6">
               <div className="flex items-start space-x-4">
-                <Skeleton className="h-6 w-6 rounded" />
+                <div className="p-2 rounded-lg bg-gradient-to-br from-gray-50 to-gray-100">
+                  <Skeleton className="h-6 w-6 rounded" />
+                </div>
                 <div className="flex-1 space-y-2">
-                  <Skeleton className="h-5 w-1/2" />
+                  <Skeleton className="h-5 w-1/2 rounded-lg" />
                   <div className="flex space-x-4">
-                    <Skeleton className="h-4 w-20" />
-                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-20 rounded-md" />
+                    <Skeleton className="h-4 w-24 rounded-md" />
                   </div>
-                  <Skeleton className="h-4 w-1/3" />
+                  <Skeleton className="h-4 w-1/3 rounded-md" />
                 </div>
                 <Skeleton className="h-6 w-16 rounded-full" />
               </div>
@@ -41,15 +43,15 @@ export function DocumentList({
   if (documents.length === 0) {
     return (
       <div className="text-center py-16">
-        <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-muted flex items-center justify-center">
-          <FileText className="h-8 w-8 text-muted-foreground" />
+        <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center shadow-lg border border-blue-200">
+          <FileText className="h-10 w-10 icon-blue" />
         </div>
-        <h3 className="text-xl font-semibold mb-3">No documents yet</h3>
-        <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+        <h3 className="text-xl font-semibold mb-3 text-enhanced">No documents yet</h3>
+        <p className="text-muted-enhanced mb-6 max-w-sm mx-auto">
           Upload your first document to get started with intelligent document
           analysis and AI-powered insights.
         </p>
-        <Button className="gap-2">
+        <Button className="gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
           <Upload className="h-4 w-4" />
           Upload Documents
         </Button>

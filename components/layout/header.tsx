@@ -31,8 +31,8 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
   const { signOut, openUserProfile } = useClerk();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 max-w-screen-2xl items-center">
+    <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/90 shadow-sm">
+      <div className="container flex h-16 max-w-screen-2xl items-center px-6 mx-auto">
         {/* Mobile menu button */}
         <Button
           variant="ghost"
@@ -45,32 +45,34 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
         </Button>
 
         {/* Logo */}
-        <Link href="/" className="mr-4 flex items-center space-x-2 lg:mr-6">
-          <FileText className="h-6 w-6 text-primary" />
-          <span className="hidden font-bold sm:inline-block">Documind</span>
+        <Link href="/" className="mr-4 flex items-center space-x-2 lg:mr-6 group">
+          <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-100 group-hover:from-blue-100 group-hover:to-indigo-200 transition-all duration-300">
+            <FileText className="h-6 w-6 icon-blue" />
+          </div>
+          <span className="hidden font-bold sm:inline-block text-enhanced group-hover:text-blue-700 transition-colors">Documind</span>
         </Link>
 
         {/* Navigation */}
         <nav className="flex items-center gap-4 text-sm lg:gap-6">
           <Link
             href="/dashboard"
-            className="hidden md:flex items-center space-x-2 transition-colors hover:text-foreground/80 text-foreground/60"
+            className="hidden md:flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 text-gray-700 hover:text-blue-700 font-semibold"
           >
-            <BarChart3 className="h-4 w-4" />
+            <BarChart3 className="h-4 w-4 text-gray-600 hover:text-blue-600" />
             <span>Dashboard</span>
           </Link>
           <Link
             href="/chat"
-            className="hidden md:flex items-center space-x-2 transition-colors hover:text-foreground/80 text-foreground/60"
+            className="hidden md:flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 text-gray-700 hover:text-green-700 font-semibold"
           >
-            <MessageSquare className="h-4 w-4" />
+            <MessageSquare className="h-4 w-4 text-gray-600 hover:text-green-600" />
             <span>Chat</span>
           </Link>
           <Link
             href="/graph"
-            className="hidden md:flex items-center space-x-2 transition-colors hover:text-foreground/80 text-foreground/60"
+            className="hidden md:flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-violet-50 text-gray-700 hover:text-purple-700 font-semibold"
           >
-            <Search className="h-4 w-4" />
+            <Search className="h-4 w-4 text-gray-600 hover:text-purple-600" />
             <span>Graph</span>
           </Link>
         </nav>
@@ -80,9 +82,9 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
           <div className="w-full flex-1 md:w-auto md:flex-none">
             <Button
               variant="outline"
-              className="relative h-8 w-full justify-start rounded-[0.5rem] bg-background text-sm font-normal text-muted-foreground shadow-none sm:pr-12 md:w-40 lg:w-64"
+              className="relative h-8 w-full justify-start rounded-lg bg-white text-sm font-medium text-gray-600 border-gray-300 hover:border-blue-400 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-700 shadow-sm sm:pr-12 md:w-40 lg:w-64 transition-all duration-300"
             >
-              <Search className="mr-2 h-4 w-4" />
+              <Search className="mr-2 h-4 w-4 text-gray-500 hover:text-blue-600" />
               Search documents...
             </Button>
           </div>
@@ -112,44 +114,44 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">
+                      <p className="text-sm font-semibold leading-none text-enhanced">
                         {user.firstName} {user.lastName}
                       </p>
-                      <p className="text-xs leading-none text-muted-foreground">
+                      <p className="text-xs leading-none text-muted-enhanced">
                         {user.emailAddresses[0]?.emailAddress}
                       </p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="flex items-center">
-                      <BarChart3 className="mr-2 h-4 w-4" />
+                    <Link href="/dashboard" className="flex items-center hover:bg-blue-50 transition-colors">
+                      <BarChart3 className="mr-2 h-4 w-4 icon-blue" />
                       Dashboard
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/chat" className="flex items-center">
-                      <MessageSquare className="mr-2 h-4 w-4" />
+                    <Link href="/chat" className="flex items-center hover:bg-green-50 transition-colors">
+                      <MessageSquare className="mr-2 h-4 w-4 icon-green" />
                       Chat
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/graph" className="flex items-center">
-                      <Search className="mr-2 h-4 w-4" />
+                    <Link href="/graph" className="flex items-center hover:bg-purple-50 transition-colors">
+                      <Search className="mr-2 h-4 w-4 icon-purple" />
                       Knowledge Graph
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    className="cursor-pointer"
+                    className="cursor-pointer hover:bg-gray-50 transition-colors"
                     onClick={() => openUserProfile()}
                   >
-                    <Settings className="mr-2 h-4 w-4" />
+                    <Settings className="mr-2 h-4 w-4 text-gray-600" />
                     Manage Account
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950"
+                    className="cursor-pointer text-red-600 hover:text-red-700 focus:text-red-600 focus:bg-red-50 hover:bg-red-50 transition-colors dark:focus:bg-red-950"
                     onClick={() => signOut({ redirectUrl: "/" })}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
