@@ -1,9 +1,10 @@
 "use client";
 
-import { UserButton, useUser } from "@clerk/nextjs";
+import { useClerk, useUser } from "@clerk/nextjs";
 import {
   BarChart3,
   FileText,
+  LogOut,
   Menu,
   MessageSquare,
   Search,
@@ -27,6 +28,7 @@ interface HeaderProps {
 
 export function Header({ onMobileMenuToggle }: HeaderProps) {
   const { user, isLoaded } = useUser();
+  const { signOut, openUserProfile } = useClerk();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -138,23 +140,20 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => openUserProfile()}
+                  >
                     <Settings className="mr-2 h-4 w-4" />
-                    Settings
+                    Manage Account
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <div className="w-full">
-                      <UserButton
-                        afterSignOutUrl="/"
-                        appearance={{
-                          elements: {
-                            avatarBox: "w-4 h-4",
-                            userButtonTrigger: "p-0 w-full justify-start",
-                          },
-                        }}
-                      />
-                    </div>
+                  <DropdownMenuItem
+                    className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950"
+                    onClick={() => signOut(() => window.location.href = "/")}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
