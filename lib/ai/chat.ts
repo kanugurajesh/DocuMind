@@ -27,7 +27,7 @@ export async function generateChatResponse(context: ChatContext): Promise<ChatRe
       queryEmbedding,
       userId: context.userId,
       maxResults: context.maxResults || 10,
-      minScore: context.minScore || 0.7,
+      minScore: context.minScore || 0.2,
       docIds: context.docIds,
     });
 
@@ -188,7 +188,7 @@ export async function performDocumentSearch({
   query,
   userId,
   maxResults = 20,
-  minScore = 0.6,
+  minScore = 0.2,
   docIds,
 }: {
   query: string;
