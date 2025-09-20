@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { extractTextFromFile, chunkText, preprocessText } from './processing';
 import { generateEmbeddings } from './embeddings';
-import { processDocumentEntities } from './entities';
+import { processDocumentEntities, processCrossDocumentEntityResolution } from './entities';
 import { insertVectors, initializeQdrantCollection } from '../db/qdrant';
 import { createDocumentNode, createChunkNode } from '../db/neo4j';
 import { getDocumentsCollection } from '../db/mongodb';
@@ -103,15 +103,25 @@ export async function processDocument(
 
     // Step 7: Extract entities and populate knowledge graph
     console.log('Step 7: Extracting entities and relationships...');
-    const chunkData = chunks.map(chunk => ({
-      id: chunk.id,
+    console.log(`📊 Processing ${chunks.length} chunks for entity extraction`);
+    const chunkData = chunks.map((chunk, index) => ({
+      id: vectorData[index].id, // Use the same UUID as the chunk node
       text: chunk.text,
     }));
 
-    const extractedEntities = await processDocumentEntities(docId, userId, chunkData);
+    console.log('🔍 Chunk data sample:', chunkData.slice(0, 2).map(c => ({ id: c.id, textLength: c.text.length })));
+    console.log('👤 User ID for entity processing:', userId);
+    console.log('📄 Document ID for entity processing:', docId);
 
-    // Step 8: Update document status to completed
-    console.log('Step 8: Updating document status...');
+    const extractedEntities = await processDocumentEntities(docId, userId, chunkData);
+    console.log(`🎯 Entity extraction completed: ${extractedEntities.length} entities extracted`);
+
+    // Step 8: Process cross-document entity resolution
+    console.log('Step 8: Processing cross-document entity resolution...');
+    await processCrossDocumentEntityResolution(docId, userId, extractedEntities);
+
+    // Step 9: Update document status to completed
+    console.log('Step 9: Updating document status...');
     await updateDocumentStatus(docId, 'completed');
 
     console.log(`✅ Document processing completed successfully for ${docId}`);

@@ -65,22 +65,36 @@ export interface EntityNode {
   mentions: number;
 }
 
+export interface TopicNode {
+  id: string;
+  topicId: string;
+  name: string;
+  type: 'Topic';
+  description: string;
+  keywords: string[];
+  userId: string;
+  confidence: number;
+}
+
 // Neo4j Relationship Types
 export interface Relationship {
   id: string;
-  type: 'CONTAINS' | 'MENTIONS' | 'RELATED_TO';
+  type: 'CONTAINS' | 'MENTIONS' | 'RELATED_TO' | 'COOCCURS_WITH' | 'SIMILAR_TO' | 'SAME_AS' | 'DOCUMENT_SIMILAR_TO' | 'CATEGORIZES';
   startNodeId: string;
   endNodeId: string;
   properties?: {
     confidence?: number;
     weight?: number;
     context?: string;
+    count?: number;
+    similarity?: number;
+    relevance?: number;
   };
 }
 
 // Graph Structure for Visualization
 export interface GraphData {
-  nodes: Array<DocumentNode | ChunkNode | EntityNode>;
+  nodes: Array<DocumentNode | ChunkNode | EntityNode | TopicNode>;
   edges: Relationship[];
 }
 

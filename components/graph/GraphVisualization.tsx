@@ -126,6 +126,17 @@ export function GraphVisualization({
             'shape': 'round-rectangle',
           },
         },
+        // Topic nodes
+        {
+          selector: 'node[type="Topic"]',
+          style: {
+            'background-color': '#9333EA',
+            'width': '70px',
+            'height': '70px',
+            'font-size': '11px',
+            'shape': 'hexagon',
+          },
+        },
         // Selected node
         {
           selector: 'node:selected',
@@ -166,6 +177,57 @@ export function GraphVisualization({
             'line-color': '#8B5CF6',
             'target-arrow-color': '#8B5CF6',
             'width': 2,
+          },
+        },
+        // COOCCURS_WITH relationships
+        {
+          selector: 'edge[type="COOCCURS_WITH"]',
+          style: {
+            'line-color': '#F59E0B',
+            'target-arrow-color': '#F59E0B',
+            'width': 'data(count)',
+            'opacity': 'data(confidence)',
+          },
+        },
+        // SIMILAR_TO relationships
+        {
+          selector: 'edge[type="SIMILAR_TO"]',
+          style: {
+            'line-color': '#06B6D4',
+            'target-arrow-color': '#06B6D4',
+            'width': 2,
+            'opacity': 'data(similarity)',
+          },
+        },
+        // SAME_AS relationships
+        {
+          selector: 'edge[type="SAME_AS"]',
+          style: {
+            'line-color': '#DC2626',
+            'target-arrow-color': '#DC2626',
+            'width': 3,
+            'line-style': 'dashed',
+          },
+        },
+        // DOCUMENT_SIMILAR_TO relationships
+        {
+          selector: 'edge[type="DOCUMENT_SIMILAR_TO"]',
+          style: {
+            'line-color': '#059669',
+            'target-arrow-color': '#059669',
+            'width': 'mapData(similarity, 0, 1, 2, 5)',
+            'opacity': 'data(similarity)',
+            'line-style': 'dotted',
+          },
+        },
+        // CATEGORIZES relationships
+        {
+          selector: 'edge[type="CATEGORIZES"]',
+          style: {
+            'line-color': '#9333EA',
+            'target-arrow-color': '#9333EA',
+            'width': 'mapData(relevance, 0, 1, 2, 4)',
+            'opacity': 'data(relevance)',
           },
         },
         // Selected edge
@@ -238,6 +300,8 @@ export function GraphVisualization({
         return `Chunk ${node.chunkIndex || ''}`;
       case 'Entity':
         return node.name || 'Entity';
+      case 'Topic':
+        return node.name || 'Topic';
       default:
         return node.id || 'Node';
     }
@@ -318,22 +382,66 @@ export function GraphVisualization({
       {/* Legend */}
       <div className="mt-4 bg-white rounded-lg border border-gray-200 p-4">
         <h4 className="text-sm font-medium text-gray-900 mb-3">Legend</h4>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-            <span>Documents</span>
+
+        {/* Node Types */}
+        <div className="mb-4">
+          <h5 className="text-xs font-medium text-gray-700 mb-2">Node Types</h5>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+              <span>Documents</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+              <span>Text Chunks</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
+              <span>Entities</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
+              <span>People</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 bg-purple-600" style={{ clipPath: 'polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)' }}></div>
+              <span>Topics</span>
+            </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-            <span>Text Chunks</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
-            <span>Entities</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
-            <span>People</span>
+        </div>
+
+        {/* Relationship Types */}
+        <div>
+          <h5 className="text-xs font-medium text-gray-700 mb-2">Relationships</h5>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-0.5 bg-blue-500"></div>
+              <span>Contains</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-0.5 bg-purple-500"></div>
+              <span>Mentions</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-0.5 bg-yellow-500"></div>
+              <span>Co-occurs</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-0.5 bg-cyan-500"></div>
+              <span>Similar</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-0.5 bg-red-500 border-dashed border-t"></div>
+              <span>Same Entity</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-0.5 bg-emerald-600 border-dotted border-t"></div>
+              <span>Doc Similarity</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-0.5 bg-purple-600"></div>
+              <span>Categorizes</span>
+            </div>
           </div>
         </div>
       </div>
