@@ -1,4 +1,4 @@
-import { OpenAI } from 'openai';
+import { OpenAI } from "openai";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
@@ -8,14 +8,14 @@ const openai = new OpenAI({
 export async function generateEmbedding(text: string): Promise<number[]> {
   try {
     const response = await openai.embeddings.create({
-      model: 'text-embedding-3-small', // Cost-effective model for embeddings
+      model: "text-embedding-3-small", // Cost-effective model for embeddings
       input: text.trim(),
     });
 
     return response.data[0].embedding;
   } catch (error) {
-    console.error('Error generating embedding:', error);
-    throw new Error('Failed to generate embedding');
+    console.error("Error generating embedding:", error);
+    throw new Error("Failed to generate embedding");
   }
 }
 
@@ -30,7 +30,7 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
       const batch = texts.slice(i, i + batchSize);
 
       const response = await openai.embeddings.create({
-        model: 'text-embedding-3-small',
+        model: "text-embedding-3-small",
         input: batch.map((text) => text.trim()),
       });
 
@@ -45,8 +45,8 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
 
     return embeddings;
   } catch (error) {
-    console.error('Error generating embeddings:', error);
-    throw new Error('Failed to generate embeddings');
+    console.error("Error generating embeddings:", error);
+    throw new Error("Failed to generate embeddings");
   }
 }
 
@@ -58,7 +58,7 @@ export async function generateQueryEmbedding(query: string): Promise<number[]> {
 // Calculate cosine similarity between two vectors
 export function cosineSimilarity(a: number[], b: number[]): number {
   if (a.length !== b.length) {
-    throw new Error('Vectors must have the same length');
+    throw new Error("Vectors must have the same length");
   }
 
   let dotProduct = 0;

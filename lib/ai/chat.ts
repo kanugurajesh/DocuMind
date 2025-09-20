@@ -1,8 +1,8 @@
-import { OpenAI } from 'openai';
-import { generateQueryEmbedding } from './embeddings';
-import { searchVectors } from '../db/qdrant';
-import { getDocumentsCollection } from '../db/mongodb';
-import { ChatResponse, SearchResult } from '@/types';
+import { OpenAI } from "openai";
+import type { ChatResponse, SearchResult } from "@/types";
+import { getDocumentsCollection } from "../db/mongodb";
+import { searchVectors } from "../db/qdrant";
+import { generateQueryEmbedding } from "./embeddings";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
@@ -18,7 +18,7 @@ export interface ChatContext {
 
 // Main chat function that combines search and LLM reasoning
 export async function generateChatResponse(
-  context: ChatContext
+  context: ChatContext,
 ): Promise<ChatResponse> {
   try {
     // Step 1: Generate embedding for the user query
@@ -46,7 +46,7 @@ export async function generateChatResponse(
     // Step 3: Generate answer using LLM with retrieved context
     const llmResponse = await generateAnswerWithContext(
       context.query,
-      searchResults
+      searchResults,
     );
 
     return {
@@ -56,8 +56,8 @@ export async function generateChatResponse(
       relatedEntities: [], // TODO: Extract related entities from answer
     };
   } catch (error) {
-    console.error('Error generating chat response:', error);
-    throw new Error('Failed to generate response');
+    console.error("Error generating chat response:", error);
+    throw new Error("Failed to generate response");
   }
 }
 
@@ -82,7 +82,7 @@ async function performSemanticSearch({
       userId,
       maxResults,
       minScore,
-      docIds
+      docIds,
     );
 
     // Get document metadata from MongoDB
@@ -114,14 +114,14 @@ async function performSemanticSearch({
     const searchResults: SearchResult[] = qdrantResults.map((result, index) => {
       const payload = result.payload || {};
       const docInfo = docMap.get(payload.docId) || {
-        filename: 'Unknown Document',
+        filename: "Unknown Document",
         uploadedAt: new Date(),
       };
 
       return {
         chunkId: result.id?.toString() || `result_${index}`,
-        docId: payload.docId || '',
-        text: payload.text || '',
+        docId: (payload.docId as string) || "",
+        text: (payload.text as string) || "",
         score: result.score || 0,
         document: docInfo,
         entities: [], // TODO: Include related entities
@@ -130,7 +130,7 @@ async function performSemanticSearch({
 
     return searchResults;
   } catch (error) {
-    console.error('Error performing semantic search:', error);
+    console.error("Error performing semantic search:", error);
     return [];
   }
 }
@@ -138,16 +138,16 @@ async function performSemanticSearch({
 // Generate answer using LLM with retrieved context
 async function generateAnswerWithContext(
   query: string,
-  searchResults: SearchResult[]
+  searchResults: SearchResult[],
 ): Promise<{ answer: string; confidence: number }> {
   try {
     // Prepare context from search results
     const contextChunks = searchResults
       .map(
         (result, index) =>
-          `[Source ${index + 1} - ${result.document.filename}]:\n${result.text}`
+          `[Source ${index + 1} - ${result.document.filename}]:\n${result.text}`,
       )
-      .join('\n\n');
+      .join("\n\n");
 
     const prompt = `
 You are an intelligent document assistant. Answer the user's question based on the provided context from their documents.
@@ -168,15 +168,15 @@ Instructions:
 Answer:`;
 
     const response = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
       messages: [
         {
-          role: 'system',
+          role: "system",
           content:
-            'You are a helpful assistant that answers questions based on provided document context. Always cite your sources and be truthful about the limitations of your knowledge.',
+            "You are a helpful assistant that answers questions based on provided document context. Always cite your sources and be truthful about the limitations of your knowledge.",
         },
         {
-          role: 'user',
+          role: "user",
           content: prompt,
         },
       ],
@@ -186,7 +186,7 @@ Answer:`;
 
     const answer =
       response.choices[0]?.message?.content ||
-      'I was unable to generate an answer.';
+      "I was unable to generate an answer.";
 
     // Calculate confidence based on search result scores and answer length
     const avgScore =
@@ -194,12 +194,12 @@ Answer:`;
       searchResults.length;
     const confidence = Math.min(
       avgScore * 0.8 + (answer.length > 50 ? 0.2 : 0),
-      1.0
+      1.0,
     );
 
     return { answer, confidence };
   } catch (error) {
-    console.error('Error generating answer with context:', error);
+    console.error("Error generating answer with context:", error);
     throw error;
   }
 }
@@ -229,7 +229,7 @@ export async function performDocumentSearch({
       docIds,
     });
   } catch (error) {
-    console.error('Error performing document search:', error);
+    console.error("Error performing document search:", error);
     return [];
   }
 }

@@ -1,15 +1,15 @@
-import { auth } from '@clerk/nextjs/server';
-import { NextRequest, NextResponse } from 'next/server';
-import { processTopicModeling } from '@/lib/ai/topic-modeling';
+import { auth } from "@clerk/nextjs/server";
+import { type NextRequest, NextResponse } from "next/server";
+import { processTopicModeling } from "@/lib/ai/topic-modeling";
 
 // POST /api/graph/topics - Trigger topic modeling for user documents
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
+        { success: false, error: "Unauthorized" },
+        { status: 401 },
       );
     }
 
@@ -18,16 +18,16 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Topic modeling completed successfully',
+      message: "Topic modeling completed successfully",
     });
   } catch (error) {
-    console.error('Topic modeling error:', error);
+    console.error("Topic modeling error:", error);
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Internal server error',
+        error: error instanceof Error ? error.message : "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,9 +1,10 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
-import { Header } from './header';
-import { showToast } from '@/lib/toast';
+import { useUser } from "@clerk/nextjs";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { showToast } from "@/lib/toast";
+import { Header } from "./header";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -17,7 +18,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   // Show welcome notification when user signs in
   useEffect(() => {
     if (isLoaded && user && !hasShownWelcome) {
-      showToast.success(`Welcome back, ${user.firstName || 'User'}!`);
+      showToast.success(`Welcome back, ${user.firstName || "User"}!`);
       setHasShownWelcome(true);
     }
   }, [isLoaded, user, hasShownWelcome]);

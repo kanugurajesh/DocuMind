@@ -1,13 +1,13 @@
 import {
-  S3Client,
-  PutObjectCommand,
-  GetObjectCommand,
   DeleteObjectCommand,
+  GetObjectCommand,
   HeadObjectCommand,
   ListObjectsV2Command,
-  PutObjectCommandOutput,
-} from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+  PutObjectCommand,
+  type PutObjectCommandOutput,
+  S3Client,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 let s3Client: S3Client | null = null;
 
@@ -38,14 +38,14 @@ export async function initializeBucket() {
     await s3.send(
       new HeadObjectCommand({
         Bucket: bucketName,
-        Key: '.test',
-      })
+        Key: ".test",
+      }),
     );
   } catch (error: any) {
-    if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
-      console.log('S3 bucket exists and is accessible');
+    if (error.name === "NotFound" || error.$metadata?.httpStatusCode === 404) {
+      console.log("S3 bucket exists and is accessible");
     } else {
-      console.error('Error accessing S3 bucket:', error);
+      console.error("Error accessing S3 bucket:", error);
       throw error;
     }
   }
@@ -57,7 +57,7 @@ export async function uploadFileBuffer(
   fileBuffer: Buffer,
   contentType: string,
   userId: string,
-  docId: string
+  docId: string,
 ): Promise<{ blobUrl: string; uploadResponse: PutObjectCommandOutput }> {
   const s3 = getS3Client();
   const bucketName = getBucketName();
@@ -68,8 +68,8 @@ export async function uploadFileBuffer(
   // Sanitize metadata values for HTTP headers - remove control characters and non-ASCII
   const sanitizeHeaderValue = (value: string): string => {
     return value
-      .replace(/[\x00-\x1F\x7F-\xFF]/g, '') // Remove control chars and non-ASCII
-      .replace(/[\r\n]/g, '') // Remove line breaks
+      .replace(/[\x00-\x1F\x7F-\xFF]/g, "") // Remove control chars and non-ASCII
+      .replace(/[\r\n]/g, "") // Remove line breaks
       .trim();
   };
 
@@ -97,7 +97,7 @@ export async function uploadFileBuffer(
       uploadResponse,
     };
   } catch (error) {
-    console.error('Error uploading file to S3:', error);
+    console.error("Error uploading file to S3:", error);
     throw error;
   }
 }
@@ -116,7 +116,7 @@ export async function downloadFile(key: string): Promise<Buffer> {
     const response = await s3.send(command);
 
     if (!response.Body) {
-      throw new Error('No body in S3 response');
+      throw new Error("No body in S3 response");
     }
 
     // Convert stream to buffer
@@ -142,7 +142,7 @@ export async function downloadFile(key: string): Promise<Buffer> {
 
     return Buffer.from(buffer);
   } catch (error) {
-    console.error('Error downloading file from S3:', error);
+    console.error("Error downloading file from S3:", error);
     throw error;
   }
 }
@@ -150,7 +150,7 @@ export async function downloadFile(key: string): Promise<Buffer> {
 // Get file download URL (with presigned URL for temporary access)
 export async function getFileDownloadUrl(
   key: string,
-  expiresInMinutes: number = 60
+  expiresInMinutes: number = 60,
 ): Promise<string> {
   const s3 = getS3Client();
   const bucketName = getBucketName();
@@ -167,7 +167,7 @@ export async function getFileDownloadUrl(
 
     return signedUrl;
   } catch (error) {
-    console.error('Error generating download URL:', error);
+    console.error("Error generating download URL:", error);
     throw error;
   }
 }
@@ -185,7 +185,7 @@ export async function deleteFile(key: string): Promise<void> {
   try {
     await s3.send(command);
   } catch (error) {
-    console.error('Error deleting file from S3:', error);
+    console.error("Error deleting file from S3:", error);
     throw error;
   }
 }
@@ -209,7 +209,7 @@ export async function getFileMetadata(key: string) {
       metadata: response.Metadata,
     };
   } catch (error) {
-    console.error('Error getting file metadata:', error);
+    console.error("Error getting file metadata:", error);
     throw error;
   }
 }
@@ -228,7 +228,7 @@ export async function listUserFiles(userId: string) {
     const response = await s3.send(command);
     return response.Contents || [];
   } catch (error) {
-    console.error('Error listing user files:', error);
+    console.error("Error listing user files:", error);
     throw error;
   }
 }

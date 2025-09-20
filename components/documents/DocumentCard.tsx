@@ -1,34 +1,39 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { DocumentCardProps } from '@/types';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { showToast } from '@/lib/toast';
+import {
+  AlertCircle,
+  Calendar,
+  CheckCircle,
+  Download,
+  Eye,
+  FileText,
+  FileType,
+  HardDrive,
+  MoreVertical,
+  Trash2,
+  X,
+} from "lucide-react";
+import type React from "react";
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { showToast } from "@/lib/toast";
 import {
-  FileText,
-  File,
-  MoreVertical,
-  Trash2,
-  Download,
-  Eye,
-  Calendar,
-  HardDrive,
-  FileType,
-  X,
-  Loader2,
-  AlertCircle,
-  CheckCircle,
-  Clock,
-} from 'lucide-react';
+  formatDate,
+  formatFileSize,
+  getFileIcon,
+  getStatusIcon,
+  getStatusVariant,
+} from "@/lib/utils";
+import type { DocumentCardProps } from "@/types";
 
 export function DocumentCard({
   document,
@@ -37,67 +42,19 @@ export function DocumentCard({
 }: DocumentCardProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const formatFileSize = (bytes: number) => {
-    const units = ['B', 'KB', 'MB', 'GB'];
-    let size = bytes;
-    let unitIndex = 0;
+  const StatusIcon = getStatusIcon(document.processingStatus);
+  const { icon: FileIconComponent, className: fileIconClass } = getFileIcon(
+    document.fileType,
+  );
 
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
-
-    return `${size.toFixed(1)} ${units[unitIndex]}`;
-  };
-
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(new Date(date));
-  };
-
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'success';
-      case 'processing':
-        return 'processing';
-      case 'failed':
-        return 'destructive';
-      case 'pending':
-      default:
-        return 'warning';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircle className="h-3 w-3" />;
-      case 'processing':
-        return <Loader2 className="h-3 w-3 animate-spin" />;
-      case 'failed':
-        return <AlertCircle className="h-3 w-3" />;
-      case 'pending':
-      default:
-        return <Clock className="h-3 w-3" />;
-    }
-  };
-
-  const getFileIcon = (fileType: string) => {
-    if (fileType.includes('pdf')) {
-      return <FileText className="w-6 h-6 text-red-500" />;
-    }
-
-    if (fileType.includes('word') || fileType.includes('document')) {
-      return <FileText className="w-6 h-6 text-blue-500" />;
-    }
-
-    return <File className="w-6 h-6 text-muted-foreground" />;
+  const renderStatusIcon = () => {
+    const iconProps = {
+      className:
+        document.processingStatus === "processing"
+          ? "h-3 w-3 animate-spin"
+          : "h-3 w-3",
+    };
+    return <StatusIcon {...iconProps} />;
   };
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -126,7 +83,7 @@ export function DocumentCard({
           <div className="flex items-start space-x-4 flex-1">
             {/* File Icon */}
             <div className="flex-shrink-0 mt-1">
-              {getFileIcon(document.fileType)}
+              <FileIconComponent className={`w-6 h-6 ${fileIconClass}`} />
             </div>
 
             {/* Document Info */}
@@ -139,7 +96,7 @@ export function DocumentCard({
                   variant={getStatusVariant(document.processingStatus)}
                   className="ml-auto"
                 >
-                  {getStatusIcon(document.processingStatus)}
+                  {renderStatusIcon()}
                   <span className="ml-1 capitalize">
                     {document.processingStatus}
                   </span>
@@ -178,7 +135,7 @@ export function DocumentCard({
               )}
 
               {/* Error Message */}
-              {document.processingStatus === 'failed' &&
+              {document.processingStatus === "failed" &&
                 document.errorMessage && (
                   <div className="mt-2 p-2 bg-destructive/10 rounded-md">
                     <div className="flex items-center gap-2">

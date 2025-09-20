@@ -9,7 +9,7 @@ export interface Document {
   uploadedAt: Date;
   fileSize: number;
   fileType: string;
-  processingStatus: 'pending' | 'processing' | 'completed' | 'failed';
+  processingStatus: "pending" | "processing" | "completed" | "failed";
   errorMessage?: string;
   metadata?: {
     title?: string;
@@ -41,7 +41,7 @@ export interface DocumentNode {
   docId: string;
   userId: string;
   filename: string;
-  type: 'Document';
+  type: "Document";
 }
 
 export interface ChunkNode {
@@ -51,15 +51,15 @@ export interface ChunkNode {
   userId: string;
   text: string;
   chunkIndex: number;
-  type: 'Chunk';
+  type: "Chunk";
 }
 
 export interface EntityNode {
   id: string;
   entityId: string;
   name: string;
-  type: 'Entity';
-  category: 'PERSON' | 'ORGANIZATION' | 'LOCATION' | 'DATE' | 'MONEY' | 'OTHER';
+  type: "Entity";
+  category: "PERSON" | "ORGANIZATION" | "LOCATION" | "DATE" | "MONEY" | "OTHER";
   userId: string;
   confidence: number;
   mentions: number;
@@ -69,7 +69,7 @@ export interface TopicNode {
   id: string;
   topicId: string;
   name: string;
-  type: 'Topic';
+  type: "Topic";
   description: string;
   keywords: string[];
   userId: string;
@@ -80,14 +80,14 @@ export interface TopicNode {
 export interface Relationship {
   id: string;
   type:
-    | 'CONTAINS'
-    | 'MENTIONS'
-    | 'RELATED_TO'
-    | 'COOCCURS_WITH'
-    | 'SIMILAR_TO'
-    | 'SAME_AS'
-    | 'DOCUMENT_SIMILAR_TO'
-    | 'CATEGORIZES';
+    | "CONTAINS"
+    | "MENTIONS"
+    | "RELATED_TO"
+    | "COOCCURS_WITH"
+    | "SIMILAR_TO"
+    | "SAME_AS"
+    | "DOCUMENT_SIMILAR_TO"
+    | "CATEGORIZES";
   startNodeId: string;
   endNodeId: string;
   properties?: {
@@ -122,7 +122,7 @@ export interface SearchResult {
 // Chat/Q&A Types
 export interface ChatMessage {
   id: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   timestamp: Date;
   sources?: SearchResult[];

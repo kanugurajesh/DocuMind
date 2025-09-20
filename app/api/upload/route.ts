@@ -1,9 +1,9 @@
-import { auth } from '@clerk/nextjs/server';
-import { NextRequest, NextResponse } from 'next/server';
-import { v4 as uuidv4 } from 'uuid';
-import { getDocumentsCollection } from '@/lib/db/mongodb';
-import { uploadFileBuffer } from '@/lib/storage/s3';
-import { Document } from '@/types';
+import { auth } from "@clerk/nextjs/server";
+import { type NextRequest, NextResponse } from "next/server";
+import { v4 as uuidv4 } from "uuid";
+import { getDocumentsCollection } from "@/lib/db/mongodb";
+import { uploadFileBuffer } from "@/lib/storage/s3";
+import type { Document } from "@/types";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,28 +11,28 @@ export async function POST(request: NextRequest) {
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
+        { success: false, error: "Unauthorized" },
+        { status: 401 },
       );
     }
 
     // Parse form data
     const formData = await request.formData();
-    const file = formData.get('file') as File;
+    const file = formData.get("file") as File;
 
     if (!file) {
       return NextResponse.json(
-        { success: false, error: 'No file provided' },
-        { status: 400 }
+        { success: false, error: "No file provided" },
+        { status: 400 },
       );
     }
 
     // Validate file type
     const allowedTypes = [
-      'application/pdf',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/msword',
-      'text/plain',
+      "application/pdf",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/msword",
+      "text/plain",
     ];
 
     if (!allowedTypes.includes(file.type)) {
@@ -40,9 +40,9 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error:
-            'Unsupported file type. Please upload PDF, DOCX, DOC, or TXT files.',
+            "Unsupported file type. Please upload PDF, DOCX, DOC, or TXT files.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
           success: false,
           error: `File size exceeds ${maxSizeMB}MB limit`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -70,11 +70,11 @@ export async function POST(request: NextRequest) {
       fileBuffer,
       file.type,
       userId,
-      docId
+      docId,
     );
 
     // Create document record in MongoDB
-    const document: Omit<Document, '_id'> = {
+    const document: Omit<Document, "_id"> = {
       docId,
       filename: file.name,
       originalName: file.name,
@@ -83,45 +83,45 @@ export async function POST(request: NextRequest) {
       uploadedAt: new Date(),
       fileSize: file.size,
       fileType: file.type,
-      processingStatus: 'pending',
+      processingStatus: "pending",
       metadata: {
         // Will be populated during processing
       },
     };
 
     const documentsCollection = await getDocumentsCollection();
-    const result = await documentsCollection.insertOne(document);
+    const _result = await documentsCollection.insertOne(document);
 
     // Trigger document processing pipeline
-    const { queueDocumentProcessing } = await import('@/lib/ai/pipeline');
+    const { queueDocumentProcessing } = await import("@/lib/ai/pipeline");
     queueDocumentProcessing(docId, userId, file.name, file.type);
 
     return NextResponse.json({
       success: true,
       docId,
       filename: file.name,
-      message: 'File uploaded successfully. Processing will begin shortly.',
+      message: "File uploaded successfully. Processing will begin shortly.",
     });
   } catch (error) {
-    console.error('Upload error:', error);
+    console.error("Upload error:", error);
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error during upload',
+        error: "Internal server error during upload",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 // Handle OPTIONS request for CORS
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS(_request: NextRequest) {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
     },
   });
 }

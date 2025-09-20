@@ -1,32 +1,33 @@
 // Database initialization script
-import { ensureIndexes } from './mongodb';
-import { initializeQdrantCollection } from './qdrant';
-import { initializeNeo4jConstraints } from './neo4j';
-import { initializeBucket } from '../storage/s3';
+
+import { initializeBucket } from "../storage/s3";
+import { ensureIndexes } from "./mongodb";
+import { initializeNeo4jConstraints } from "./neo4j";
+import { initializeQdrantCollection } from "./qdrant";
 
 export async function initializeDatabases() {
-  console.log('Initializing databases...');
+  console.log("Initializing databases...");
 
   try {
     // Initialize MongoDB indexes
     await ensureIndexes();
-    console.log('✅ MongoDB indexes created');
+    console.log("✅ MongoDB indexes created");
 
     // Initialize Qdrant collection
     await initializeQdrantCollection();
-    console.log('✅ Qdrant collection initialized');
+    console.log("✅ Qdrant collection initialized");
 
     // Initialize Neo4j constraints and indexes
     await initializeNeo4jConstraints();
-    console.log('✅ Neo4j constraints and indexes created');
+    console.log("✅ Neo4j constraints and indexes created");
 
     // Initialize AWS S3 bucket
     await initializeBucket();
-    console.log('✅ AWS S3 bucket ready');
+    console.log("✅ AWS S3 bucket ready");
 
-    console.log('🎉 All databases initialized successfully!');
+    console.log("🎉 All databases initialized successfully!");
   } catch (error) {
-    console.error('❌ Error initializing databases:', error);
+    console.error("❌ Error initializing databases:", error);
     throw error;
   }
 }
@@ -42,44 +43,44 @@ export async function checkDatabaseHealth() {
 
   try {
     // Check MongoDB
-    const { connectToDatabase } = await import('./mongodb');
+    const { connectToDatabase } = await import("./mongodb");
     await connectToDatabase();
     status.mongodb = true;
   } catch (error) {
-    console.error('MongoDB health check failed:', error);
+    console.error("MongoDB health check failed:", error);
   }
 
   try {
     // Check Qdrant
-    const { getQdrantClient } = await import('./qdrant');
+    const { getQdrantClient } = await import("./qdrant");
     const qdrantClient = getQdrantClient();
     await qdrantClient.getCollections();
     status.qdrant = true;
   } catch (error) {
-    console.error('Qdrant health check failed:', error);
+    console.error("Qdrant health check failed:", error);
   }
 
   try {
     // Check Neo4j
-    const { getSession } = await import('./neo4j');
+    const { getSession } = await import("./neo4j");
     const session = getSession();
-    await session.run('RETURN 1');
+    await session.run("RETURN 1");
     await session.close();
     status.neo4j = true;
   } catch (error) {
-    console.error('Neo4j health check failed:', error);
+    console.error("Neo4j health check failed:", error);
   }
 
   try {
     // Check S3
-    const { getS3Client, getBucketName } = await import('../storage/s3');
-    const { HeadBucketCommand } = await import('@aws-sdk/client-s3');
+    const { getS3Client, getBucketName } = await import("../storage/s3");
+    const { HeadBucketCommand } = await import("@aws-sdk/client-s3");
     const s3Client = getS3Client();
     const bucketName = getBucketName();
     await s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
     status.s3 = true;
   } catch (error) {
-    console.error('S3 health check failed:', error);
+    console.error("S3 health check failed:", error);
   }
 
   return status;

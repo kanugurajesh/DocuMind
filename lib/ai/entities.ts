@@ -1,13 +1,13 @@
-import { OpenAI } from 'openai';
-import { v4 as uuidv4 } from 'uuid';
+import { OpenAI } from "openai";
+import { v4 as uuidv4 } from "uuid";
 import {
-  createEntityNode,
   createEntityCooccurrenceRelationship,
+  createEntityNode,
   createEntityResolutionRelationship,
   createEntitySimilarityRelationship,
-  getUserEntities,
   getEntityCooccurrences,
-} from '../db/neo4j';
+  getUserEntities,
+} from "../db/neo4j";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
@@ -16,7 +16,7 @@ const openai = new OpenAI({
 export interface ExtractedEntity {
   id: string;
   name: string;
-  category: 'PERSON' | 'ORGANIZATION' | 'LOCATION' | 'DATE' | 'MONEY' | 'OTHER';
+  category: "PERSON" | "ORGANIZATION" | "LOCATION" | "DATE" | "MONEY" | "OTHER";
   confidence: number;
   context?: string;
 }
@@ -36,7 +36,7 @@ export interface EntityRelationship {
 
 // Extract entities from text using OpenAI
 export async function extractEntities(
-  text: string
+  text: string,
 ): Promise<EntityExtractionResult> {
   try {
     const prompt = `
@@ -77,10 +77,10 @@ Return only valid JSON, no additional text.
     `;
 
     const response = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
       messages: [
         {
-          role: 'user',
+          role: "user",
           content: prompt,
         },
       ],
@@ -90,7 +90,7 @@ Return only valid JSON, no additional text.
 
     const content = response.choices[0]?.message?.content;
     if (!content) {
-      throw new Error('No response from OpenAI');
+      throw new Error("No response from OpenAI");
     }
 
     try {
@@ -100,11 +100,11 @@ Return only valid JSON, no additional text.
       const entities: ExtractedEntity[] = (result.entities || [])
         .map((entity: any) => ({
           id: uuidv4(),
-          name: entity.name?.trim() || '',
+          name: entity.name?.trim() || "",
           category: validateCategory(entity.category),
           confidence: Math.max(
             0,
-            Math.min(1, Number(entity.confidence) || 0.5)
+            Math.min(1, Number(entity.confidence) || 0.5),
           ),
           context: entity.context?.trim() || undefined,
         }))
@@ -114,10 +114,10 @@ Return only valid JSON, no additional text.
       const relationships: EntityRelationship[] = (result.relationships || [])
         .map((rel: any) => {
           const sourceEntity = entities.find(
-            (e) => e.name.toLowerCase() === rel.source?.toLowerCase()
+            (e) => e.name.toLowerCase() === rel.source?.toLowerCase(),
           );
           const targetEntity = entities.find(
-            (e) => e.name.toLowerCase() === rel.target?.toLowerCase()
+            (e) => e.name.toLowerCase() === rel.target?.toLowerCase(),
           );
 
           if (!sourceEntity || !targetEntity) return null;
@@ -125,7 +125,7 @@ Return only valid JSON, no additional text.
           return {
             sourceEntityId: sourceEntity.id,
             targetEntityId: targetEntity.id,
-            relationType: rel.relationType?.trim() || 'RELATED_TO',
+            relationType: rel.relationType?.trim() || "RELATED_TO",
             confidence: Math.max(0, Math.min(1, Number(rel.confidence) || 0.5)),
             context: rel.context?.trim() || undefined,
           };
@@ -134,30 +134,30 @@ Return only valid JSON, no additional text.
 
       return { entities, relationships };
     } catch (parseError) {
-      console.error('Error parsing entity extraction JSON:', parseError);
+      console.error("Error parsing entity extraction JSON:", parseError);
       return { entities: [], relationships: [] };
     }
   } catch (error) {
-    console.error('Error extracting entities:', error);
+    console.error("Error extracting entities:", error);
     return { entities: [], relationships: [] };
   }
 }
 
 // Validate entity category
-function validateCategory(category: string): ExtractedEntity['category'] {
-  const validCategories: ExtractedEntity['category'][] = [
-    'PERSON',
-    'ORGANIZATION',
-    'LOCATION',
-    'DATE',
-    'MONEY',
-    'OTHER',
+function validateCategory(category: string): ExtractedEntity["category"] {
+  const validCategories: ExtractedEntity["category"][] = [
+    "PERSON",
+    "ORGANIZATION",
+    "LOCATION",
+    "DATE",
+    "MONEY",
+    "OTHER",
   ];
 
   const upperCategory = category?.toUpperCase();
   return validCategories.includes(upperCategory as any)
-    ? (upperCategory as ExtractedEntity['category'])
-    : 'OTHER';
+    ? (upperCategory as ExtractedEntity["category"])
+    : "OTHER";
 }
 
 // Process entities for a document chunk
@@ -165,23 +165,23 @@ export async function processChunkEntities(
   chunkId: string,
   chunkText: string,
   docId: string,
-  userId: string
+  userId: string,
 ): Promise<ExtractedEntity[]> {
   try {
     // Skip very short text chunks
     if (chunkText.length < 50) {
       console.log(
-        `⏭️ Skipping short chunk ${chunkId} (${chunkText.length} chars)`
+        `⏭️ Skipping short chunk ${chunkId} (${chunkText.length} chars)`,
       );
       return [];
     }
 
     console.log(
-      `🧠 Extracting entities from chunk ${chunkId} (${chunkText.length} chars)`
+      `🧠 Extracting entities from chunk ${chunkId} (${chunkText.length} chars)`,
     );
     const result = await extractEntities(chunkText);
     console.log(
-      `📋 LLM extracted ${result.entities.length} entities from chunk ${chunkId}`
+      `📋 LLM extracted ${result.entities.length} entities from chunk ${chunkId}`,
     );
 
     const processedEntities: ExtractedEntity[] = [];
@@ -192,7 +192,7 @@ export async function processChunkEntities(
         const entityId = `${docId}_${entity.id}`;
 
         console.log(
-          `🏗️ Creating entity node: ${entity.name} (${entity.category})`
+          `🏗️ Creating entity node: ${entity.name} (${entity.category})`,
         );
         await createEntityNode(
           entityId,
@@ -200,7 +200,7 @@ export async function processChunkEntities(
           userId,
           entity.name,
           entity.category,
-          entity.confidence
+          entity.confidence,
         );
 
         processedEntities.push({
@@ -210,7 +210,7 @@ export async function processChunkEntities(
       } catch (error) {
         console.error(
           `❌ Error creating entity node for ${entity.name}:`,
-          error
+          error,
         );
       }
     }
@@ -218,13 +218,13 @@ export async function processChunkEntities(
     // Process co-occurrence relationships between entities in the same chunk
     if (processedEntities.length > 1) {
       console.log(
-        `🔗 Creating co-occurrence relationships for ${processedEntities.length} entities in chunk ${chunkId}`
+        `🔗 Creating co-occurrence relationships for ${processedEntities.length} entities in chunk ${chunkId}`,
       );
       await processEntityCooccurrences(processedEntities, userId, chunkText);
     }
 
     console.log(
-      `✅ Chunk ${chunkId} processed: ${processedEntities.length} entities created`
+      `✅ Chunk ${chunkId} processed: ${processedEntities.length} entities created`,
     );
     return processedEntities;
   } catch (error) {
@@ -237,7 +237,7 @@ export async function processChunkEntities(
 async function processEntityCooccurrences(
   entities: ExtractedEntity[],
   userId: string,
-  chunkText: string
+  chunkText: string,
 ): Promise<void> {
   try {
     // Create co-occurrence relationships between all entity pairs in the chunk
@@ -269,20 +269,20 @@ async function processEntityCooccurrences(
             userId,
             confidence,
             1, // co-occurrence count
-            `Co-occurring in same text chunk`
+            `Co-occurring in same text chunk`,
           );
         }
       }
     }
   } catch (error) {
-    console.error('Error processing entity co-occurrences:', error);
+    console.error("Error processing entity co-occurrences:", error);
   }
 }
 
 // Calculate entity similarity based on category and name
 function calculateEntitySimilarity(
   entity1: ExtractedEntity,
-  entity2: ExtractedEntity
+  entity2: ExtractedEntity,
 ): number {
   // Same category bonus
   const categoryMatch = entity1.category === entity2.category ? 0.3 : 0;
@@ -290,7 +290,7 @@ function calculateEntitySimilarity(
   // Name similarity using simple string similarity
   const nameSimilarity = calculateStringSimilarity(
     entity1.name.toLowerCase(),
-    entity2.name.toLowerCase()
+    entity2.name.toLowerCase(),
   );
 
   return Math.min(1, categoryMatch + nameSimilarity * 0.7);
@@ -311,18 +311,18 @@ function calculateStringSimilarity(str1: string, str2: string): number {
 export async function processDocumentEntities(
   docId: string,
   userId: string,
-  chunks: Array<{ id: string; text: string }>
+  chunks: Array<{ id: string; text: string }>,
 ): Promise<ExtractedEntity[]> {
   console.log(
-    `🔍 Starting entity extraction for document ${docId} with ${chunks.length} chunks`
+    `🔍 Starting entity extraction for document ${docId} with ${chunks.length} chunks`,
   );
   console.log(
     `📋 Chunk details:`,
     chunks.map((c) => ({
       id: c.id,
       textLength: c.text.length,
-      textPreview: c.text.substring(0, 100) + '...',
-    }))
+      textPreview: `${c.text.substring(0, 100)}...`,
+    })),
   );
   console.log(`👤 Processing for user: ${userId}`);
   console.log(`📄 Document ID: ${docId}`);
@@ -335,11 +335,11 @@ export async function processDocumentEntities(
   for (let i = 0; i < chunks.length; i += batchSize) {
     const batch = chunks.slice(i, i + batchSize);
     console.log(
-      `📦 Processing entity batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(chunks.length / batchSize)} (chunks ${i}-${Math.min(i + batchSize - 1, chunks.length - 1)})`
+      `📦 Processing entity batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(chunks.length / batchSize)} (chunks ${i}-${Math.min(i + batchSize - 1, chunks.length - 1)})`,
     );
 
     const batchPromises = batch.map((chunk) =>
-      processChunkEntities(chunk.id, chunk.text, docId, userId)
+      processChunkEntities(chunk.id, chunk.text, docId, userId),
     );
 
     try {
@@ -348,7 +348,7 @@ export async function processDocumentEntities(
       allEntities.push(...batchEntities);
 
       console.log(
-        `✅ Batch completed: extracted ${batchEntities.length} entities`
+        `✅ Batch completed: extracted ${batchEntities.length} entities`,
       );
 
       // Small delay between batches to respect rate limits
@@ -358,22 +358,22 @@ export async function processDocumentEntities(
     } catch (error) {
       console.error(
         `❌ Error processing entity batch ${i}-${i + batchSize}:`,
-        error
+        error,
       );
     }
   }
 
   console.log(
-    `🎯 Entity extraction completed: total ${allEntities.length} entities extracted for document ${docId}`
+    `🎯 Entity extraction completed: total ${allEntities.length} entities extracted for document ${docId}`,
   );
   return allEntities;
 }
 
 // Process cross-document entity resolution
 export async function processCrossDocumentEntityResolution(
-  docId: string,
+  _docId: string,
   userId: string,
-  newEntities: ExtractedEntity[]
+  newEntities: ExtractedEntity[],
 ): Promise<void> {
   try {
     // Group new entities by category for more efficient processing
@@ -385,7 +385,7 @@ export async function processCrossDocumentEntityResolution(
         acc[entity.category].push(entity);
         return acc;
       },
-      {} as Record<string, ExtractedEntity[]>
+      {} as Record<string, ExtractedEntity[]>,
     );
 
     // Process each category separately
@@ -410,7 +410,7 @@ export async function processCrossDocumentEntityResolution(
               existing.id, // primary entity (existing)
               newEntity.id, // duplicate entity (new)
               userId,
-              similarity
+              similarity,
             );
           }
           // If moderately similar, create SIMILAR_TO relationship
@@ -419,21 +419,21 @@ export async function processCrossDocumentEntityResolution(
               newEntity.id,
               existing.id,
               userId,
-              similarity
+              similarity,
             );
           }
         }
       }
     }
   } catch (error) {
-    console.error('Error processing cross-document entity resolution:', error);
+    console.error("Error processing cross-document entity resolution:", error);
   }
 }
 
 // Enhanced entity similarity calculation for cross-document resolution
 function calculateAdvancedEntitySimilarity(
   entity1: ExtractedEntity,
-  entity2: ExtractedEntity
+  entity2: ExtractedEntity,
 ): number {
   // Exact name match
   if (entity1.name.toLowerCase() === entity2.name.toLowerCase()) {
@@ -448,11 +448,11 @@ function calculateAdvancedEntitySimilarity(
   // Calculate various similarity metrics
   const nameSimilarity = calculateStringSimilarity(
     entity1.name.toLowerCase(),
-    entity2.name.toLowerCase()
+    entity2.name.toLowerCase(),
   );
 
   // For person names, check if one is a subset of the other
-  if (entity1.category === 'PERSON') {
+  if (entity1.category === "PERSON") {
     const name1Parts = entity1.name.toLowerCase().split(/\s+/);
     const name2Parts = entity2.name.toLowerCase().split(/\s+/);
 
@@ -464,8 +464,8 @@ function calculateAdvancedEntitySimilarity(
 
     const partMatches = shorter.filter((part) =>
       longer.some(
-        (longPart) => longPart.includes(part) || part.includes(longPart)
-      )
+        (longPart) => longPart.includes(part) || part.includes(longPart),
+      ),
     );
 
     if (partMatches.length === shorter.length && shorter.length > 0) {
@@ -474,9 +474,9 @@ function calculateAdvancedEntitySimilarity(
   }
 
   // For organizations, check for common abbreviations or variations
-  if (entity1.category === 'ORGANIZATION') {
-    const cleanName1 = entity1.name.toLowerCase().replace(/[.,\s]+/g, '');
-    const cleanName2 = entity2.name.toLowerCase().replace(/[.,\s]+/g, '');
+  if (entity1.category === "ORGANIZATION") {
+    const cleanName1 = entity1.name.toLowerCase().replace(/[.,\s]+/g, "");
+    const cleanName2 = entity2.name.toLowerCase().replace(/[.,\s]+/g, "");
 
     if (cleanName1.includes(cleanName2) || cleanName2.includes(cleanName1)) {
       return 0.85;
@@ -489,16 +489,16 @@ function calculateAdvancedEntitySimilarity(
 // Process semantic entity clustering to group related entities
 export async function processEntityClustering(userId: string): Promise<void> {
   try {
-    console.log('Processing semantic entity clustering...');
+    console.log("Processing semantic entity clustering...");
 
     // Get all user entities grouped by category
     const categories = [
-      'PERSON',
-      'ORGANIZATION',
-      'LOCATION',
-      'DATE',
-      'MONEY',
-      'OTHER',
+      "PERSON",
+      "ORGANIZATION",
+      "LOCATION",
+      "DATE",
+      "MONEY",
+      "OTHER",
     ];
 
     for (const category of categories) {
@@ -513,7 +513,7 @@ export async function processEntityClustering(userId: string): Promise<void> {
     // Create cross-category relationships for related concepts
     await createCrossCategoryRelationships(userId);
   } catch (error) {
-    console.error('Error processing entity clustering:', error);
+    console.error("Error processing entity clustering:", error);
   }
 }
 
@@ -526,7 +526,7 @@ async function createSemanticClusters(
     category: string;
     confidence: number;
   }>,
-  category: string
+  category: string,
 ): Promise<void> {
   try {
     // For each entity, find semantically similar entities
@@ -537,7 +537,7 @@ async function createSemanticClusters(
 
         const similarity = calculateAdvancedEntitySimilarity(
           { ...entity1, context: undefined } as ExtractedEntity,
-          { ...entity2, context: undefined } as ExtractedEntity
+          { ...entity2, context: undefined } as ExtractedEntity,
         );
 
         // Create similarity relationships for moderately similar entities
@@ -546,18 +546,18 @@ async function createSemanticClusters(
             entity1.id,
             entity2.id,
             userId,
-            similarity
+            similarity,
           );
         }
       }
     }
 
     // Create category-specific clustering logic
-    if (category === 'PERSON') {
+    if (category === "PERSON") {
       await createPersonClusters(userId, entities);
-    } else if (category === 'ORGANIZATION') {
+    } else if (category === "ORGANIZATION") {
       await createOrganizationClusters(userId, entities);
-    } else if (category === 'LOCATION') {
+    } else if (category === "LOCATION") {
       await createLocationClusters(userId, entities);
     }
   } catch (error) {
@@ -573,18 +573,18 @@ async function createPersonClusters(
     name: string;
     category: string;
     confidence: number;
-  }>
+  }>,
 ): Promise<void> {
   // Group persons who might work at the same organization or have similar roles
   const professionalTerms = [
-    'ceo',
-    'cto',
-    'manager',
-    'director',
-    'president',
-    'founder',
-    'engineer',
-    'developer',
+    "ceo",
+    "cto",
+    "manager",
+    "director",
+    "president",
+    "founder",
+    "engineer",
+    "developer",
   ];
 
   for (const person1 of persons) {
@@ -596,7 +596,7 @@ async function createPersonClusters(
 
       // Check if they share professional terms
       const sharedTerms = professionalTerms.filter(
-        (term) => name1Lower.includes(term) && name2Lower.includes(term)
+        (term) => name1Lower.includes(term) && name2Lower.includes(term),
       );
 
       if (sharedTerms.length > 0) {
@@ -605,7 +605,7 @@ async function createPersonClusters(
           person2.id,
           userId,
           0.6,
-          'PROFESSIONAL_SIMILARITY'
+          "PROFESSIONAL_SIMILARITY",
         );
       }
     }
@@ -620,18 +620,18 @@ async function createOrganizationClusters(
     name: string;
     category: string;
     confidence: number;
-  }>
+  }>,
 ): Promise<void> {
   const industryTerms = [
-    'tech',
-    'technology',
-    'software',
-    'bank',
-    'financial',
-    'medical',
-    'healthcare',
-    'university',
-    'college',
+    "tech",
+    "technology",
+    "software",
+    "bank",
+    "financial",
+    "medical",
+    "healthcare",
+    "university",
+    "college",
   ];
 
   for (const org1 of organizations) {
@@ -643,7 +643,7 @@ async function createOrganizationClusters(
 
       // Check if they share industry terms
       const sharedIndustryTerms = industryTerms.filter(
-        (term) => name1Lower.includes(term) && name2Lower.includes(term)
+        (term) => name1Lower.includes(term) && name2Lower.includes(term),
       );
 
       if (sharedIndustryTerms.length > 0) {
@@ -652,7 +652,7 @@ async function createOrganizationClusters(
           org2.id,
           userId,
           0.5,
-          'INDUSTRY_SIMILARITY'
+          "INDUSTRY_SIMILARITY",
         );
       }
     }
@@ -667,7 +667,7 @@ async function createLocationClusters(
     name: string;
     category: string;
     confidence: number;
-  }>
+  }>,
 ): Promise<void> {
   // Group locations by geographic hierarchy
   for (const loc1 of locations) {
@@ -684,7 +684,7 @@ async function createLocationClusters(
           loc2.id,
           userId,
           0.7,
-          'GEOGRAPHIC_CONTAINMENT'
+          "GEOGRAPHIC_CONTAINMENT",
         );
       }
     }
@@ -695,9 +695,9 @@ async function createLocationClusters(
 async function createCrossCategoryRelationships(userId: string): Promise<void> {
   try {
     // Get entities from different categories that might be related
-    const persons = await getUserEntities(userId, 'PERSON');
-    const organizations = await getUserEntities(userId, 'ORGANIZATION');
-    const locations = await getUserEntities(userId, 'LOCATION');
+    const persons = await getUserEntities(userId, "PERSON");
+    const organizations = await getUserEntities(userId, "ORGANIZATION");
+    const locations = await getUserEntities(userId, "LOCATION");
 
     // Create person-organization relationships
     for (const person of persons) {
@@ -709,7 +709,7 @@ async function createCrossCategoryRelationships(userId: string): Promise<void> {
             org.id,
             userId,
             0.6,
-            'WORKS_AT'
+            "WORKS_AT",
           );
         }
       }
@@ -724,13 +724,13 @@ async function createCrossCategoryRelationships(userId: string): Promise<void> {
             location.id,
             userId,
             0.6,
-            'LOCATED_IN'
+            "LOCATED_IN",
           );
         }
       }
     }
   } catch (error) {
-    console.error('Error creating cross-category relationships:', error);
+    console.error("Error creating cross-category relationships:", error);
   }
 }
 
@@ -738,15 +738,15 @@ async function createCrossCategoryRelationships(userId: string): Promise<void> {
 async function entitiesAppearTogether(
   userId: string,
   entity1Id: string,
-  entity2Id: string
+  entity2Id: string,
 ): Promise<boolean> {
   try {
     const cooccurrences = await getEntityCooccurrences(entity1Id, userId, 50);
     return cooccurrences.some(
-      (cooccurrence) => cooccurrence.entity.entityId === entity2Id
+      (cooccurrence) => cooccurrence.entity.entityId === entity2Id,
     );
   } catch (error) {
-    console.error('Error checking entity co-occurrence:', error);
+    console.error("Error checking entity co-occurrence:", error);
     return false;
   }
 }

@@ -1,4 +1,4 @@
-import { MongoClient, Db } from 'mongodb';
+import { type Db, MongoClient } from "mongodb";
 
 declare global {
   var _mongoClientPromise: Promise<MongoClient> | undefined;
@@ -7,7 +7,7 @@ declare global {
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === "development") {
   // In development mode, use a global variable so the value is preserved across module reloads
   if (!global._mongoClientPromise) {
     client = new MongoClient(process.env.MONGODB_URI!);
@@ -31,12 +31,12 @@ export async function connectToDatabase(): Promise<{
 
 export async function getDocumentsCollection() {
   const { db } = await connectToDatabase();
-  return db.collection('documents');
+  return db.collection("documents");
 }
 
 export async function getUsersCollection() {
   const { db } = await connectToDatabase();
-  return db.collection('users');
+  return db.collection("users");
 }
 
 // Helper function to ensure indexes are created
@@ -49,7 +49,7 @@ export async function ensureIndexes() {
   await documentsCollection.createIndex({ userId: 1, uploadedAt: -1 });
   await documentsCollection.createIndex({ processingStatus: 1 });
 
-  console.log('MongoDB indexes ensured');
+  console.log("MongoDB indexes ensured");
 }
 
 export default clientPromise;

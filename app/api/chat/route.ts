@@ -1,35 +1,27 @@
-import { auth } from '@clerk/nextjs/server';
-import { NextRequest, NextResponse } from 'next/server';
-import { generateChatResponse } from '@/lib/ai/chat';
-import { ChatRequest, ChatApiResponse } from '@/types';
+import { NextResponse } from "next/server";
+import { generateChatResponse } from "@/lib/ai/chat";
+import { validateUserAccess, withAuth } from "@/lib/api/auth-middleware";
+import {
+  createForbiddenError,
+  createValidationError,
+  handleApiError,
+} from "@/lib/api/error-handling";
+import type { ChatApiResponse, ChatRequest } from "@/types";
 
 // POST /api/chat - Generate chat response
-export async function POST(request: NextRequest) {
+export const POST = withAuth<ChatApiResponse>(async ({ userId, request }) => {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
     const body: ChatRequest = await request.json();
 
     // Validate request
     if (!body.query?.trim()) {
-      return NextResponse.json(
-        { success: false, error: 'Query is required' },
-        { status: 400 }
-      );
+      return createValidationError("Query is required");
     }
 
     // Ensure user can only query their own documents
-    if (body.userId !== userId) {
-      return NextResponse.json(
-        { success: false, error: 'Access denied' },
-        { status: 403 }
-      );
+    const accessError = validateUserAccess(body.userId, userId);
+    if (accessError) {
+      return createForbiddenError();
     }
 
     // Generate chat response
@@ -40,35 +32,18 @@ export async function POST(request: NextRequest) {
       docIds: body.docIds,
     });
 
-    const apiResponse: ChatApiResponse = {
+    return NextResponse.json({
       success: true,
       data: chatResponse,
-    };
-
-    return NextResponse.json(apiResponse);
+    } as ChatApiResponse);
   } catch (error) {
-    console.error('Chat API error:', error);
-
-    const errorResponse: ChatApiResponse = {
-      success: false,
-      error: error instanceof Error ? error.message : 'Internal server error',
-    };
-
-    return NextResponse.json(errorResponse, { status: 500 });
+    return handleApiError(error, "Chat API");
   }
-}
+});
 
 // GET /api/chat - Get chat history (placeholder for future implementation)
-export async function GET(request: NextRequest) {
+export const GET = withAuth<any>(async ({ userId: _userId }) => {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
     // TODO: Implement chat history retrieval
     // For now, return empty history
     return NextResponse.json({
@@ -79,10 +54,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Get chat history error:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to get chat history' },
-      { status: 500 }
-    );
+    return handleApiError(error, "Get chat history");
   }
-}
+});

@@ -1,33 +1,34 @@
-'use client';
+"use client";
 
-import React, { useState, useRef, KeyboardEvent } from 'react';
-import { ChatInputProps } from '@/types';
-import { showToast } from '@/lib/toast';
+import type React from "react";
+import { type KeyboardEvent, useRef, useState } from "react";
+import { showToast } from "@/lib/toast";
+import type { ChatInputProps } from "@/types";
 
 export function ChatInput({
   onSend,
   disabled = false,
-  placeholder = 'Ask a question...',
+  placeholder = "Ask a question...",
 }: ChatInputProps) {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = () => {
     const trimmedMessage = message.trim();
     if (trimmedMessage && !disabled) {
       onSend(trimmedMessage);
-      setMessage('');
+      setMessage("");
       // Reset textarea height
       if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
+        textareaRef.current.style.height = "auto";
       }
     } else if (!trimmedMessage) {
-      showToast.error('Please enter a message');
+      showToast.error("Please enter a message");
     }
   };
 
   const handleKeyPress = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
     }
@@ -38,8 +39,8 @@ export function ChatInput({
 
     // Auto-resize textarea
     const textarea = e.target;
-    textarea.style.height = 'auto';
-    textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+    textarea.style.height = "auto";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
   };
 
   return (
@@ -59,7 +60,7 @@ export function ChatInput({
             disabled:bg-gray-100 disabled:cursor-not-allowed
             transition-colors duration-200
           `}
-          style={{ maxHeight: '120px' }}
+          style={{ maxHeight: "120px" }}
         />
 
         {/* Send Button */}
@@ -70,8 +71,8 @@ export function ChatInput({
             absolute right-2 bottom-2 p-2 rounded-lg transition-all duration-200
             ${
               !message.trim() || disabled
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-blue-600 hover:bg-blue-50 hover:text-blue-700'
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-blue-600 hover:bg-blue-50 hover:text-blue-700"
             }
           `}
           title="Send message (Enter)"
@@ -96,14 +97,14 @@ export function ChatInput({
       <div className="flex items-center space-x-2">
         {/* Clear Chat Button */}
         <button
-          onClick={() => setMessage('')}
+          onClick={() => setMessage("")}
           disabled={!message || disabled}
           className={`
             p-2 rounded-lg transition-colors duration-200
             ${
               !message || disabled
-                ? 'text-gray-300 cursor-not-allowed'
-                : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
             }
           `}
           title="Clear input"

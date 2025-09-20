@@ -1,7 +1,7 @@
-import { auth } from '@clerk/nextjs/server';
-import { NextRequest, NextResponse } from 'next/server';
-import { performDocumentSearch } from '@/lib/ai/chat';
-import { SearchRequest, SearchApiResponse } from '@/types';
+import { auth } from "@clerk/nextjs/server";
+import { type NextRequest, NextResponse } from "next/server";
+import { performDocumentSearch } from "@/lib/ai/chat";
+import type { SearchApiResponse, SearchRequest } from "@/types";
 
 // POST /api/search - Search documents
 export async function POST(request: NextRequest) {
@@ -9,8 +9,8 @@ export async function POST(request: NextRequest) {
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
+        { success: false, error: "Unauthorized" },
+        { status: 401 },
       );
     }
 
@@ -19,16 +19,16 @@ export async function POST(request: NextRequest) {
     // Validate request
     if (!body.query?.trim()) {
       return NextResponse.json(
-        { success: false, error: 'Query is required' },
-        { status: 400 }
+        { success: false, error: "Query is required" },
+        { status: 400 },
       );
     }
 
     // Ensure user can only search their own documents
     if (body.userId !== userId) {
       return NextResponse.json(
-        { success: false, error: 'Access denied' },
-        { status: 403 }
+        { success: false, error: "Access denied" },
+        { status: 403 },
       );
     }
 
@@ -49,11 +49,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(apiResponse);
   } catch (error) {
-    console.error('Search API error:', error);
+    console.error("Search API error:", error);
 
     const errorResponse: SearchApiResponse = {
       success: false,
-      error: error instanceof Error ? error.message : 'Internal server error',
+      error: error instanceof Error ? error.message : "Internal server error",
     };
 
     return NextResponse.json(errorResponse, { status: 500 });
@@ -66,13 +66,13 @@ export async function GET(request: NextRequest) {
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
+        { success: false, error: "Unauthorized" },
+        { status: 401 },
       );
     }
 
     const { searchParams } = new URL(request.url);
-    const query = searchParams.get('q');
+    const query = searchParams.get("q");
 
     if (!query) {
       return NextResponse.json({
@@ -88,10 +88,10 @@ export async function GET(request: NextRequest) {
       suggestions: [],
     });
   } catch (error) {
-    console.error('Search suggestions error:', error);
+    console.error("Search suggestions error:", error);
     return NextResponse.json(
-      { success: false, error: 'Failed to get search suggestions' },
-      { status: 500 }
+      { success: false, error: "Failed to get search suggestions" },
+      { status: 500 },
     );
   }
 }

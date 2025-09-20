@@ -1,9 +1,9 @@
-import axios from 'axios';
-import { showToast } from './toast';
+import axios from "axios";
+import { showToast } from "./toast";
 
 // Create axios instance
 const apiClient = axios.create({
-  baseURL: '/api',
+  baseURL: "/api",
   timeout: 30000, // 30 seconds
 });
 
@@ -13,9 +13,9 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => {
-    showToast.error('Request failed to send');
+    showToast.error("Request failed to send");
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor for global error handling
@@ -24,7 +24,7 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error) => {
-    let errorMessage = 'An unexpected error occurred';
+    let errorMessage = "An unexpected error occurred";
 
     if (error.response) {
       // Server responded with error status
@@ -33,32 +33,32 @@ apiClient.interceptors.response.use(
 
       switch (status) {
         case 400:
-          errorMessage = data.error || 'Invalid request';
+          errorMessage = data.error || "Invalid request";
           break;
         case 401:
-          errorMessage = 'Authentication required';
+          errorMessage = "Authentication required";
           break;
         case 403:
-          errorMessage = 'Access denied';
+          errorMessage = "Access denied";
           break;
         case 404:
-          errorMessage = 'Resource not found';
+          errorMessage = "Resource not found";
           break;
         case 429:
-          errorMessage = 'Too many requests. Please try again later';
+          errorMessage = "Too many requests. Please try again later";
           break;
         case 500:
-          errorMessage = 'Server error. Please try again later';
+          errorMessage = "Server error. Please try again later";
           break;
         default:
           errorMessage = data.error || `Error ${status}`;
       }
     } else if (error.request) {
       // Network error
-      errorMessage = 'Network error. Please check your connection';
+      errorMessage = "Network error. Please check your connection";
     } else {
       // Other error
-      errorMessage = error.message || 'Request failed';
+      errorMessage = error.message || "Request failed";
     }
 
     // Only show toast for non-custom error handling
@@ -68,7 +68,7 @@ apiClient.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export { apiClient };

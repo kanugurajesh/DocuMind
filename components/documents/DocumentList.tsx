@@ -1,12 +1,11 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { DocumentListProps } from '@/types';
-import { DocumentCard } from './DocumentCard';
-import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { FileText, Upload } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { FileText, Upload } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { DocumentListProps } from "@/types";
+import { DocumentCard } from "./DocumentCard";
 
 export function DocumentList({
   documents,

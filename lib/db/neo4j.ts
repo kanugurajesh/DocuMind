@@ -1,4 +1,4 @@
-import neo4j, { Driver, Session } from 'neo4j-driver';
+import neo4j, { type Driver, type Session } from "neo4j-driver";
 
 let driver: Driver | null = null;
 
@@ -6,7 +6,10 @@ export function getNeo4jDriver(): Driver {
   if (!driver) {
     driver = neo4j.driver(
       process.env.NEO4J_URI!,
-      neo4j.auth.basic(process.env.NEO4J_USERNAME!, process.env.NEO4J_PASSWORD!)
+      neo4j.auth.basic(
+        process.env.NEO4J_USERNAME!,
+        process.env.NEO4J_PASSWORD!,
+      ),
     );
   }
 
@@ -25,9 +28,9 @@ export async function initializeNeo4jConstraints() {
   try {
     // Create constraints for unique identifiers
     const constraints = [
-      'CREATE CONSTRAINT document_docid_userid IF NOT EXISTS FOR (d:Document) REQUIRE (d.docId, d.userId) IS UNIQUE',
-      'CREATE CONSTRAINT chunk_chunkid_userid IF NOT EXISTS FOR (c:Chunk) REQUIRE (c.chunkId, c.userId) IS UNIQUE',
-      'CREATE CONSTRAINT entity_entityid_userid IF NOT EXISTS FOR (e:Entity) REQUIRE (e.entityId, e.userId) IS UNIQUE',
+      "CREATE CONSTRAINT document_docid_userid IF NOT EXISTS FOR (d:Document) REQUIRE (d.docId, d.userId) IS UNIQUE",
+      "CREATE CONSTRAINT chunk_chunkid_userid IF NOT EXISTS FOR (c:Chunk) REQUIRE (c.chunkId, c.userId) IS UNIQUE",
+      "CREATE CONSTRAINT entity_entityid_userid IF NOT EXISTS FOR (e:Entity) REQUIRE (e.entityId, e.userId) IS UNIQUE",
     ];
 
     for (const constraint of constraints) {
@@ -36,19 +39,19 @@ export async function initializeNeo4jConstraints() {
 
     // Create indexes for performance
     const indexes = [
-      'CREATE INDEX document_userid IF NOT EXISTS FOR (d:Document) ON (d.userId)',
-      'CREATE INDEX chunk_userid IF NOT EXISTS FOR (c:Chunk) ON (c.userId)',
-      'CREATE INDEX entity_userid IF NOT EXISTS FOR (e:Entity) ON (e.userId)',
-      'CREATE INDEX entity_category IF NOT EXISTS FOR (e:Entity) ON (e.category)',
+      "CREATE INDEX document_userid IF NOT EXISTS FOR (d:Document) ON (d.userId)",
+      "CREATE INDEX chunk_userid IF NOT EXISTS FOR (c:Chunk) ON (c.userId)",
+      "CREATE INDEX entity_userid IF NOT EXISTS FOR (e:Entity) ON (e.userId)",
+      "CREATE INDEX entity_category IF NOT EXISTS FOR (e:Entity) ON (e.category)",
     ];
 
     for (const index of indexes) {
       await session.run(index);
     }
 
-    console.log('Neo4j constraints and indexes initialized');
+    console.log("Neo4j constraints and indexes initialized");
   } catch (error) {
-    console.error('Error initializing Neo4j constraints:', error);
+    console.error("Error initializing Neo4j constraints:", error);
     throw error;
   } finally {
     await session.close();
@@ -59,7 +62,7 @@ export async function initializeNeo4jConstraints() {
 export async function createDocumentNode(
   docId: string,
   userId: string,
-  filename: string
+  filename: string,
 ) {
   const session = getSession();
 
@@ -70,12 +73,12 @@ export async function createDocumentNode(
       SET d.filename = $filename, d.createdAt = datetime()
       RETURN d
       `,
-      { docId, userId, filename }
+      { docId, userId, filename },
     );
 
-    return result.records[0]?.get('d');
+    return result.records[0]?.get("d");
   } catch (error) {
-    console.error('Error creating document node:', error);
+    console.error("Error creating document node:", error);
     throw error;
   } finally {
     await session.close();
@@ -88,7 +91,7 @@ export async function createChunkNode(
   docId: string,
   userId: string,
   text: string,
-  chunkIndex: number
+  chunkIndex: number,
 ) {
   const session = getSession();
 
@@ -100,12 +103,12 @@ export async function createChunkNode(
       CREATE (d)-[:CONTAINS]->(c)
       RETURN c
       `,
-      { chunkId, docId, userId, text, chunkIndex }
+      { chunkId, docId, userId, text, chunkIndex },
     );
 
-    return result.records[0]?.get('c');
+    return result.records[0]?.get("c");
   } catch (error) {
-    console.error('Error creating chunk node:', error);
+    console.error("Error creating chunk node:", error);
     throw error;
   } finally {
     await session.close();
@@ -119,7 +122,7 @@ export async function createEntityNode(
   userId: string,
   name: string,
   category: string,
-  confidence: number
+  confidence: number,
 ) {
   const session = getSession();
 
@@ -132,12 +135,12 @@ export async function createEntityNode(
       MERGE (c)-[:MENTIONS]->(e)
       RETURN e
       `,
-      { entityId, chunkId, userId, name, category, confidence }
+      { entityId, chunkId, userId, name, category, confidence },
     );
 
-    return result.records[0]?.get('e');
+    return result.records[0]?.get("e");
   } catch (error) {
-    console.error('Error creating entity node:', error);
+    console.error("Error creating entity node:", error);
     throw error;
   } finally {
     await session.close();
@@ -180,16 +183,16 @@ export async function getUserGraphData(userId: string, docIds?: string[]) {
     const edges = new Set();
 
     result.records.forEach((record) => {
-      const document = record.get('d');
-      const chunk = record.get('c');
-      const entity = record.get('e');
-      const topic = record.get('t');
+      const document = record.get("d");
+      const chunk = record.get("c");
+      const entity = record.get("e");
+      const topic = record.get("t");
 
       // Add nodes
       if (document) {
         nodes.set(document.properties.docId, {
           id: document.properties.docId,
-          type: 'Document',
+          type: "Document",
           ...document.properties,
         });
       }
@@ -197,7 +200,7 @@ export async function getUserGraphData(userId: string, docIds?: string[]) {
       if (chunk) {
         nodes.set(chunk.properties.chunkId, {
           id: chunk.properties.chunkId,
-          type: 'Chunk',
+          type: "Chunk",
           ...chunk.properties,
         });
       }
@@ -205,7 +208,7 @@ export async function getUserGraphData(userId: string, docIds?: string[]) {
       if (entity) {
         nodes.set(entity.properties.entityId, {
           id: entity.properties.entityId,
-          type: 'Entity',
+          type: "Entity",
           ...entity.properties,
         });
       }
@@ -213,19 +216,19 @@ export async function getUserGraphData(userId: string, docIds?: string[]) {
       if (topic) {
         nodes.set(topic.properties.topicId, {
           id: topic.properties.topicId,
-          type: 'Topic',
+          type: "Topic",
           ...topic.properties,
         });
       }
 
       // Add edges
-      const containsRels = record.get('containsRels') || [];
-      const mentionsRels = record.get('mentionsRels') || [];
-      const cooccurrenceRels = record.get('cooccurrenceRels') || [];
-      const similarityRels = record.get('similarityRels') || [];
-      const sameAsRels = record.get('sameAsRels') || [];
-      const docSimilarityRels = record.get('docSimilarityRels') || [];
-      const topicRels = record.get('topicRels') || [];
+      const containsRels = record.get("containsRels") || [];
+      const mentionsRels = record.get("mentionsRels") || [];
+      const cooccurrenceRels = record.get("cooccurrenceRels") || [];
+      const similarityRels = record.get("similarityRels") || [];
+      const sameAsRels = record.get("sameAsRels") || [];
+      const docSimilarityRels = record.get("docSimilarityRels") || [];
+      const topicRels = record.get("topicRels") || [];
 
       containsRels.forEach((rel: any) => {
         edges.add(JSON.stringify(rel));
@@ -261,7 +264,7 @@ export async function getUserGraphData(userId: string, docIds?: string[]) {
       edges: Array.from(edges).map((edge) => JSON.parse(edge as string)),
     };
   } catch (error) {
-    console.error('Error getting user graph data:', error);
+    console.error("Error getting user graph data:", error);
     throw error;
   } finally {
     await session.close();
@@ -278,7 +281,7 @@ export async function deleteDocumentGraph(docId: string, userId: string) {
       MATCH (d:Document {docId: $docId, userId: $userId})
       DETACH DELETE d
       `,
-      { docId, userId }
+      { docId, userId },
     );
 
     // Clean up orphaned chunks and entities
@@ -288,7 +291,7 @@ export async function deleteDocumentGraph(docId: string, userId: string) {
       WHERE NOT ()-[:CONTAINS]->(c)
       DETACH DELETE c
       `,
-      { userId }
+      { userId },
     );
 
     await session.run(
@@ -297,10 +300,10 @@ export async function deleteDocumentGraph(docId: string, userId: string) {
       WHERE NOT ()-[:MENTIONS]->(e)
       DETACH DELETE e
       `,
-      { userId }
+      { userId },
     );
   } catch (error) {
-    console.error('Error deleting document graph:', error);
+    console.error("Error deleting document graph:", error);
     throw error;
   } finally {
     await session.close();
@@ -314,7 +317,7 @@ export async function createEntityCooccurrenceRelationship(
   userId: string,
   confidence: number,
   cooccurrenceCount: number = 1,
-  context?: string
+  context?: string,
 ) {
   const session = getSession();
 
@@ -338,12 +341,12 @@ export async function createEntityCooccurrenceRelationship(
         confidence,
         cooccurrenceCount,
         context,
-      }
+      },
     );
 
-    return result.records[0]?.get('r');
+    return result.records[0]?.get("r");
   } catch (error) {
-    console.error('Error creating entity co-occurrence relationship:', error);
+    console.error("Error creating entity co-occurrence relationship:", error);
     throw error;
   } finally {
     await session.close();
@@ -356,7 +359,7 @@ export async function createEntitySimilarityRelationship(
   targetEntityId: string,
   userId: string,
   similarityScore: number,
-  relationshipType: string = 'SIMILAR_TO'
+  relationshipType: string = "SIMILAR_TO",
 ) {
   const session = getSession();
 
@@ -371,12 +374,12 @@ export async function createEntitySimilarityRelationship(
           r.updatedAt = datetime()
       RETURN r
       `,
-      { sourceEntityId, targetEntityId, userId, similarityScore }
+      { sourceEntityId, targetEntityId, userId, similarityScore },
     );
 
-    return result.records[0]?.get('r');
+    return result.records[0]?.get("r");
   } catch (error) {
-    console.error('Error creating entity similarity relationship:', error);
+    console.error("Error creating entity similarity relationship:", error);
     throw error;
   } finally {
     await session.close();
@@ -388,7 +391,7 @@ export async function createEntityResolutionRelationship(
   primaryEntityId: string,
   duplicateEntityId: string,
   userId: string,
-  confidence: number
+  confidence: number,
 ) {
   const session = getSession();
 
@@ -403,12 +406,12 @@ export async function createEntityResolutionRelationship(
           r.createdAt = datetime()
       RETURN r
       `,
-      { primaryEntityId, duplicateEntityId, userId, confidence }
+      { primaryEntityId, duplicateEntityId, userId, confidence },
     );
 
-    return result.records[0]?.get('r');
+    return result.records[0]?.get("r");
   } catch (error) {
-    console.error('Error creating entity resolution relationship:', error);
+    console.error("Error creating entity resolution relationship:", error);
     throw error;
   } finally {
     await session.close();
@@ -439,13 +442,13 @@ export async function getUserEntities(userId: string, category?: string) {
     const result = await session.run(query, params);
 
     return result.records.map((record) => ({
-      id: record.get('id'),
-      name: record.get('name'),
-      category: record.get('category'),
-      confidence: record.get('confidence'),
+      id: record.get("id"),
+      name: record.get("name"),
+      category: record.get("category"),
+      confidence: record.get("confidence"),
     }));
   } catch (error) {
-    console.error('Error getting user entities:', error);
+    console.error("Error getting user entities:", error);
     throw error;
   } finally {
     await session.close();
@@ -458,7 +461,7 @@ export async function createDocumentSimilarityRelationship(
   targetDocId: string,
   userId: string,
   similarityScore: number,
-  relationshipType: string = 'SIMILAR_TO'
+  relationshipType: string = "SIMILAR_TO",
 ) {
   const session = getSession();
 
@@ -473,12 +476,12 @@ export async function createDocumentSimilarityRelationship(
           r.updatedAt = datetime()
       RETURN r
       `,
-      { sourceDocId, targetDocId, userId, similarityScore }
+      { sourceDocId, targetDocId, userId, similarityScore },
     );
 
-    return result.records[0]?.get('r');
+    return result.records[0]?.get("r");
   } catch (error) {
-    console.error('Error creating document similarity relationship:', error);
+    console.error("Error creating document similarity relationship:", error);
     throw error;
   } finally {
     await session.close();
@@ -496,15 +499,15 @@ export async function getUserDocuments(userId: string) {
       RETURN d.docId as docId, d.filename as filename
       ORDER BY d.filename
       `,
-      { userId }
+      { userId },
     );
 
     return result.records.map((record) => ({
-      docId: record.get('docId'),
-      filename: record.get('filename'),
+      docId: record.get("docId"),
+      filename: record.get("filename"),
     }));
   } catch (error) {
-    console.error('Error getting user documents:', error);
+    console.error("Error getting user documents:", error);
     throw error;
   } finally {
     await session.close();
@@ -518,7 +521,7 @@ export async function createTopicNode(
   name: string,
   description: string,
   keywords: string[],
-  confidence: number
+  confidence: number,
 ) {
   const session = getSession();
 
@@ -533,12 +536,12 @@ export async function createTopicNode(
           t.createdAt = datetime()
       RETURN t
       `,
-      { topicId, userId, name, description, keywords, confidence }
+      { topicId, userId, name, description, keywords, confidence },
     );
 
-    return result.records[0]?.get('t');
+    return result.records[0]?.get("t");
   } catch (error) {
-    console.error('Error creating topic node:', error);
+    console.error("Error creating topic node:", error);
     throw error;
   } finally {
     await session.close();
@@ -550,7 +553,7 @@ export async function createTopicDocumentRelationship(
   topicId: string,
   docId: string,
   userId: string,
-  relevance: number
+  relevance: number,
 ) {
   const session = getSession();
 
@@ -564,12 +567,12 @@ export async function createTopicDocumentRelationship(
           r.updatedAt = datetime()
       RETURN r
       `,
-      { topicId, docId, userId, relevance }
+      { topicId, docId, userId, relevance },
     );
 
-    return result.records[0]?.get('r');
+    return result.records[0]?.get("r");
   } catch (error) {
-    console.error('Error creating topic-document relationship:', error);
+    console.error("Error creating topic-document relationship:", error);
     throw error;
   } finally {
     await session.close();
@@ -580,7 +583,7 @@ export async function createTopicDocumentRelationship(
 export async function getEntityCooccurrences(
   entityId: string,
   userId: string,
-  limit: number = 10
+  limit: number = 10,
 ) {
   const session = getSession();
 
@@ -592,16 +595,16 @@ export async function getEntityCooccurrences(
       ORDER BY r.count DESC, r.confidence DESC
       LIMIT $limit
       `,
-      { entityId, userId, limit }
+      { entityId, userId, limit },
     );
 
     return result.records.map((record) => ({
-      entity: record.get('related').properties,
-      confidence: record.get('confidence'),
-      count: record.get('count'),
+      entity: record.get("related").properties,
+      confidence: record.get("confidence"),
+      count: record.get("count"),
     }));
   } catch (error) {
-    console.error('Error getting entity co-occurrences:', error);
+    console.error("Error getting entity co-occurrences:", error);
     throw error;
   } finally {
     await session.close();

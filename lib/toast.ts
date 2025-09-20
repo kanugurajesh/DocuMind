@@ -1,21 +1,21 @@
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 
 export const showToast = {
   success: (message: string) =>
     toast.success(message, {
       duration: 4000,
-      position: 'top-right',
+      position: "top-right",
     }),
 
   error: (message: string) =>
     toast.error(message, {
       duration: 5000,
-      position: 'top-right',
+      position: "top-right",
     }),
 
   loading: (message: string) =>
     toast.loading(message, {
-      position: 'top-right',
+      position: "top-right",
     }),
 
   promise: <T>(
@@ -28,7 +28,7 @@ export const showToast = {
       loading: string;
       success: string | ((result: T) => string);
       error: string | ((error: any) => string);
-    }
+    },
   ) =>
     toast.promise(promise, {
       loading,
@@ -41,7 +41,7 @@ export const showToast = {
   custom: (message: string, options?: any) =>
     toast(message, {
       duration: 4000,
-      position: 'top-right',
+      position: "top-right",
       ...options,
     }),
 };

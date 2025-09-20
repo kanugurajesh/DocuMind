@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import React, { useCallback, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
-import axios from 'axios';
-import { DocumentUploadProps, Document } from '@/types';
-import { showToast } from '@/lib/toast';
+import axios from "axios";
+import { useCallback, useState } from "react";
+import { useDropzone } from "react-dropzone";
+import { showToast } from "@/lib/toast";
+import type { Document, DocumentUploadProps } from "@/types";
 
 export function DocumentUpload({
   onUploadComplete,
   onUploadError,
   maxSizeKB = 10240, // 10MB default
   acceptedTypes = [
-    'application/pdf',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/msword',
-    'text/plain',
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/msword",
+    "text/plain",
   ],
 }: DocumentUploadProps) {
   const [uploading, setUploading] = useState(false);
@@ -46,17 +46,17 @@ export function DocumentUpload({
 
           // Create form data
           const formData = new FormData();
-          formData.append('file', file);
+          formData.append("file", file);
 
           // Upload file with progress tracking
-          const response = await axios.post('/api/upload', formData, {
+          const response = await axios.post("/api/upload", formData, {
             headers: {
-              'Content-Type': 'multipart/form-data',
+              "Content-Type": "multipart/form-data",
             },
             onUploadProgress: (progressEvent) => {
               if (progressEvent.total) {
                 const progress = Math.round(
-                  (progressEvent.loaded * 100) / progressEvent.total
+                  (progressEvent.loaded * 100) / progressEvent.total,
                 );
                 setUploadProgress((prev) => ({
                   ...prev,
@@ -75,19 +75,19 @@ export function DocumentUpload({
               fileSize: file.size,
               fileType: file.type,
               uploadedAt: new Date(),
-              processingStatus: 'pending',
+              processingStatus: "pending",
             };
 
             showToast.success(`"${file.name}" uploaded successfully!`);
             onUploadComplete(document as Document);
           } else {
-            const errorMsg = response.data.error || 'Upload failed';
+            const errorMsg = response.data.error || "Upload failed";
             showToast.error(`Failed to upload "${file.name}": ${errorMsg}`);
             onUploadError(errorMsg);
           }
         } catch (error: any) {
           const errorMessage =
-            error.response?.data?.error || error.message || 'Upload failed';
+            error.response?.data?.error || error.message || "Upload failed";
           const fullErrorMsg = `Failed to upload "${file.name}": ${errorMessage}`;
           showToast.error(fullErrorMsg);
           onUploadError(fullErrorMsg);
@@ -103,7 +103,7 @@ export function DocumentUpload({
 
       setUploading(false);
     },
-    [acceptedTypes, maxSizeKB, onUploadComplete, onUploadError]
+    [acceptedTypes, maxSizeKB, onUploadComplete, onUploadError],
   );
 
   const { getRootProps, getInputProps, isDragActive, isDragReject } =
@@ -114,7 +114,7 @@ export function DocumentUpload({
           acc[type] = [];
           return acc;
         },
-        {} as Record<string, string[]>
+        {} as Record<string, string[]>,
       ),
       maxSize: maxSizeKB * 1024,
       disabled: uploading,
@@ -130,12 +130,12 @@ export function DocumentUpload({
           border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer
           ${
             isDragActive && !isDragReject
-              ? 'border-blue-400 bg-blue-50'
+              ? "border-blue-400 bg-blue-50"
               : isDragReject
-                ? 'border-red-400 bg-red-50'
-                : 'border-gray-300 hover:border-gray-400'
+                ? "border-red-400 bg-red-50"
+                : "border-gray-300 hover:border-gray-400"
           }
-          ${uploading ? 'cursor-not-allowed opacity-50' : ''}
+          ${uploading ? "cursor-not-allowed opacity-50" : ""}
         `}
       >
         <input {...getInputProps()} />
@@ -161,14 +161,14 @@ export function DocumentUpload({
             <p className="text-lg font-medium text-gray-900">
               {isDragActive
                 ? isDragReject
-                  ? 'Unsupported file type'
-                  : 'Drop files here'
-                : 'Upload your documents'}
+                  ? "Unsupported file type"
+                  : "Drop files here"
+                : "Upload your documents"}
             </p>
             <p className="text-sm text-gray-500">
               {uploading
-                ? 'Processing uploads...'
-                : 'Drag & drop files or click to browse'}
+                ? "Processing uploads..."
+                : "Drag & drop files or click to browse"}
             </p>
           </div>
 

@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
-import { ChatInterface } from '@/components/chat/ChatInterface';
-import { AppLayout } from '@/components/layout/app-layout';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { ChatMessage } from '@/types';
-import { v4 as uuidv4 } from 'uuid';
-import axios from 'axios';
-import Link from 'next/link';
-import { showToast } from '@/lib/toast';
-import { Trash2, ArrowLeft } from 'lucide-react';
+import { useUser } from "@clerk/nextjs";
+import axios from "axios";
+import { ArrowLeft, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { ChatInterface } from "@/components/chat/ChatInterface";
+import { AppLayout } from "@/components/layout/app-layout";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { showToast } from "@/lib/toast";
+import type { ChatMessage } from "@/types";
 
 export default function ChatPage() {
   const { user, isLoaded } = useUser();
@@ -24,8 +24,8 @@ export default function ChatPage() {
     if (isLoaded && user) {
       setMessages([
         {
-          id: 'welcome',
-          role: 'assistant',
+          id: "welcome",
+          role: "assistant",
           content: `Hello ${user.firstName}! I'm your AI document assistant. I can help you find information, answer questions, and provide insights based on your uploaded documents. What would you like to know?`,
           timestamp: new Date(),
           sources: [],
@@ -40,7 +40,7 @@ export default function ChatPage() {
     // Add user message
     const userMessage: ChatMessage = {
       id: uuidv4(),
-      role: 'user',
+      role: "user",
       content: message,
       timestamp: new Date(),
     };
@@ -51,7 +51,7 @@ export default function ChatPage() {
 
     try {
       // Send request to chat API
-      const response = await axios.post('/api/chat', {
+      const response = await axios.post("/api/chat", {
         query: message,
         userId: user.id,
         maxResults: 10,
@@ -63,7 +63,7 @@ export default function ChatPage() {
         // Add assistant message
         const assistantMessage: ChatMessage = {
           id: uuidv4(),
-          role: 'assistant',
+          role: "assistant",
           content: chatResponse.answer,
           timestamp: new Date(),
           sources: chatResponse.sources || [],
@@ -71,16 +71,16 @@ export default function ChatPage() {
 
         setMessages((prev) => [...prev, assistantMessage]);
       } else {
-        throw new Error(response.data.error || 'Failed to get response');
+        throw new Error(response.data.error || "Failed to get response");
       }
     } catch (error: any) {
-      console.error('Chat error:', error);
+      console.error("Chat error:", error);
 
       let errorMessage =
-        'Sorry, I encountered an error while processing your request.';
+        "Sorry, I encountered an error while processing your request.";
 
       if (error.response?.status === 401) {
-        errorMessage = 'Please sign in to continue chatting.';
+        errorMessage = "Please sign in to continue chatting.";
       } else if (error.response?.data?.error) {
         errorMessage = error.response.data.error;
       } else if (error.message) {
@@ -90,7 +90,7 @@ export default function ChatPage() {
       // Add error message
       const errorAssistantMessage: ChatMessage = {
         id: uuidv4(),
-        role: 'assistant',
+        role: "assistant",
         content: errorMessage,
         timestamp: new Date(),
         sources: [],
@@ -104,23 +104,23 @@ export default function ChatPage() {
     }
   };
 
-  const handleSourceClick = (docId: string) => {
+  const _handleSourceClick = (docId: string) => {
     // TODO: Navigate to document view or open document details
-    console.log('Clicked source document:', docId);
+    console.log("Clicked source document:", docId);
   };
 
   const clearChat = () => {
     if (user) {
       setMessages([
         {
-          id: 'welcome',
-          role: 'assistant',
+          id: "welcome",
+          role: "assistant",
           content: `Chat cleared! How can I help you with your documents today, ${user.firstName}?`,
           timestamp: new Date(),
           sources: [],
         },
       ]);
-      showToast.success('Chat cleared successfully');
+      showToast.success("Chat cleared successfully");
     }
     setError(null);
   };

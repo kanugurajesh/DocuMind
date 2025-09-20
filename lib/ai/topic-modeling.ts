@@ -1,11 +1,11 @@
-import { OpenAI } from 'openai';
-import { v4 as uuidv4 } from 'uuid';
+import { OpenAI } from "openai";
+import { v4 as uuidv4 } from "uuid";
+import { getDocumentsCollection } from "../db/mongodb";
 import {
-  createTopicNode,
   createTopicDocumentRelationship,
+  createTopicNode,
   getUserDocuments,
-} from '../db/neo4j';
-import { getDocumentsCollection } from '../db/mongodb';
+} from "../db/neo4j";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
@@ -31,7 +31,7 @@ export interface TopicModelingResult {
 // Extract topics from a collection of document texts
 export async function extractTopicsFromDocuments(
   userId: string,
-  maxTopics: number = 10
+  maxTopics: number = 10,
 ): Promise<TopicModelingResult> {
   try {
     const documents = await getUserDocuments(userId);
@@ -54,13 +54,13 @@ export async function extractTopicsFromDocuments(
           // Use title/filename as a proxy for document content for topic extraction
           documentTexts.set(
             doc.docId,
-            docData?.metadata?.title || doc.filename
+            docData?.metadata?.title || doc.filename,
           );
         }
       } catch (error) {
         console.error(
           `Error fetching document content for ${doc.docId}:`,
-          error
+          error,
         );
       }
     }
@@ -72,7 +72,7 @@ export async function extractTopicsFromDocuments(
     // Extract topics using OpenAI
     const topics = await extractTopicsUsingLLM(
       Array.from(documentTexts.values()),
-      maxTopics
+      maxTopics,
     );
 
     // Assign documents to topics
@@ -80,7 +80,7 @@ export async function extractTopicsFromDocuments(
 
     return { topics, documentTopics };
   } catch (error) {
-    console.error('Error extracting topics from documents:', error);
+    console.error("Error extracting topics from documents:", error);
     return { topics: [], documentTopics: [] };
   }
 }
@@ -88,14 +88,14 @@ export async function extractTopicsFromDocuments(
 // Extract topics using OpenAI LLM
 async function extractTopicsUsingLLM(
   documentTexts: string[],
-  maxTopics: number
+  maxTopics: number,
 ): Promise<ExtractedTopic[]> {
   try {
     const prompt = `
 You are an expert topic modeling system. Analyze the following document titles/names and identify the main topics they represent.
 
 Document titles:
-${documentTexts.map((text, i) => `${i + 1}. ${text}`).join('\n')}
+${documentTexts.map((text, i) => `${i + 1}. ${text}`).join("\n")}
 
 Please identify up to ${maxTopics} distinct topics that these documents cover. Return your analysis in the following JSON format:
 
@@ -122,10 +122,10 @@ Topic examples: "Technology & Software", "Business & Finance", "Research & Acade
     `;
 
     const response = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
       messages: [
         {
-          role: 'user',
+          role: "user",
           content: prompt,
         },
       ],
@@ -135,36 +135,36 @@ Topic examples: "Technology & Software", "Business & Finance", "Research & Acade
 
     const content = response.choices[0]?.message?.content;
     if (!content) {
-      throw new Error('No response from OpenAI');
+      throw new Error("No response from OpenAI");
     }
 
     try {
       // Clean content by removing markdown code blocks if present
       const cleanContent = content
-        .replace(/^```json\s*/, '')
-        .replace(/\s*```$/, '')
+        .replace(/^```json\s*/, "")
+        .replace(/\s*```$/, "")
         .trim();
       const result = JSON.parse(cleanContent);
 
       const topics: ExtractedTopic[] = (result.topics || [])
         .map((topic: any) => ({
           id: uuidv4(),
-          name: topic.name?.trim() || 'Untitled Topic',
-          description: topic.description?.trim() || '',
+          name: topic.name?.trim() || "Untitled Topic",
+          description: topic.description?.trim() || "",
           keywords: Array.isArray(topic.keywords)
             ? topic.keywords.slice(0, 10)
             : [],
           confidence: Math.max(0, Math.min(1, Number(topic.confidence) || 0.5)),
         }))
-        .filter((topic: ExtractedTopic) => topic.name !== 'Untitled Topic');
+        .filter((topic: ExtractedTopic) => topic.name !== "Untitled Topic");
 
       return topics;
     } catch (parseError) {
-      console.error('Error parsing topic extraction JSON:', parseError);
+      console.error("Error parsing topic extraction JSON:", parseError);
       return [];
     }
   } catch (error) {
-    console.error('Error extracting topics with LLM:', error);
+    console.error("Error extracting topics with LLM:", error);
     return [];
   }
 }
@@ -172,7 +172,7 @@ Topic examples: "Technology & Software", "Business & Finance", "Research & Acade
 // Assign documents to topics based on content similarity
 async function assignDocumentsToTopics(
   documentTexts: Map<string, string>,
-  topics: ExtractedTopic[]
+  topics: ExtractedTopic[],
 ): Promise<Array<{ docId: string; topicId: string; relevance: number }>> {
   const assignments: Array<{
     docId: string;
@@ -201,7 +201,7 @@ async function assignDocumentsToTopics(
 // Calculate how relevant a document is to a specific topic
 function calculateTopicRelevance(
   documentText: string,
-  topic: ExtractedTopic
+  topic: ExtractedTopic,
 ): number {
   const docLower = documentText.toLowerCase();
   const topicNameLower = topic.name.toLowerCase();
@@ -245,12 +245,12 @@ function calculateTopicRelevance(
 // Process topic modeling for a user and create graph nodes
 export async function processTopicModeling(userId: string): Promise<void> {
   try {
-    console.log('Processing topic modeling...');
+    console.log("Processing topic modeling...");
 
     const result = await extractTopicsFromDocuments(userId, 8);
 
     if (result.topics.length === 0) {
-      console.log('No topics extracted');
+      console.log("No topics extracted");
       return;
     }
 
@@ -263,7 +263,7 @@ export async function processTopicModeling(userId: string): Promise<void> {
           topic.name,
           topic.description,
           topic.keywords,
-          topic.confidence
+          topic.confidence,
         );
 
         console.log(`Created topic: ${topic.name}`);
@@ -279,7 +279,7 @@ export async function processTopicModeling(userId: string): Promise<void> {
           assignment.topicId,
           assignment.docId,
           userId,
-          assignment.relevance
+          assignment.relevance,
         );
       } catch (error) {
         console.error(`Error creating topic-document relationship:`, error);
@@ -287,25 +287,25 @@ export async function processTopicModeling(userId: string): Promise<void> {
     }
 
     console.log(
-      `Topic modeling completed: ${result.topics.length} topics, ${result.documentTopics.length} document-topic relationships`
+      `Topic modeling completed: ${result.topics.length} topics, ${result.documentTopics.length} document-topic relationships`,
     );
   } catch (error) {
-    console.error('Error processing topic modeling:', error);
+    console.error("Error processing topic modeling:", error);
   }
 }
 
 // Create topic clusters based on similar keywords and themes
-export async function createTopicClusters(userId: string): Promise<void> {
+export async function createTopicClusters(_userId: string): Promise<void> {
   try {
-    console.log('Creating topic clusters...');
+    console.log("Creating topic clusters...");
 
     // This would analyze existing topics and create similarity relationships
     // between topics that share keywords or themes
 
     // Implementation would go here
-    console.log('Topic clustering completed');
+    console.log("Topic clustering completed");
   } catch (error) {
-    console.error('Error creating topic clusters:', error);
+    console.error("Error creating topic clusters:", error);
   }
 }
 

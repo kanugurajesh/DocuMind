@@ -1,26 +1,26 @@
-import { currentUser } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
-import { SignInButton, SignUpButton } from '@clerk/nextjs';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { SignInButton, SignUpButton } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
 import {
   ArrowRight,
+  BarChart3,
   FileText,
   MessageSquare,
-  BarChart3,
-  Upload,
-  Sparkles,
   Shield,
+  Sparkles,
+  Upload,
   Zap,
-} from 'lucide-react';
+} from "lucide-react";
+import { redirect } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default async function Home() {
   const user = await currentUser();
 
   // Redirect authenticated users to dashboard
   if (user) {
-    redirect('/dashboard');
+    redirect("/dashboard");
   }
 
   return (
@@ -178,29 +178,29 @@ export default async function Home() {
           <div className="grid md:grid-cols-4 gap-8">
             {[
               {
-                step: '01',
-                title: 'Upload',
-                description: 'Securely upload your documents to our platform',
-                color: 'bg-blue-500',
+                step: "01",
+                title: "Upload",
+                description: "Securely upload your documents to our platform",
+                color: "bg-blue-500",
               },
               {
-                step: '02',
-                title: 'Process',
+                step: "02",
+                title: "Process",
                 description:
-                  'AI extracts knowledge and creates searchable indexes',
-                color: 'bg-green-500',
+                  "AI extracts knowledge and creates searchable indexes",
+                color: "bg-green-500",
               },
               {
-                step: '03',
-                title: 'Query',
-                description: 'Ask questions using natural language',
-                color: 'bg-purple-500',
+                step: "03",
+                title: "Query",
+                description: "Ask questions using natural language",
+                color: "bg-purple-500",
               },
               {
-                step: '04',
-                title: 'Discover',
-                description: 'Get intelligent insights and visualizations',
-                color: 'bg-orange-500',
+                step: "04",
+                title: "Discover",
+                description: "Get intelligent insights and visualizations",
+                color: "bg-orange-500",
               },
             ].map((item, index) => (
               <div key={index} className="text-center">

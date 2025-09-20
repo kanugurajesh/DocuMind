@@ -1,4 +1,4 @@
-import { QdrantClient } from '@qdrant/js-client-rest';
+import { QdrantClient } from "@qdrant/js-client-rest";
 
 let client: QdrantClient | null = null;
 
@@ -19,7 +19,7 @@ export function getQdrantClient(): QdrantClient {
 }
 
 // Collection name for document chunks
-export const COLLECTION_NAME = 'documind_chunks';
+export const COLLECTION_NAME = "documind_chunks";
 
 // Initialize collection with proper configuration
 export async function initializeQdrantCollection() {
@@ -30,7 +30,7 @@ export async function initializeQdrantCollection() {
     // Check if collection exists
     const collections = await client.getCollections();
     const collectionExists = collections.collections.some(
-      (col) => col.name === COLLECTION_NAME
+      (col) => col.name === COLLECTION_NAME,
     );
 
     if (!collectionExists) {
@@ -38,7 +38,7 @@ export async function initializeQdrantCollection() {
       await client.createCollection(COLLECTION_NAME, {
         vectors: {
           size: embeddingDimensions,
-          distance: 'Cosine',
+          distance: "Cosine",
         },
         optimizers_config: {
           default_segment_number: 2,
@@ -48,19 +48,19 @@ export async function initializeQdrantCollection() {
 
       // Create payload indexes for efficient filtering
       await client.createPayloadIndex(COLLECTION_NAME, {
-        field_name: 'userId',
-        field_schema: 'keyword',
+        field_name: "userId",
+        field_schema: "keyword",
       });
 
       await client.createPayloadIndex(COLLECTION_NAME, {
-        field_name: 'docId',
-        field_schema: 'keyword',
+        field_name: "docId",
+        field_schema: "keyword",
       });
 
-      console.log('Qdrant collection initialized');
+      console.log("Qdrant collection initialized");
     }
   } catch (error) {
-    console.error('Error initializing Qdrant collection:', error);
+    console.error("Error initializing Qdrant collection:", error);
     throw error;
   }
 }
@@ -71,14 +71,14 @@ export async function searchVectors(
   userId: string,
   limit: number = 10,
   scoreThreshold: number = 0.7,
-  docIds?: string[]
+  docIds?: string[],
 ) {
   const client = getQdrantClient();
 
   const filter: any = {
     must: [
       {
-        key: 'userId',
+        key: "userId",
         match: {
           value: userId,
         },
@@ -89,7 +89,7 @@ export async function searchVectors(
   // Add document filtering if specified
   if (docIds && docIds.length > 0) {
     filter.must.push({
-      key: 'docId',
+      key: "docId",
       match: {
         any: docIds,
       },
@@ -107,7 +107,7 @@ export async function searchVectors(
 
     return response;
   } catch (error) {
-    console.error('Error searching vectors:', error);
+    console.error("Error searching vectors:", error);
     throw error;
   }
 }
@@ -118,7 +118,7 @@ export async function insertVectors(vectors: any[]) {
 
   try {
     // Log vector data structure for debugging
-    console.log('Inserting vectors:', {
+    console.log("Inserting vectors:", {
       count: vectors.length,
       sampleVector: vectors[0]
         ? {
@@ -126,13 +126,13 @@ export async function insertVectors(vectors: any[]) {
             vectorLength: vectors[0].vector?.length,
             payloadKeys: Object.keys(vectors[0].payload || {}),
           }
-        : 'No vectors to insert',
+        : "No vectors to insert",
     });
 
     // Validate vector format
     for (const vector of vectors) {
       if (!vector.id) {
-        throw new Error('Vector missing required id field');
+        throw new Error("Vector missing required id field");
       }
       if (!vector.vector || !Array.isArray(vector.vector)) {
         throw new Error(`Vector ${vector.id} missing or invalid vector field`);
@@ -147,12 +147,12 @@ export async function insertVectors(vectors: any[]) {
       points: vectors,
     });
 
-    console.log('Successfully inserted vectors:', response);
+    console.log("Successfully inserted vectors:", response);
     return response;
   } catch (error) {
-    console.error('Error inserting vectors:', error);
-    console.error('Error details:', {
-      message: error instanceof Error ? error.message : 'Unknown error',
+    console.error("Error inserting vectors:", error);
+    console.error("Error details:", {
+      message: error instanceof Error ? error.message : "Unknown error",
       status: (error as any)?.status,
       data: (error as any)?.data,
     });
@@ -169,13 +169,13 @@ export async function deleteVectorsByDocId(docId: string, userId: string) {
       filter: {
         must: [
           {
-            key: 'docId',
+            key: "docId",
             match: {
               value: docId,
             },
           },
           {
-            key: 'userId',
+            key: "userId",
             match: {
               value: userId,
             },
@@ -186,7 +186,7 @@ export async function deleteVectorsByDocId(docId: string, userId: string) {
 
     return response;
   } catch (error) {
-    console.error('Error deleting vectors:', error);
+    console.error("Error deleting vectors:", error);
     throw error;
   }
 }

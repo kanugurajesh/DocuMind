@@ -1,9 +1,17 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { useUser, UserButton } from '@clerk/nextjs';
-import { Button } from '@/components/ui/button';
+import { UserButton, useUser } from "@clerk/nextjs";
+import {
+  BarChart3,
+  FileText,
+  Menu,
+  MessageSquare,
+  Search,
+  Settings,
+} from "lucide-react";
+import Link from "next/link";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,17 +19,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  Search,
-  MessageSquare,
-  Upload,
-  BarChart3,
-  Settings,
-  Menu,
-  FileText,
-} from 'lucide-react';
+} from "@/components/ui/dropdown-menu";
 
 interface HeaderProps {
   onMobileMenuToggle?: () => void;
@@ -99,12 +97,12 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
                     <Avatar className="h-8 w-8">
                       <AvatarImage
                         src={user.imageUrl}
-                        alt={user.firstName || ''}
+                        alt={user.firstName || ""}
                       />
                       <AvatarFallback>
                         {user.firstName?.charAt(0) ||
                           user.emailAddresses[0]?.emailAddress?.charAt(0) ||
-                          'U'}
+                          "U"}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
@@ -151,8 +149,8 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
                         afterSignOutUrl="/"
                         appearance={{
                           elements: {
-                            avatarBox: 'w-4 h-4',
-                            userButtonTrigger: 'p-0 w-full justify-start',
+                            avatarBox: "w-4 h-4",
+                            userButtonTrigger: "p-0 w-full justify-start",
                           },
                         }}
                       />
