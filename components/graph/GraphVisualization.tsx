@@ -1,12 +1,16 @@
-'use client';
+"use client";
 
-import React, { useEffect, useRef, useState } from 'react';
-import cytoscape, { Core, NodeSingular, EdgeSingular } from 'cytoscape';
-import coseBilkent from 'cytoscape-cose-bilkent';
-import { GraphVisualizationProps } from '@/types';
+import cytoscape, {
+  type Core,
+  type EdgeSingular,
+  type NodeSingular,
+} from "cytoscape";
+import coseBilkent from "cytoscape-cose-bilkent";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { GraphVisualizationProps } from "@/types";
 
 // Register the layout
-if (typeof cytoscape === 'function') {
+if (typeof cytoscape === "function") {
   cytoscape.use(coseBilkent);
 }
 
@@ -20,7 +24,22 @@ export function GraphVisualization({
   const cyRef = useRef<HTMLDivElement>(null);
   const cyInstanceRef = useRef<Core | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedNode, setSelectedNode] = useState<string | null>(null);
+  const [_selectedNode, setSelectedNode] = useState<string | null>(null);
+
+  const getNodeLabel = useCallback((node: any) => {
+    switch (node.type) {
+      case "Document":
+        return node.filename || "Document";
+      case "Chunk":
+        return `Chunk ${node.chunkIndex || ""}`;
+      case "Entity":
+        return node.name || "Entity";
+      case "Topic":
+        return node.name || "Topic";
+      default:
+        return node.id || "Node";
+    }
+  }, []);
 
   useEffect(() => {
     if (!cyRef.current || !graphData) return;
@@ -32,21 +51,18 @@ export function GraphVisualization({
       // Nodes
       ...graphData.nodes.map((node) => ({
         data: {
-          id: node.id,
-          label: getNodeLabel(node),
-          type: node.type,
           ...node,
+          label: getNodeLabel(node),
         },
       })),
       // Edges
       ...graphData.edges.map((edge) => ({
         data: {
+          ...edge,
           id: `${edge.startNodeId}-${edge.endNodeId}`,
           source: edge.startNodeId,
           target: edge.endNodeId,
           label: edge.type,
-          type: edge.type,
-          ...edge,
         },
       })),
     ];
@@ -58,115 +74,115 @@ export function GraphVisualization({
       style: [
         // Node styles
         {
-          selector: 'node',
+          selector: "node",
           style: {
-            'background-color': '#666',
-            label: 'data(label)',
-            'text-valign': 'center',
-            'text-halign': 'center',
-            'font-size': '12px',
-            'font-weight': 'bold',
-            'text-outline-width': 2,
-            'text-outline-color': '#fff',
-            width: '60px',
-            height: '60px',
+            "background-color": "#666",
+            label: "data(label)",
+            "text-valign": "center",
+            "text-halign": "center",
+            "font-size": "12px",
+            "font-weight": "bold",
+            "text-outline-width": 2,
+            "text-outline-color": "#fff",
+            width: "60px",
+            height: "60px",
           },
         },
         // Document nodes
         {
           selector: 'node[type="Document"]',
           style: {
-            'background-color': '#3B82F6',
-            width: '80px',
-            height: '80px',
-            'font-size': '14px',
+            "background-color": "#3B82F6",
+            width: "80px",
+            height: "80px",
+            "font-size": "14px",
           },
         },
         // Chunk nodes
         {
           selector: 'node[type="Chunk"]',
           style: {
-            'background-color': '#10B981',
-            width: '50px',
-            height: '50px',
-            'font-size': '10px',
+            "background-color": "#10B981",
+            width: "50px",
+            height: "50px",
+            "font-size": "10px",
           },
         },
         // Entity nodes
         {
           selector: 'node[type="Entity"]',
           style: {
-            'background-color': '#8B5CF6',
-            width: '65px',
-            height: '65px',
-            'font-size': '12px',
+            "background-color": "#8B5CF6",
+            width: "65px",
+            height: "65px",
+            "font-size": "12px",
           },
         },
         // Person entities
         {
           selector: 'node[type="Entity"][category="PERSON"]',
           style: {
-            'background-color': '#F59E0B',
-            shape: 'round-rectangle',
+            "background-color": "#F59E0B",
+            shape: "round-rectangle",
           },
         },
         // Organization entities
         {
           selector: 'node[type="Entity"][category="ORGANIZATION"]',
           style: {
-            'background-color': '#EF4444',
-            shape: 'round-rectangle',
+            "background-color": "#EF4444",
+            shape: "round-rectangle",
           },
         },
         // Location entities
         {
           selector: 'node[type="Entity"][category="LOCATION"]',
           style: {
-            'background-color': '#06B6D4',
-            shape: 'round-rectangle',
+            "background-color": "#06B6D4",
+            shape: "round-rectangle",
           },
         },
         // Topic nodes
         {
           selector: 'node[type="Topic"]',
           style: {
-            'background-color': '#9333EA',
-            width: '70px',
-            height: '70px',
-            'font-size': '11px',
-            shape: 'hexagon',
+            "background-color": "#9333EA",
+            width: "70px",
+            height: "70px",
+            "font-size": "11px",
+            shape: "hexagon",
           },
         },
         // Selected node
         {
-          selector: 'node:selected',
+          selector: "node:selected",
           style: {
-            'border-width': 3,
-            'border-color': '#FCD34D',
-            'border-opacity': 1,
+            "border-width": 3,
+            "border-color": "#FCD34D",
+            "border-opacity": 1,
           },
         },
         // Edge styles
         {
-          selector: 'edge',
+          selector: "edge",
           style: {
             width: 2,
-            'line-color': '#9CA3AF',
-            'target-arrow-color': '#9CA3AF',
-            'target-arrow-shape': 'triangle',
-            'curve-style': 'bezier',
-            label: 'data(label)',
-            'font-size': '10px',
-            'text-rotation': 'autorotate',
-            'text-margin-y': -10,
+            "line-color": "#9CA3AF",
+            "target-arrow-color": "#9CA3AF",
+            "target-arrow-shape": "triangle",
+            "curve-style": "bezier",
+            label: "data(label)",
+            "font-size": "10px",
+            "text-rotation": "autorotate",
+            "text-margin-y": -10,
           },
         },
         // CONTAINS relationships
         {
           selector: 'edge[type="CONTAINS"]',
           style: {
-            'line-color': '#3B82F6',
-            'target-arrow-color': '#3B82F6',
+            "line-color": "#3B82F6",
+            "target-arrow-color": "#3B82F6",
             width: 3,
           },
         },
@@ -174,8 +190,8 @@ export function GraphVisualization({
         {
           selector: 'edge[type="MENTIONS"]',
           style: {
-            'line-color': '#8B5CF6',
-            'target-arrow-color': '#8B5CF6',
+            "line-color": "#8B5CF6",
+            "target-arrow-color": "#8B5CF6",
             width: 2,
           },
         },
@@ -183,65 +199,65 @@ export function GraphVisualization({
         {
           selector: 'edge[type="COOCCURS_WITH"]',
           style: {
-            'line-color': '#F59E0B',
-            'target-arrow-color': '#F59E0B',
-            width: 'data(count)',
-            opacity: 'data(confidence)',
+            "line-color": "#F59E0B",
+            "target-arrow-color": "#F59E0B",
+            width: "data(count)",
+            opacity: "data(confidence)" as any,
           },
         },
         // SIMILAR_TO relationships
         {
           selector: 'edge[type="SIMILAR_TO"]',
           style: {
-            'line-color': '#06B6D4',
-            'target-arrow-color': '#06B6D4',
+            "line-color": "#06B6D4",
+            "target-arrow-color": "#06B6D4",
             width: 2,
-            opacity: 'data(similarity)',
+            opacity: "data(similarity)" as any,
           },
         },
         // SAME_AS relationships
         {
           selector: 'edge[type="SAME_AS"]',
           style: {
-            'line-color': '#DC2626',
-            'target-arrow-color': '#DC2626',
+            "line-color": "#DC2626",
+            "target-arrow-color": "#DC2626",
             width: 3,
-            'line-style': 'dashed',
+            "line-style": "dashed",
           },
         },
         // DOCUMENT_SIMILAR_TO relationships
         {
           selector: 'edge[type="DOCUMENT_SIMILAR_TO"]',
           style: {
-            'line-color': '#059669',
-            'target-arrow-color': '#059669',
-            width: 'mapData(similarity, 0, 1, 2, 5)',
-            opacity: 'data(similarity)',
-            'line-style': 'dotted',
+            "line-color": "#059669",
+            "target-arrow-color": "#059669",
+            width: "mapData(similarity, 0, 1, 2, 5)",
+            opacity: "data(similarity)" as any,
+            "line-style": "dotted",
           },
         },
         // CATEGORIZES relationships
         {
           selector: 'edge[type="CATEGORIZES"]',
           style: {
-            'line-color': '#9333EA',
-            'target-arrow-color': '#9333EA',
-            width: 'mapData(relevance, 0, 1, 2, 4)',
-            opacity: 'data(relevance)',
+            "line-color": "#9333EA",
+            "target-arrow-color": "#9333EA",
+            width: "mapData(relevance, 0, 1, 2, 4)",
+            opacity: "data(relevance)" as any,
           },
         },
         // Selected edge
         {
-          selector: 'edge:selected',
+          selector: "edge:selected",
           style: {
             width: 4,
-            'line-color': '#FCD34D',
-            'target-arrow-color': '#FCD34D',
+            "line-color": "#FCD34D",
+            "target-arrow-color": "#FCD34D",
           },
         },
       ],
       layout: {
-        name: 'cose-bilkent',
+        name: "cose-bilkent",
         animate: true,
         animationDuration: 1000,
         fit: true,
@@ -255,28 +271,28 @@ export function GraphVisualization({
         tile: true,
         tilingPaddingVertical: 10,
         tilingPaddingHorizontal: 10,
-      },
+      } as any,
     });
 
     // Event handlers
-    cy.on('tap', 'node', (evt) => {
+    cy.on("tap", "node", (evt) => {
       const node = evt.target as NodeSingular;
       const nodeId = node.id();
       setSelectedNode(nodeId);
-      onNodeClick?.(nodeId, node.data('type'));
+      onNodeClick?.(nodeId, node.data("type"));
     });
 
-    cy.on('tap', 'edge', (evt) => {
+    cy.on("tap", "edge", (evt) => {
       const edge = evt.target as EdgeSingular;
       const edgeId = edge.id();
       onEdgeClick?.(edgeId);
     });
 
     // Clear selection when clicking on background
-    cy.on('tap', (evt) => {
+    cy.on("tap", (evt) => {
       if (evt.target === cy) {
         setSelectedNode(null);
-        cy.$(':selected').unselect();
+        cy.$(":selected").unselect();
       }
     });
 
@@ -290,22 +306,8 @@ export function GraphVisualization({
         cyInstanceRef.current = null;
       }
     };
-  }, [graphData, onNodeClick, onEdgeClick]);
+  }, [graphData, onNodeClick, onEdgeClick, getNodeLabel]);
 
-  const getNodeLabel = (node: any) => {
-    switch (node.type) {
-      case 'Document':
-        return node.filename || 'Document';
-      case 'Chunk':
-        return `Chunk ${node.chunkIndex || ''}`;
-      case 'Entity':
-        return node.name || 'Entity';
-      case 'Topic':
-        return node.name || 'Topic';
-      default:
-        return node.id || 'Node';
-    }
-  };
 
   const fitToView = () => {
     if (cyInstanceRef.current) {
@@ -404,7 +406,7 @@ export function GraphVisualization({
         ref={cyRef}
         style={{
           height: `${height}px`,
-          width: width ? `${width}px` : '100%',
+          width: width ? `${width}px` : "100%",
         }}
         className="bg-gray-50 rounded-lg border border-gray-200"
       />
@@ -438,7 +440,7 @@ export function GraphVisualization({
                 className="w-4 h-4 bg-purple-600"
                 style={{
                   clipPath:
-                    'polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)',
+                    "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)",
                 }}
               ></div>
               <span>Topics</span>

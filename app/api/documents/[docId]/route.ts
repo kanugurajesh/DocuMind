@@ -1,18 +1,18 @@
-import { auth } from '@clerk/nextjs/server';
-import { NextRequest, NextResponse } from 'next/server';
-import { getDocumentsCollection } from '@/lib/db/mongodb';
+import { auth } from "@clerk/nextjs/server";
+import { type NextRequest, NextResponse } from "next/server";
+import { getDocumentsCollection } from "@/lib/db/mongodb";
 
 // GET /api/documents/[docId] - Get specific document details
 export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ docId: string }> }
+  _request: NextRequest,
+  { params }: { params: Promise<{ docId: string }> },
 ) {
   try {
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
+        { success: false, error: "Unauthorized" },
+        { status: 401 },
       );
     }
 
@@ -23,8 +23,8 @@ export async function GET(
 
     if (!document) {
       return NextResponse.json(
-        { success: false, error: 'Document not found' },
-        { status: 404 }
+        { success: false, error: "Document not found" },
+        { status: 404 },
       );
     }
 
@@ -33,10 +33,10 @@ export async function GET(
       document,
     });
   } catch (error) {
-    console.error('Error fetching document:', error);
+    console.error("Error fetching document:", error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch document' },
-      { status: 500 }
+      { success: false, error: "Failed to fetch document" },
+      { status: 500 },
     );
   }
 }
@@ -44,14 +44,14 @@ export async function GET(
 // PATCH /api/documents/[docId] - Update document metadata
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ docId: string }> }
+  { params }: { params: Promise<{ docId: string }> },
 ) {
   try {
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
+        { success: false, error: "Unauthorized" },
+        { status: 401 },
       );
     }
 
@@ -59,7 +59,7 @@ export async function PATCH(
     const updates = await request.json();
 
     // Only allow certain fields to be updated
-    const allowedUpdates = ['filename', 'metadata'];
+    const allowedUpdates = ["filename", "metadata"];
     const updateData: any = {};
 
     for (const key of allowedUpdates) {
@@ -70,8 +70,8 @@ export async function PATCH(
 
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
-        { success: false, error: 'No valid updates provided' },
-        { status: 400 }
+        { success: false, error: "No valid updates provided" },
+        { status: 400 },
       );
     }
 
@@ -83,13 +83,13 @@ export async function PATCH(
           ...updateData,
           updatedAt: new Date(),
         },
-      }
+      },
     );
 
     if (result.matchedCount === 0) {
       return NextResponse.json(
-        { success: false, error: 'Document not found' },
-        { status: 404 }
+        { success: false, error: "Document not found" },
+        { status: 404 },
       );
     }
 
@@ -102,13 +102,13 @@ export async function PATCH(
     return NextResponse.json({
       success: true,
       document: updatedDocument,
-      message: 'Document updated successfully',
+      message: "Document updated successfully",
     });
   } catch (error) {
-    console.error('Error updating document:', error);
+    console.error("Error updating document:", error);
     return NextResponse.json(
-      { success: false, error: 'Failed to update document' },
-      { status: 500 }
+      { success: false, error: "Failed to update document" },
+      { status: 500 },
     );
   }
 }

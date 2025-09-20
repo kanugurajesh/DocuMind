@@ -1,35 +1,34 @@
-'use client';
+"use client";
 
-import { useUser } from '@clerk/nextjs';
-import { useEffect, useState } from 'react';
-import { DocumentUpload } from '@/components/documents/DocumentUpload';
-import { DocumentList } from '@/components/documents/DocumentList';
-import { AppLayout } from '@/components/layout/app-layout';
-import { Button } from '@/components/ui/button';
+import { useUser } from "@clerk/nextjs";
+import axios from "axios";
+import {
+  AlertCircle,
+  BarChart3,
+  FileText,
+  MessageSquare,
+  Plus,
+  RefreshCw,
+  TrendingUp,
+  Upload,
+  Users,
+  X,
+} from "lucide-react";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
+import { DocumentList } from "@/components/documents/DocumentList";
+import { DocumentUpload } from "@/components/documents/DocumentUpload";
+import { AppLayout } from "@/components/layout/app-layout";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Document } from '@/types';
-import axios from 'axios';
-import Link from 'next/link';
-import { showToast } from '@/lib/toast';
-import {
-  Upload,
-  MessageSquare,
-  BarChart3,
-  FileText,
-  TrendingUp,
-  Users,
-  RefreshCw,
-  Plus,
-  AlertCircle,
-  X,
-} from 'lucide-react';
+} from "@/components/ui/card";
+import { showToast } from "@/lib/toast";
+import type { Document } from "@/types";
 
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
@@ -38,29 +37,29 @@ export default function DashboardPage() {
   const [showUpload, setShowUpload] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch user's documents
-  useEffect(() => {
-    if (isLoaded && user) {
-      fetchDocuments();
-    }
-  }, [isLoaded, user]);
-
-  const fetchDocuments = async () => {
+  const fetchDocuments = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/documents');
+      const response = await axios.get("/api/documents");
       if (response.data.success) {
         setDocuments(response.data.documents || []);
       }
     } catch (error: any) {
-      console.error('Error fetching documents:', error);
-      const errorMsg = 'Failed to load documents';
+      console.error("Error fetching documents:", error);
+      const errorMsg = "Failed to load documents";
       setError(errorMsg);
       showToast.error(errorMsg);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Fetch user's documents
+  useEffect(() => {
+    if (isLoaded && user) {
+      fetchDocuments();
+    }
+  }, [isLoaded, user, fetchDocuments]);
 
   const handleUploadComplete = (document: Document) => {
     setDocuments((prev) => [document, ...prev]);
@@ -73,7 +72,7 @@ export default function DashboardPage() {
 
   const handleDocumentDelete = async (docId: string) => {
     const deletingDocument = documents.find((doc) => doc.docId === docId);
-    const documentName = deletingDocument?.filename || 'document';
+    const documentName = deletingDocument?.filename || "document";
 
     try {
       const response = await axios.delete(`/api/documents?docId=${docId}`);
@@ -82,15 +81,15 @@ export default function DashboardPage() {
         showToast.dismiss(); // Dismiss any loading toast
         showToast.success(`"${documentName}" deleted successfully`);
       } else {
-        const errorMsg = response.data.error || 'Failed to delete document';
+        const errorMsg = response.data.error || "Failed to delete document";
         setError(errorMsg);
         showToast.dismiss();
         showToast.error(errorMsg);
       }
     } catch (error: any) {
-      console.error('Error deleting document:', error);
+      console.error("Error deleting document:", error);
       const errorMsg =
-        error.response?.data?.error || 'Failed to delete document';
+        error.response?.data?.error || "Failed to delete document";
       setError(errorMsg);
       showToast.dismiss();
       showToast.error(errorMsg);
@@ -109,14 +108,14 @@ export default function DashboardPage() {
 
   // Calculate statistics
   const completedDocs = documents.filter(
-    (doc) => doc.processingStatus === 'completed'
+    (doc) => doc.processingStatus === "completed",
   ).length;
   const processingDocs = documents.filter(
-    (doc) => doc.processingStatus === 'processing'
+    (doc) => doc.processingStatus === "processing",
   ).length;
   const totalWords = documents.reduce(
     (sum, doc) => sum + (doc.metadata?.wordCount || 0),
-    0
+    0,
   );
 
   return (
@@ -317,7 +316,7 @@ export default function DashboardPage() {
                   disabled={loading}
                 >
                   <RefreshCw
-                    className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`}
+                    className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
                   />
                   Refresh
                 </Button>

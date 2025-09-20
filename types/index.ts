@@ -1,11 +1,10 @@
 // Database Types
-export * from './database';
 
 // API Types
-export * from './api';
-
+export * from "./api";
 // Component Types
-export * from './components';
+export * from "./components";
+export * from "./database";
 
 // Environment Types
 export interface EnvConfig {
@@ -43,7 +42,7 @@ export interface PaginationParams {
   page: number;
   limit: number;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 export interface PaginatedResponse<T> {
@@ -70,8 +69,8 @@ export interface ProcessingJob {
   id: string;
   docId: string;
   userId: string;
-  type: 'text_extraction' | 'embedding_generation' | 'entity_extraction';
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  type: "text_extraction" | "embedding_generation" | "entity_extraction";
+  status: "pending" | "processing" | "completed" | "failed";
   progress: number;
   createdAt: Date;
   updatedAt: Date;

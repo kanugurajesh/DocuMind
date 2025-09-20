@@ -1,4 +1,9 @@
-import { Document, SearchResult, ChatResponse, GraphData } from './database';
+import type {
+  ChatResponse,
+  Document,
+  GraphData,
+  SearchResult,
+} from "./database";
 
 // Upload API Types
 export interface UploadRequest {
@@ -38,6 +43,7 @@ export interface ChatRequest {
   userId: string;
   conversationId?: string;
   maxResults?: number;
+  docIds?: string[];
 }
 
 export interface ChatApiResponse {
@@ -84,7 +90,7 @@ export interface ProcessingStatusRequest {
 
 export interface ProcessingStatusResponse {
   success: boolean;
-  status?: 'pending' | 'processing' | 'completed' | 'failed';
+  status?: "pending" | "processing" | "completed" | "failed";
   progress?: number;
   message?: string;
   error?: string;

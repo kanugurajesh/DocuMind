@@ -1,4 +1,4 @@
-import { Document, ChatMessage, GraphData, EntityNode } from './database';
+import type { ChatMessage, Document, EntityNode, GraphData } from "./database";
 
 // Document Components
 export interface DocumentListProps {
@@ -75,7 +75,7 @@ export interface SearchResultsProps {
 
 // UI Components
 export interface LoadingSpinnerProps {
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
   text?: string;
 }
 
@@ -110,11 +110,11 @@ export interface DashboardLayoutProps {
 export interface EntityBadgeProps {
   entity: EntityNode;
   onClick?: (entity: EntityNode) => void;
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
 }
 
 export interface EntityListProps {
   entities: EntityNode[];
   onEntityClick?: (entity: EntityNode) => void;
-  groupBy?: 'category' | 'document';
+  groupBy?: "category" | "document";
 }

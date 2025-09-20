@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
-import { GraphVisualization } from '@/components/graph/GraphVisualization';
-import { GraphData } from '@/types';
-import axios from 'axios';
-import { showToast } from '@/lib/toast';
+import { useUser } from "@clerk/nextjs";
+import axios from "axios";
+import { useCallback, useEffect, useState } from "react";
+import { GraphVisualization } from "@/components/graph/GraphVisualization";
+import { showToast } from "@/lib/toast";
+import type { GraphData } from "@/types";
 
 export default function GraphPage() {
   const { user, isLoaded } = useUser();
@@ -18,23 +18,16 @@ export default function GraphPage() {
     maxNodes: 100,
   });
 
-  // Load graph data
-  useEffect(() => {
-    if (isLoaded && user) {
-      fetchGraphData();
-    }
-  }, [isLoaded, user, filters]);
-
-  const fetchGraphData = async () => {
+  const fetchGraphData = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
 
       if (filters.entityTypes.length > 0) {
-        params.append('entityTypes', filters.entityTypes.join(','));
+        params.append("entityTypes", filters.entityTypes.join(","));
       }
       if (filters.maxNodes) {
-        params.append('maxNodes', filters.maxNodes.toString());
+        params.append("maxNodes", filters.maxNodes.toString());
       }
 
       const response = await axios.get(`/api/graph?${params.toString()}`);
@@ -43,41 +36,48 @@ export default function GraphPage() {
         setGraphData(response.data.data);
         setError(null);
       } else {
-        throw new Error(response.data.error || 'Failed to load graph data');
+        throw new Error(response.data.error || "Failed to load graph data");
       }
     } catch (error: any) {
-      console.error('Error fetching graph data:', error);
+      console.error("Error fetching graph data:", error);
       const errorMsg =
         error.response?.data?.error ||
         error.message ||
-        'Failed to load graph data';
+        "Failed to load graph data";
       setError(errorMsg);
       showToast.error(errorMsg);
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
+
+  // Load graph data
+  useEffect(() => {
+    if (isLoaded && user) {
+      fetchGraphData();
+    }
+  }, [isLoaded, user, fetchGraphData]);
 
   const triggerEntityClustering = async () => {
     try {
       setLoading(true);
-      showToast.loading('Clustering entities...');
-      const response = await axios.post('/api/graph/cluster');
+      showToast.loading("Clustering entities...");
+      const response = await axios.post("/api/graph/cluster");
 
       if (response.data.success) {
         showToast.dismiss();
-        showToast.success('Entity clustering completed!');
+        showToast.success("Entity clustering completed!");
         // Refresh graph data after clustering
         await fetchGraphData();
       } else {
-        throw new Error(response.data.error || 'Failed to cluster entities');
+        throw new Error(response.data.error || "Failed to cluster entities");
       }
     } catch (error: any) {
-      console.error('Error clustering entities:', error);
+      console.error("Error clustering entities:", error);
       const errorMsg =
         error.response?.data?.error ||
         error.message ||
-        'Failed to cluster entities';
+        "Failed to cluster entities";
       setError(errorMsg);
       showToast.dismiss();
       showToast.error(errorMsg);
@@ -89,25 +89,25 @@ export default function GraphPage() {
   const triggerDocumentSimilarity = async () => {
     try {
       setLoading(true);
-      showToast.loading('Analyzing document similarity...');
-      const response = await axios.post('/api/graph/similarity');
+      showToast.loading("Analyzing document similarity...");
+      const response = await axios.post("/api/graph/similarity");
 
       if (response.data.success) {
         showToast.dismiss();
-        showToast.success('Document similarity analysis completed!');
+        showToast.success("Document similarity analysis completed!");
         // Refresh graph data after similarity analysis
         await fetchGraphData();
       } else {
         throw new Error(
-          response.data.error || 'Failed to analyze document similarity'
+          response.data.error || "Failed to analyze document similarity",
         );
       }
     } catch (error: any) {
-      console.error('Error analyzing document similarity:', error);
+      console.error("Error analyzing document similarity:", error);
       const errorMsg =
         error.response?.data?.error ||
         error.message ||
-        'Failed to analyze document similarity';
+        "Failed to analyze document similarity";
       setError(errorMsg);
       showToast.dismiss();
       showToast.error(errorMsg);
@@ -119,23 +119,23 @@ export default function GraphPage() {
   const triggerTopicModeling = async () => {
     try {
       setLoading(true);
-      showToast.loading('Extracting topics...');
-      const response = await axios.post('/api/graph/topics');
+      showToast.loading("Extracting topics...");
+      const response = await axios.post("/api/graph/topics");
 
       if (response.data.success) {
         showToast.dismiss();
-        showToast.success('Topic extraction completed!');
+        showToast.success("Topic extraction completed!");
         // Refresh graph data after topic modeling
         await fetchGraphData();
       } else {
-        throw new Error(response.data.error || 'Failed to extract topics');
+        throw new Error(response.data.error || "Failed to extract topics");
       }
     } catch (error: any) {
-      console.error('Error extracting topics:', error);
+      console.error("Error extracting topics:", error);
       const errorMsg =
         error.response?.data?.error ||
         error.message ||
-        'Failed to extract topics';
+        "Failed to extract topics";
       setError(errorMsg);
       showToast.dismiss();
       showToast.error(errorMsg);
@@ -144,7 +144,7 @@ export default function GraphPage() {
     }
   };
 
-  const handleNodeClick = (nodeId: string, nodeType: string) => {
+  const handleNodeClick = (nodeId: string, _nodeType: string) => {
     if (graphData) {
       const node = graphData.nodes.find((n) => n.id === nodeId);
       setSelectedNode(node);
@@ -152,7 +152,7 @@ export default function GraphPage() {
   };
 
   const handleEdgeClick = (edgeId: string) => {
-    console.log('Edge clicked:', edgeId);
+    console.log("Edge clicked:", edgeId);
   };
 
   const toggleEntityTypeFilter = (entityType: string) => {
@@ -361,12 +361,12 @@ export default function GraphPage() {
                 </h4>
                 <div className="space-y-2">
                   {[
-                    'PERSON',
-                    'ORGANIZATION',
-                    'LOCATION',
-                    'DATE',
-                    'MONEY',
-                    'OTHER',
+                    "PERSON",
+                    "ORGANIZATION",
+                    "LOCATION",
+                    "DATE",
+                    "MONEY",
+                    "OTHER",
                   ].map((type) => (
                     <label key={type} className="flex items-center">
                       <input
@@ -393,7 +393,7 @@ export default function GraphPage() {
                   onChange={(e) =>
                     setFilters((prev) => ({
                       ...prev,
-                      maxNodes: parseInt(e.target.value),
+                      maxNodes: parseInt(e.target.value, 10),
                     }))
                   }
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -415,16 +415,16 @@ export default function GraphPage() {
                     <div>Nodes: {graphData.nodes.length}</div>
                     <div>Edges: {graphData.edges.length}</div>
                     <div>
-                      Documents:{' '}
+                      Documents:{" "}
                       {
-                        graphData.nodes.filter((n) => n.type === 'Document')
+                        graphData.nodes.filter((n) => n.type === "Document")
                           .length
                       }
                     </div>
                     <div>
-                      Entities:{' '}
+                      Entities:{" "}
                       {
-                        graphData.nodes.filter((n) => n.type === 'Entity')
+                        graphData.nodes.filter((n) => n.type === "Entity")
                           .length
                       }
                     </div>
@@ -446,12 +446,12 @@ export default function GraphPage() {
                   <div>
                     <strong>ID:</strong> {selectedNode.id}
                   </div>
-                  {selectedNode.type === 'Document' && (
+                  {selectedNode.type === "Document" && (
                     <div>
                       <strong>Filename:</strong> {selectedNode.filename}
                     </div>
                   )}
-                  {selectedNode.type === 'Entity' && (
+                  {selectedNode.type === "Entity" && (
                     <>
                       <div>
                         <strong>Name:</strong> {selectedNode.name}
@@ -461,7 +461,7 @@ export default function GraphPage() {
                       </div>
                     </>
                   )}
-                  {selectedNode.type === 'Chunk' && (
+                  {selectedNode.type === "Chunk" && (
                     <div>
                       <strong>Index:</strong> {selectedNode.chunkIndex}
                     </div>

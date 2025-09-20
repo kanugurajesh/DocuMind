@@ -7,8 +7,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "biome check",
-    "format": "biome format --write",
-    "prettier": "prettier --write ."
+    "format": "biome format --write"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.892.0",
@@ -52,7 +51,6 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "prettier": "^3.6.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

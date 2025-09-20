@@ -1,5 +1,5 @@
-import mammoth from 'mammoth';
-import { downloadFile } from '../storage/s3';
+import mammoth from "mammoth";
+import { downloadFile } from "../storage/s3";
 
 export interface ExtractedContent {
   text: string;
@@ -15,27 +15,27 @@ export interface ExtractedContent {
 // Extract text content from different file types
 export async function extractTextFromFile(
   blobName: string,
-  fileType: string
+  fileType: string,
 ): Promise<ExtractedContent> {
   try {
     const fileBuffer = await downloadFile(blobName);
 
     switch (fileType) {
-      case 'application/pdf':
+      case "application/pdf":
         return await extractTextFromPDF(fileBuffer);
 
-      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-      case 'application/msword':
+      case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+      case "application/msword":
         return await extractTextFromWord(fileBuffer);
 
-      case 'text/plain':
+      case "text/plain":
         return extractTextFromTxt(fileBuffer);
 
       default:
         throw new Error(`Unsupported file type: ${fileType}`);
     }
   } catch (error) {
-    console.error('Error extracting text from file:', error);
+    console.error("Error extracting text from file:", error);
     throw error;
   }
 }
@@ -45,30 +45,30 @@ async function extractTextFromPDF(buffer: Buffer): Promise<ExtractedContent> {
   try {
     // Ensure buffer is valid
     if (!buffer || !Buffer.isBuffer(buffer)) {
-      throw new Error('Invalid buffer provided to PDF parser');
+      throw new Error("Invalid buffer provided to PDF parser");
     }
 
     console.log(`Processing PDF buffer of size: ${buffer.length} bytes`);
 
     // Use LangChain's PDF loader
     const { PDFLoader } = await import(
-      '@langchain/community/document_loaders/fs/pdf'
+      "@langchain/community/document_loaders/fs/pdf"
     );
 
     // Create a Blob from the buffer for LangChain
-    const blob = new Blob([buffer], { type: 'application/pdf' });
+    const blob = new Blob([new Uint8Array(buffer)], { type: "application/pdf" });
 
     // Create PDF loader instance
     const loader = new PDFLoader(blob, {
       splitPages: false, // We want all text in one document
-      parsedItemSeparator: '\n', // Separate items with newlines
+      parsedItemSeparator: "\n", // Separate items with newlines
     });
 
     // Load and parse the PDF
     const docs = await loader.load();
 
     // Combine all document content
-    const extractedText = docs.map((doc) => doc.pageContent).join('\n\n');
+    const extractedText = docs.map((doc) => doc.pageContent).join("\n\n");
 
     // Extract metadata from the first document if available
     const metadata = docs[0]?.metadata || {};
@@ -85,14 +85,14 @@ async function extractTextFromPDF(buffer: Buffer): Promise<ExtractedContent> {
       },
     };
   } catch (error) {
-    console.error('Error parsing PDF with LangChain:', error);
+    console.error("Error parsing PDF with LangChain:", error);
     console.error(
-      'Buffer info:',
-      buffer ? `Buffer length: ${buffer.length}` : 'No buffer provided'
+      "Buffer info:",
+      buffer ? `Buffer length: ${buffer.length}` : "No buffer provided",
     );
 
     throw new Error(
-      `Failed to extract text from PDF: ${error instanceof Error ? error.message : 'Unknown error'}`
+      `Failed to extract text from PDF: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
   }
 }
@@ -112,14 +112,14 @@ async function extractTextFromWord(buffer: Buffer): Promise<ExtractedContent> {
       },
     };
   } catch (error) {
-    console.error('Error parsing Word document:', error);
-    throw new Error('Failed to extract text from Word document');
+    console.error("Error parsing Word document:", error);
+    throw new Error("Failed to extract text from Word document");
   }
 }
 
 // Extract text from plain text files
 function extractTextFromTxt(buffer: Buffer): ExtractedContent {
-  const text = buffer.toString('utf-8');
+  const text = buffer.toString("utf-8");
   const wordCount = text.split(/\s+/).length;
 
   return {
@@ -143,7 +143,7 @@ export interface TextChunk {
 export function chunkText(
   text: string,
   chunkSize: number = 500,
-  overlap: number = 50
+  overlap: number = 50,
 ): TextChunk[] {
   const chunks: TextChunk[] = [];
   const words = text.split(/\s+/);
@@ -166,12 +166,12 @@ export function chunkText(
   while (startIndex < words.length) {
     const endIndex = Math.min(startIndex + chunkSize, words.length);
     const chunkWords = words.slice(startIndex, endIndex);
-    const chunkText = chunkWords.join(' ');
+    const chunkText = chunkWords.join(" ");
 
     // Calculate character positions
     const wordsBeforeChunk = words.slice(0, startIndex);
     const startPosition =
-      wordsBeforeChunk.join(' ').length + (wordsBeforeChunk.length > 0 ? 1 : 0);
+      wordsBeforeChunk.join(" ").length + (wordsBeforeChunk.length > 0 ? 1 : 0);
     const endPosition = startPosition + chunkText.length;
 
     chunks.push({
@@ -198,16 +198,16 @@ export function chunkText(
 // Clean and preprocess text
 export function preprocessText(text: string): string {
   // Remove excessive whitespace
-  let cleaned = text.replace(/\s+/g, ' ').trim();
+  let cleaned = text.replace(/\s+/g, " ").trim();
 
   // Remove common PDF artifacts
-  cleaned = cleaned.replace(/\f/g, ' '); // Form feed characters
-  cleaned = cleaned.replace(/\r\n|\r|\n/g, ' '); // Line breaks
-  cleaned = cleaned.replace(/\u00A0/g, ' '); // Non-breaking spaces
+  cleaned = cleaned.replace(/\f/g, " "); // Form feed characters
+  cleaned = cleaned.replace(/\r\n|\r|\n/g, " "); // Line breaks
+  cleaned = cleaned.replace(/\u00A0/g, " "); // Non-breaking spaces
 
   // Remove excessive punctuation
-  cleaned = cleaned.replace(/\.{3,}/g, '...');
-  cleaned = cleaned.replace(/-{3,}/g, '---');
+  cleaned = cleaned.replace(/\.{3,}/g, "...");
+  cleaned = cleaned.replace(/-{3,}/g, "---");
 
   // Normalize quotes
   cleaned = cleaned.replace(/[""]|``|''/g, '"');

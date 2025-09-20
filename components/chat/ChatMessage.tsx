@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { ChatMessageProps } from '@/types';
+import { useState } from "react";
+import type { ChatMessageProps } from "@/types";
 
 export function ChatMessage({
   message,
@@ -11,21 +11,21 @@ export function ChatMessage({
   const [showSourcesExpanded, setShowSourcesExpanded] = useState(false);
 
   const formatTimestamp = (timestamp: Date) => {
-    return new Intl.DateTimeFormat('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Intl.DateTimeFormat("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(new Date(timestamp));
   };
 
-  const isUser = message.role === 'user';
+  const isUser = message.role === "user";
 
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
         className={`max-w-3xl rounded-lg p-4 ${
           isUser
-            ? 'bg-blue-600 text-white ml-12'
-            : 'bg-gray-100 text-gray-900 mr-12'
+            ? "bg-blue-600 text-white ml-12"
+            : "bg-gray-100 text-gray-900 mr-12"
         }`}
       >
         {/* Message Content */}
@@ -45,7 +45,7 @@ export function ChatMessage({
                   onClick={() => setShowSourcesExpanded(!showSourcesExpanded)}
                   className="text-xs text-blue-600 hover:text-blue-800 font-medium"
                 >
-                  {showSourcesExpanded ? 'Hide' : 'Show'} sources
+                  {showSourcesExpanded ? "Hide" : "Show"} sources
                 </button>
               </div>
 
@@ -97,7 +97,7 @@ export function ChatMessage({
         {/* Timestamp */}
         <div
           className={`text-xs mt-2 ${
-            isUser ? 'text-blue-100' : 'text-gray-500'
+            isUser ? "text-blue-100" : "text-gray-500"
           }`}
         >
           {formatTimestamp(message.timestamp)}

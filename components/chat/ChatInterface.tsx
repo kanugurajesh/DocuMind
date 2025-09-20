@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import React, { useState, useRef, useEffect } from 'react';
-import { ChatInterfaceProps } from '@/types';
-import { ChatMessage } from './ChatMessage';
-import { ChatInput } from './ChatInput';
-import { Card } from '@/components/ui/card';
-import { MessageSquare, Sparkles, Loader2 } from 'lucide-react';
+import { Loader2, MessageSquare, Sparkles } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { Card } from "@/components/ui/card";
+import type { ChatInterfaceProps } from "@/types";
+import { ChatInput } from "./ChatInput";
+import { ChatMessage } from "./ChatMessage";
 
 export function ChatInterface({
   onMessageSend,
@@ -17,8 +17,8 @@ export function ChatInterface({
 
   // Auto-scroll to bottom when new messages are added
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
 
   return (
     <Card className="flex flex-col h-full">
@@ -85,8 +85,8 @@ export function ChatInterface({
           disabled={disabled || loading}
           placeholder={
             messages.length === 0
-              ? 'Ask a question about your documents...'
-              : 'Follow up question...'
+              ? "Ask a question about your documents..."
+              : "Follow up question..."
           }
         />
       </div>
