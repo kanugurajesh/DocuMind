@@ -29,11 +29,10 @@ export function ChatInterface({
             <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
               <MessageSquare className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold mb-3">
-              Start a conversation
-            </h3>
+            <h3 className="text-xl font-semibold mb-3">Start a conversation</h3>
             <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-              Ask questions about your uploaded documents and get intelligent answers with precise source citations.
+              Ask questions about your uploaded documents and get intelligent
+              answers with precise source citations.
             </p>
             <div className="space-y-4 text-sm">
               <div className="flex items-center justify-center gap-2 text-primary font-medium">
@@ -86,8 +85,8 @@ export function ChatInterface({
           disabled={disabled || loading}
           placeholder={
             messages.length === 0
-              ? "Ask a question about your documents..."
-              : "Follow up question..."
+              ? 'Ask a question about your documents...'
+              : 'Follow up question...'
           }
         />
       </div>

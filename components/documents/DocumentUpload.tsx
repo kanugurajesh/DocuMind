@@ -18,7 +18,9 @@ export function DocumentUpload({
   ],
 }: DocumentUploadProps) {
   const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
+  const [uploadProgress, setUploadProgress] = useState<{
+    [key: string]: number;
+  }>({});
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -84,7 +86,8 @@ export function DocumentUpload({
             onUploadError(errorMsg);
           }
         } catch (error: any) {
-          const errorMessage = error.response?.data?.error || error.message || 'Upload failed';
+          const errorMessage =
+            error.response?.data?.error || error.message || 'Upload failed';
           const fullErrorMsg = `Failed to upload "${file.name}": ${errorMessage}`;
           showToast.error(fullErrorMsg);
           onUploadError(fullErrorMsg);
@@ -103,15 +106,19 @@ export function DocumentUpload({
     [acceptedTypes, maxSizeKB, onUploadComplete, onUploadError]
   );
 
-  const { getRootProps, getInputProps, isDragActive, isDragReject } = useDropzone({
-    onDrop,
-    accept: acceptedTypes.reduce((acc, type) => {
-      acc[type] = [];
-      return acc;
-    }, {} as Record<string, string[]>),
-    maxSize: maxSizeKB * 1024,
-    disabled: uploading,
-  });
+  const { getRootProps, getInputProps, isDragActive, isDragReject } =
+    useDropzone({
+      onDrop,
+      accept: acceptedTypes.reduce(
+        (acc, type) => {
+          acc[type] = [];
+          return acc;
+        },
+        {} as Record<string, string[]>
+      ),
+      maxSize: maxSizeKB * 1024,
+      disabled: uploading,
+    });
 
   const progressFiles = Object.keys(uploadProgress);
 
@@ -121,11 +128,12 @@ export function DocumentUpload({
         {...getRootProps()}
         className={`
           border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer
-          ${isDragActive && !isDragReject
-            ? 'border-blue-400 bg-blue-50'
-            : isDragReject
-            ? 'border-red-400 bg-red-50'
-            : 'border-gray-300 hover:border-gray-400'
+          ${
+            isDragActive && !isDragReject
+              ? 'border-blue-400 bg-blue-50'
+              : isDragReject
+                ? 'border-red-400 bg-red-50'
+                : 'border-gray-300 hover:border-gray-400'
           }
           ${uploading ? 'cursor-not-allowed opacity-50' : ''}
         `}
@@ -160,8 +168,7 @@ export function DocumentUpload({
             <p className="text-sm text-gray-500">
               {uploading
                 ? 'Processing uploads...'
-                : 'Drag & drop files or click to browse'
-              }
+                : 'Drag & drop files or click to browse'}
             </p>
           </div>
 
@@ -176,7 +183,9 @@ export function DocumentUpload({
       {/* Upload Progress */}
       {progressFiles.length > 0 && (
         <div className="mt-4 space-y-2">
-          <p className="text-sm font-medium text-gray-900">Uploading files...</p>
+          <p className="text-sm font-medium text-gray-900">
+            Uploading files...
+          </p>
           {progressFiles.map((filename) => (
             <div key={filename} className="space-y-1">
               <div className="flex justify-between text-sm text-gray-600">

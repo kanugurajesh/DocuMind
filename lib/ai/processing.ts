@@ -51,7 +51,9 @@ async function extractTextFromPDF(buffer: Buffer): Promise<ExtractedContent> {
     console.log(`Processing PDF buffer of size: ${buffer.length} bytes`);
 
     // Use LangChain's PDF loader
-    const { PDFLoader } = await import('@langchain/community/document_loaders/fs/pdf');
+    const { PDFLoader } = await import(
+      '@langchain/community/document_loaders/fs/pdf'
+    );
 
     // Create a Blob from the buffer for LangChain
     const blob = new Blob([buffer], { type: 'application/pdf' });
@@ -66,7 +68,7 @@ async function extractTextFromPDF(buffer: Buffer): Promise<ExtractedContent> {
     const docs = await loader.load();
 
     // Combine all document content
-    const extractedText = docs.map(doc => doc.pageContent).join('\n\n');
+    const extractedText = docs.map((doc) => doc.pageContent).join('\n\n');
 
     // Extract metadata from the first document if available
     const metadata = docs[0]?.metadata || {};
@@ -75,7 +77,8 @@ async function extractTextFromPDF(buffer: Buffer): Promise<ExtractedContent> {
       text: extractedText,
       metadata: {
         pageCount: docs.length,
-        wordCount: extractedText.split(/\s+/).filter(word => word.length > 0).length,
+        wordCount: extractedText.split(/\s+/).filter((word) => word.length > 0)
+          .length,
         title: metadata.title || undefined,
         author: metadata.author || undefined,
         subject: metadata.subject || undefined,
@@ -83,9 +86,14 @@ async function extractTextFromPDF(buffer: Buffer): Promise<ExtractedContent> {
     };
   } catch (error) {
     console.error('Error parsing PDF with LangChain:', error);
-    console.error('Buffer info:', buffer ? `Buffer length: ${buffer.length}` : 'No buffer provided');
+    console.error(
+      'Buffer info:',
+      buffer ? `Buffer length: ${buffer.length}` : 'No buffer provided'
+    );
 
-    throw new Error(`Failed to extract text from PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to extract text from PDF: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
   }
 }
 
@@ -162,7 +170,8 @@ export function chunkText(
 
     // Calculate character positions
     const wordsBeforeChunk = words.slice(0, startIndex);
-    const startPosition = wordsBeforeChunk.join(' ').length + (wordsBeforeChunk.length > 0 ? 1 : 0);
+    const startPosition =
+      wordsBeforeChunk.join(' ').length + (wordsBeforeChunk.length > 0 ? 1 : 0);
     const endPosition = startPosition + chunkText.length;
 
     chunks.push({

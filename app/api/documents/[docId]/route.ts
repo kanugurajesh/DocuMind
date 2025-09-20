@@ -94,7 +94,10 @@ export async function PATCH(
     }
 
     // Get updated document
-    const updatedDocument = await documentsCollection.findOne({ docId, userId });
+    const updatedDocument = await documentsCollection.findOne({
+      docId,
+      userId,
+    });
 
     return NextResponse.json({
       success: true,

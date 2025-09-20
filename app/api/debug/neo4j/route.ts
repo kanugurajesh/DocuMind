@@ -1,6 +1,10 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { createEntityNode, createChunkNode, getUserGraphData } from '@/lib/db/neo4j';
+import {
+  createEntityNode,
+  createChunkNode,
+  getUserGraphData,
+} from '@/lib/db/neo4j';
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,7 +39,6 @@ export async function POST(request: NextRequest) {
         1
       );
       console.log('✅ Chunk creation result:', result);
-
     } else if (action === 'test_entity_creation') {
       // First create a chunk, then try to create an entity
       const testDocId = 'debug_doc_test';
@@ -63,15 +66,14 @@ export async function POST(request: NextRequest) {
         0.95
       );
       console.log('✅ Entity creation result:', result);
-
     } else if (action === 'check_existing_chunks') {
       // Check what chunks exist for this user
       const graphData = await getUserGraphData(userId);
       result = {
         totalNodes: graphData.nodes.length,
-        chunks: graphData.nodes.filter(n => n.type === 'Chunk'),
-        entities: graphData.nodes.filter(n => n.type === 'Entity'),
-        documents: graphData.nodes.filter(n => n.type === 'Document')
+        chunks: graphData.nodes.filter((n) => n.type === 'Chunk'),
+        entities: graphData.nodes.filter((n) => n.type === 'Entity'),
+        documents: graphData.nodes.filter((n) => n.type === 'Document'),
       };
       console.log('📊 Existing data:', result);
     }
@@ -85,19 +87,22 @@ export async function POST(request: NextRequest) {
       result,
       finalGraphData: {
         totalNodes: finalGraphData.nodes.length,
-        totalEntities: finalGraphData.nodes.filter(n => n.type === 'Entity').length,
-        totalChunks: finalGraphData.nodes.filter(n => n.type === 'Chunk').length,
-        totalDocuments: finalGraphData.nodes.filter(n => n.type === 'Document').length,
-      }
+        totalEntities: finalGraphData.nodes.filter((n) => n.type === 'Entity')
+          .length,
+        totalChunks: finalGraphData.nodes.filter((n) => n.type === 'Chunk')
+          .length,
+        totalDocuments: finalGraphData.nodes.filter(
+          (n) => n.type === 'Document'
+        ).length,
+      },
     });
-
   } catch (error) {
     console.error('❌ Neo4j debug error:', error);
     return NextResponse.json(
       {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
+        stack: error instanceof Error ? error.stack : undefined,
       },
       { status: 500 }
     );

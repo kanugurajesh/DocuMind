@@ -20,7 +20,7 @@ import {
   BarChart3,
   Settings,
   Menu,
-  FileText
+  FileText,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -47,9 +47,7 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
         {/* Logo */}
         <Link href="/" className="mr-4 flex items-center space-x-2 lg:mr-6">
           <FileText className="h-6 w-6 text-primary" />
-          <span className="hidden font-bold sm:inline-block">
-            Documind
-          </span>
+          <span className="hidden font-bold sm:inline-block">Documind</span>
         </Link>
 
         {/* Navigation */}
@@ -80,7 +78,10 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
           {/* Search */}
           <div className="w-full flex-1 md:w-auto md:flex-none">
-            <Button variant="outline" className="relative h-8 w-full justify-start rounded-[0.5rem] bg-background text-sm font-normal text-muted-foreground shadow-none sm:pr-12 md:w-40 lg:w-64">
+            <Button
+              variant="outline"
+              className="relative h-8 w-full justify-start rounded-[0.5rem] bg-background text-sm font-normal text-muted-foreground shadow-none sm:pr-12 md:w-40 lg:w-64"
+            >
               <Search className="mr-2 h-4 w-4" />
               Search documents...
             </Button>
@@ -91,11 +92,19 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
             {isLoaded && user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Button
+                    variant="ghost"
+                    className="relative h-8 w-8 rounded-full"
+                  >
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.imageUrl} alt={user.firstName || ''} />
+                      <AvatarImage
+                        src={user.imageUrl}
+                        alt={user.firstName || ''}
+                      />
                       <AvatarFallback>
-                        {user.firstName?.charAt(0) || user.emailAddresses[0]?.emailAddress?.charAt(0) || 'U'}
+                        {user.firstName?.charAt(0) ||
+                          user.emailAddresses[0]?.emailAddress?.charAt(0) ||
+                          'U'}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
@@ -142,9 +151,9 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
                         afterSignOutUrl="/"
                         appearance={{
                           elements: {
-                            avatarBox: "w-4 h-4",
-                            userButtonTrigger: "p-0 w-full justify-start",
-                          }
+                            avatarBox: 'w-4 h-4',
+                            userButtonTrigger: 'p-0 w-full justify-start',
+                          },
                         }}
                       />
                     </div>

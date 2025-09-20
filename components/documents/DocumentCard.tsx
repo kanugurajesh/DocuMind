@@ -27,10 +27,14 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle,
-  Clock
+  Clock,
 } from 'lucide-react';
 
-export function DocumentCard({ document, onDelete, onClick }: DocumentCardProps) {
+export function DocumentCard({
+  document,
+  onDelete,
+  onClick,
+}: DocumentCardProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const formatFileSize = (bytes: number) => {
@@ -113,7 +117,10 @@ export function DocumentCard({ document, onDelete, onClick }: DocumentCardProps)
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={onClick}>
+    <Card
+      className="hover:shadow-lg transition-shadow cursor-pointer group"
+      onClick={onClick}
+    >
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
           <div className="flex items-start space-x-4 flex-1">
@@ -128,9 +135,14 @@ export function DocumentCard({ document, onDelete, onClick }: DocumentCardProps)
                 <h3 className="text-lg font-semibold truncate">
                   {document.filename}
                 </h3>
-                <Badge variant={getStatusVariant(document.processingStatus)} className="ml-auto">
+                <Badge
+                  variant={getStatusVariant(document.processingStatus)}
+                  className="ml-auto"
+                >
                   {getStatusIcon(document.processingStatus)}
-                  <span className="ml-1 capitalize">{document.processingStatus}</span>
+                  <span className="ml-1 capitalize">
+                    {document.processingStatus}
+                  </span>
                 </Badge>
               </div>
 
@@ -157,23 +169,26 @@ export function DocumentCard({ document, onDelete, onClick }: DocumentCardProps)
                   {document.metadata.wordCount && (
                     <div className="flex items-center gap-1">
                       <FileText className="h-3 w-3" />
-                      <span>{document.metadata.wordCount.toLocaleString()} words</span>
+                      <span>
+                        {document.metadata.wordCount.toLocaleString()} words
+                      </span>
                     </div>
                   )}
                 </div>
               )}
 
               {/* Error Message */}
-              {document.processingStatus === 'failed' && document.errorMessage && (
-                <div className="mt-2 p-2 bg-destructive/10 rounded-md">
-                  <div className="flex items-center gap-2">
-                    <AlertCircle className="h-4 w-4 text-destructive" />
-                    <p className="text-sm text-destructive">
-                      {document.errorMessage}
-                    </p>
+              {document.processingStatus === 'failed' &&
+                document.errorMessage && (
+                  <div className="mt-2 p-2 bg-destructive/10 rounded-md">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-destructive" />
+                      <p className="text-sm text-destructive">
+                        {document.errorMessage}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
           </div>
 
@@ -191,7 +206,12 @@ export function DocumentCard({ document, onDelete, onClick }: DocumentCardProps)
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick?.(); }}>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClick?.();
+                }}
+              >
                 <Eye className="mr-2 h-4 w-4" />
                 View Details
               </DropdownMenuItem>

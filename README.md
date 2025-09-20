@@ -5,6 +5,7 @@ Documind is an end-to-end document intelligence application that allows users to
 ## Authentication & Privacy
 
 Documind uses **Clerk** for user authentication and ensures complete data privacy:
+
 - **User Authentication**: Secure sign-up/sign-in via Clerk with support for email, social logins, and more.
 - **Document Isolation**: Each user can only access, query, and manage their own uploaded documents.
 - **Private Knowledge Graphs**: Users see only their own document relationships and entities in the graph visualization.
@@ -13,6 +14,7 @@ Documind uses **Clerk** for user authentication and ensures complete data privac
 ## Application Workflow – Document Q&A with Graph + Vector Search
 
 ### 1. Uploading a Document
+
 - User uploads a document (PDF, DOCX, TXT, etc.) from the Next.js frontend.
 - The app backend (API route) does the following:
   1. Verifies user authentication via **Clerk**.
@@ -38,6 +40,7 @@ Documind uses **Clerk** for user authentication and ensures complete data privac
 ---
 
 ### 2. Asking Questions
+
 - User types a natural language question in the UI.
 - The backend flow:
   1. Verifies user authentication via **Clerk**.
@@ -51,6 +54,7 @@ Documind uses **Clerk** for user authentication and ensures complete data privac
 ---
 
 ### 3. Viewing the Graph
+
 - User can open a graph visualization page in the app.
 - The backend queries **Neo4j** for user-specific data only:
   - All nodes (documents, chunks, entities) where `userId = current_user`.
@@ -64,6 +68,7 @@ Documind uses **Clerk** for user authentication and ensures complete data privac
 ---
 
 ### 4. Deleting a Document
+
 - User selects "Delete document" from their personal document list.
 - Backend verifies ownership and removes document from all systems:
   1. **Authentication** → verifies user owns the document via Clerk.
@@ -75,6 +80,7 @@ Documind uses **Clerk** for user authentication and ensures complete data privac
 ---
 
 ### 5. System Components
+
 - **Next.js Frontend** → UI for upload, Q&A, graph view, delete with user authentication.
 - **Clerk** → User authentication and session management.
 - **Azure Blob Storage** → Raw file storage.
@@ -86,14 +92,15 @@ Documind uses **Clerk** for user authentication and ensures complete data privac
 ---
 
 ### 6. Example Flow (User-Specific)
+
 1. **User authenticates** via Clerk and uploads `contract.pdf`.
    - Stored in Blob → docId = `doc_123`, userId = `user_456`.
    - Text chunks embedded → stored in Qdrant with userId.
    - Entities extracted (e.g., `John Doe`, `Company X`) → stored in Neo4j with userId.
-2. **User asks**: *"Who is the contract between?"*
+2. **User asks**: _"Who is the contract between?"_
    - Query embedding → Qdrant finds relevant chunk from user's documents only.
    - Neo4j shows entities linked to that chunk within user's graph.
-   - LLM answers: *"The contract is between John Doe and Company X."*
+   - LLM answers: _"The contract is between John Doe and Company X."_
 3. **User views graph**:
    - Shows only user's documents, chunks, and entities.
    - Document node connected to `Chunk1`.
@@ -103,132 +110,147 @@ Documind uses **Clerk** for user authentication and ensures complete data privac
 
 ---
 
-  ✅ DOCUMIND APPLICATION COMPLETED!
+✅ DOCUMIND APPLICATION COMPLETED!
 
-  What We Built:
+What We Built:
 
-  🏗️ Foundation (Completed)
+🏗️ Foundation (Completed)
 
-  - ✅ Environment configuration with all service credentials
-  - ✅ Complete Next.js 15 project with TypeScript and TailwindCSS
-  - ✅ All necessary dependencies installed and configured
-  - ✅ Proper project structure with organized components and utilities
-  - ✅ Comprehensive TypeScript interfaces for all data models
+- ✅ Environment configuration with all service credentials
+- ✅ Complete Next.js 15 project with TypeScript and TailwindCSS
+- ✅ All necessary dependencies installed and configured
+- ✅ Proper project structure with organized components and utilities
+- ✅ Comprehensive TypeScript interfaces for all data models
 
-  🔐 Authentication (Completed)
+🔐 Authentication (Completed)
 
-  - ✅ Full Clerk integration with sign-in/sign-up flows
-  - ✅ Protected routes and middleware
-  - ✅ User-scoped data isolation across all operations
+- ✅ Full Clerk integration with sign-in/sign-up flows
+- ✅ Protected routes and middleware
+- ✅ User-scoped data isolation across all operations
 
-  🗄️ Database Infrastructure (Completed)
+🗄️ Database Infrastructure (Completed)
 
-  - ✅ MongoDB: Document metadata and user data
-  - ✅ Qdrant: Vector embeddings for semantic search
-  - ✅ Neo4j: Knowledge graph with entities and relationships
-  - ✅ Azure Blob Storage: Raw document file storage
-  - ✅ Database initialization and health checking utilities
+- ✅ MongoDB: Document metadata and user data
+- ✅ Qdrant: Vector embeddings for semantic search
+- ✅ Neo4j: Knowledge graph with entities and relationships
+- ✅ Azure Blob Storage: Raw document file storage
+- ✅ Database initialization and health checking utilities
 
-  📄 Document Processing Pipeline (Completed)
+📄 Document Processing Pipeline (Completed)
 
-  - ✅ Multi-format support (PDF, DOCX, DOC, TXT)
-  - ✅ Intelligent text extraction and preprocessing
-  - ✅ Smart text chunking with overlap
-  - ✅ OpenAI embedding generation
-  - ✅ Automatic entity and relationship extraction
-  - ✅ Background processing with status tracking
+- ✅ Multi-format support (PDF, DOCX, DOC, TXT)
+- ✅ Intelligent text extraction and preprocessing
+- ✅ Smart text chunking with overlap
+- ✅ OpenAI embedding generation
+- ✅ Automatic entity and relationship extraction
+- ✅ Background processing with status tracking
 
-  🤖 AI-Powered Features (Completed)
+🤖 AI-Powered Features (Completed)
 
-  - ✅ Semantic Search: Vector-based document search
-  - ✅ Intelligent Q&A: LLM-powered answers with source citations
-  - ✅ Entity Recognition: NER with relationship mapping
+- ✅ Semantic Search: Vector-based document search
+- ✅ Intelligent Q&A: LLM-powered answers with source citations
+- ✅ Entity Recognition: NER with relationship mapping
 
-  - ✅ Knowledge Graph: Visual relationship exploration
+- ✅ Knowledge Graph: Visual relationship exploration
 
-  I've implemented an interactive knowledge graph feature that allows users to visually explore     
-  complex relationships between entities. The graph visualization uses Cytoscape.js to create       
-  dynamic, intuitive network representations of document connections. Users can now navigate        
-  intricate semantic links with an engaging, interactive interface that brings document 
-  relationships to life.
+I've implemented an interactive knowledge graph feature that allows users to visually explore  
+ complex relationships between entities. The graph visualization uses Cytoscape.js to create  
+ dynamic, intuitive network representations of document connections. Users can now navigate  
+ intricate semantic links with an engaging, interactive interface that brings document
+relationships to life.
 
-  The graph component supports zooming, node highlighting, and detailed entity information on       
-  demand. This visual approach transforms abstract connections into a tangible, explorable knowledge
-   map that enhances document understanding. 5. 🔒 Robust Security Framework
-  - Granular user authentication
-  - Encrypted document repositories
-  - Isolated knowledge environments
+The graph component supports zooming, node highlighting, and detailed entity information on  
+ demand. This visual approach transforms abstract connections into a tangible, explorable knowledge
+map that enhances document understanding. 5. 🔒 Robust Security Framework
 
-  🚀 Deployment Preparation Checklist:
+- Granular user authentication
+- Encrypted document repositories
+- Isolated knowledge environments
 
-  1. Cloud Service Configuration:
+🚀 Deployment Preparation Checklist:
+
+1. Cloud Service Configuration:
+
+
     - Integrate authentication mechanisms
     - Provision secure storage infrastructure
     - Validate database credentials
     - Secure API key management
-  2. Infrastructure Deployment:
+
+2. Infrastructure Deployment:
+
+
     - Platform hosting setup
     - Production database initialization
     - Environment variable optimization
-  3. Comprehensive Application Validation:
+
+3. Comprehensive Application Validation:
+
+
     - Document upload testing
     - Processing pipeline verification
     - Interactive Q&A system evaluation
     - Knowledge graph exploration
 
-  A fully realized intelligent document management solution ready for enterprise implementation.    
+A fully realized intelligent document management solution ready for enterprise implementation.
 
 ● 🎉 Documind Application Successfully Built!
 
-  I've completed building the entire Documind document intelligence platform according to the
-  comprehensive plan. Here's what was accomplished:
+I've completed building the entire Documind document intelligence platform according to the
+comprehensive plan. Here's what was accomplished:
 
-  ✅ Complete Feature Set Delivered:
+✅ Complete Feature Set Delivered:
 
-  🏗️ Core Infrastructure
-  - Next.js 15 with TypeScript & TailwindCSS v4
-  - Clerk authentication with user isolation
-  - Multi-database architecture (MongoDB, Qdrant, Neo4j, Azure Blob)
-  - Comprehensive type definitions and error handling
+🏗️ Core Infrastructure
 
-  📄 Document Processing Pipeline
-  - Multi-format support (PDF, DOCX, TXT)
-  - Intelligent text extraction and chunking
-  - OpenAI embedding generation
-  - Entity extraction and relationship mapping
-  - Background processing with real-time status
+- Next.js 15 with TypeScript & TailwindCSS v4
+- Clerk authentication with user isolation
+- Multi-database architecture (MongoDB, Qdrant, Neo4j, Azure Blob)
+- Comprehensive type definitions and error handling
 
-  🤖 AI-Powered Features
-  - Semantic search with vector similarity
-  - Natural language Q&A with source citations
-  - Entity recognition and categorization
-  - Knowledge graph construction
+📄 Document Processing Pipeline
 
-  💻 User Interface
-  - Modern dashboard with document management
-  - Drag-and-drop file upload with progress tracking
-  - Real-time chat interface for Q&A
-  - Interactive knowledge graph visualization with Cytoscape.js
-  - Responsive design with comprehensive error handling
+- Multi-format support (PDF, DOCX, TXT)
+- Intelligent text extraction and chunking
+- OpenAI embedding generation
+- Entity extraction and relationship mapping
+- Background processing with real-time status
 
-  🔐 Security & Privacy
-  - Complete user data isolation
-  - Protected API routes with authentication
-  - Secure file storage and access control
+🤖 AI-Powered Features
 
-  🚀 Ready for Deployment
+- Semantic search with vector similarity
+- Natural language Q&A with source citations
+- Entity recognition and categorization
+- Knowledge graph construction
 
-  The application is production-ready and just needs:
-  1. Service Configuration: Add your API keys to .env.local
-  2. Database Setup: Ensure all cloud services are accessible
-  3. Deployment: Deploy to your preferred hosting platform
+💻 User Interface
 
-  🎯 What Users Can Do:
+- Modern dashboard with document management
+- Drag-and-drop file upload with progress tracking
+- Real-time chat interface for Q&A
+- Interactive knowledge graph visualization with Cytoscape.js
+- Responsive design with comprehensive error handling
 
-  - Upload documents and watch them process automatically
-  - Ask natural language questions and get intelligent answers
-  - Explore relationships between documents and entities
-  - Manage their private document knowledge base
+🔐 Security & Privacy
 
-  The Documind platform is now complete and ready to transform documents into an intelligent,       
-  searchable knowledge base!
+- Complete user data isolation
+- Protected API routes with authentication
+- Secure file storage and access control
+
+🚀 Ready for Deployment
+
+The application is production-ready and just needs:
+
+1. Service Configuration: Add your API keys to .env.local
+2. Database Setup: Ensure all cloud services are accessible
+3. Deployment: Deploy to your preferred hosting platform
+
+🎯 What Users Can Do:
+
+- Upload documents and watch them process automatically
+- Ask natural language questions and get intelligent answers
+- Explore relationships between documents and entities
+- Manage their private document knowledge base
+
+The Documind platform is now complete and ready to transform documents into an intelligent,  
+ searchable knowledge base!

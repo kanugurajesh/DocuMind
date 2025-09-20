@@ -45,7 +45,7 @@ export default function ChatPage() {
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setLoading(true);
     setError(null);
 
@@ -69,14 +69,15 @@ export default function ChatPage() {
           sources: chatResponse.sources || [],
         };
 
-        setMessages(prev => [...prev, assistantMessage]);
+        setMessages((prev) => [...prev, assistantMessage]);
       } else {
         throw new Error(response.data.error || 'Failed to get response');
       }
     } catch (error: any) {
       console.error('Chat error:', error);
 
-      let errorMessage = 'Sorry, I encountered an error while processing your request.';
+      let errorMessage =
+        'Sorry, I encountered an error while processing your request.';
 
       if (error.response?.status === 401) {
         errorMessage = 'Please sign in to continue chatting.';
@@ -95,7 +96,7 @@ export default function ChatPage() {
         sources: [],
       };
 
-      setMessages(prev => [...prev, errorAssistantMessage]);
+      setMessages((prev) => [...prev, errorAssistantMessage]);
       setError(errorMessage);
       showToast.error(errorMessage);
     } finally {
@@ -141,7 +142,8 @@ export default function ChatPage() {
           <Card className="p-8 text-center max-w-md mx-auto">
             <h1 className="text-2xl font-bold mb-4">Sign In Required</h1>
             <p className="text-muted-foreground mb-6">
-              Please sign in to access the chat interface and interact with your documents.
+              Please sign in to access the chat interface and interact with your
+              documents.
             </p>
             <Button asChild>
               <Link href="/sign-in">Sign In</Link>
@@ -160,7 +162,8 @@ export default function ChatPage() {
           <div>
             <h1 className="text-3xl font-bold mb-2">Document Chat</h1>
             <p className="text-muted-foreground">
-              Ask questions about your documents and get intelligent answers with sources
+              Ask questions about your documents and get intelligent answers
+              with sources
             </p>
           </div>
 

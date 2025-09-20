@@ -47,7 +47,8 @@ export function DocumentList({
         </div>
         <h3 className="text-xl font-semibold mb-3">No documents yet</h3>
         <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-          Upload your first document to get started with intelligent document analysis and AI-powered insights.
+          Upload your first document to get started with intelligent document
+          analysis and AI-powered insights.
         </p>
         <Button className="gap-2">
           <Upload className="h-4 w-4" />

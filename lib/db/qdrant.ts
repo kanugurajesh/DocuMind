@@ -120,11 +120,13 @@ export async function insertVectors(vectors: any[]) {
     // Log vector data structure for debugging
     console.log('Inserting vectors:', {
       count: vectors.length,
-      sampleVector: vectors[0] ? {
-        id: vectors[0].id,
-        vectorLength: vectors[0].vector?.length,
-        payloadKeys: Object.keys(vectors[0].payload || {}),
-      } : 'No vectors to insert'
+      sampleVector: vectors[0]
+        ? {
+            id: vectors[0].id,
+            vectorLength: vectors[0].vector?.length,
+            payloadKeys: Object.keys(vectors[0].payload || {}),
+          }
+        : 'No vectors to insert',
     });
 
     // Validate vector format
@@ -189,4 +191,10 @@ export async function deleteVectorsByDocId(docId: string, userId: string) {
   }
 }
 
-export default { getQdrantClient, initializeQdrantCollection, searchVectors, insertVectors, deleteVectorsByDocId };
+export default {
+  getQdrantClient,
+  initializeQdrantCollection,
+  searchVectors,
+  insertVectors,
+  deleteVectorsByDocId,
+};

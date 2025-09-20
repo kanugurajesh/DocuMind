@@ -20,8 +20,12 @@ export async function GET(request: NextRequest) {
     const maxNodesParam = searchParams.get('maxNodes');
 
     // Parse query parameters
-    const docIds = docIdsParam ? docIdsParam.split(',').filter(Boolean) : undefined;
-    const entityTypes = entityTypesParam ? entityTypesParam.split(',').filter(Boolean) : undefined;
+    const docIds = docIdsParam
+      ? docIdsParam.split(',').filter(Boolean)
+      : undefined;
+    const entityTypes = entityTypesParam
+      ? entityTypesParam.split(',').filter(Boolean)
+      : undefined;
     const maxNodes = maxNodesParam ? parseInt(maxNodesParam, 10) : undefined;
 
     // Get graph data from Neo4j
@@ -33,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     // Filter by entity types if specified
     if (entityTypes && entityTypes.length > 0) {
-      filteredNodes = filteredNodes.filter(node => {
+      filteredNodes = filteredNodes.filter((node) => {
         if (node.type === 'Entity') {
           return entityTypes.includes((node as any).category);
         }
@@ -41,9 +45,9 @@ export async function GET(request: NextRequest) {
       });
 
       // Update edges to only include those connecting remaining nodes
-      const nodeIds = new Set(filteredNodes.map(node => node.id));
-      filteredEdges = filteredEdges.filter(edge =>
-        nodeIds.has(edge.startNodeId) && nodeIds.has(edge.endNodeId)
+      const nodeIds = new Set(filteredNodes.map((node) => node.id));
+      filteredEdges = filteredEdges.filter(
+        (edge) => nodeIds.has(edge.startNodeId) && nodeIds.has(edge.endNodeId)
       );
     }
 
@@ -51,17 +55,17 @@ export async function GET(request: NextRequest) {
     if (maxNodes && filteredNodes.length > maxNodes) {
       // Prioritize document and entity nodes, then chunks
       const prioritized = [
-        ...filteredNodes.filter(node => node.type === 'Document'),
-        ...filteredNodes.filter(node => node.type === 'Entity'),
-        ...filteredNodes.filter(node => node.type === 'Chunk'),
+        ...filteredNodes.filter((node) => node.type === 'Document'),
+        ...filteredNodes.filter((node) => node.type === 'Entity'),
+        ...filteredNodes.filter((node) => node.type === 'Chunk'),
       ].slice(0, maxNodes);
 
       filteredNodes = prioritized;
 
       // Update edges again
-      const nodeIds = new Set(filteredNodes.map(node => node.id));
-      filteredEdges = filteredEdges.filter(edge =>
-        nodeIds.has(edge.startNodeId) && nodeIds.has(edge.endNodeId)
+      const nodeIds = new Set(filteredNodes.map((node) => node.id));
+      filteredEdges = filteredEdges.filter(
+        (edge) => nodeIds.has(edge.startNodeId) && nodeIds.has(edge.endNodeId)
       );
     }
 
@@ -100,10 +104,13 @@ export async function POST(request: NextRequest) {
     // TODO: Implement graph search functionality
     // This could allow searching for specific entities or relationships
 
-    return NextResponse.json({
-      success: false,
-      error: 'Graph search not yet implemented',
-    }, { status: 501 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Graph search not yet implemented',
+      },
+      { status: 501 }
+    );
   } catch (error) {
     console.error('Graph search error:', error);
     return NextResponse.json(

@@ -39,7 +39,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Unsupported file type. Please upload PDF, DOCX, DOC, or TXT files.',
+          error:
+            'Unsupported file type. Please upload PDF, DOCX, DOC, or TXT files.',
         },
         { status: 400 }
       );

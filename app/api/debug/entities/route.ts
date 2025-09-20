@@ -49,17 +49,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       extractedEntities: result,
-      totalEntitiesInGraph: graphData.nodes.filter(n => n.type === 'Entity').length,
-      graphData: graphData
+      totalEntitiesInGraph: graphData.nodes.filter((n) => n.type === 'Entity')
+        .length,
+      graphData: graphData,
     });
-
   } catch (error) {
     console.error('❌ Debug entity extraction error:', error);
     return NextResponse.json(
       {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
+        stack: error instanceof Error ? error.stack : undefined,
       },
       { status: 500 }
     );
@@ -82,22 +82,24 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       totalNodes: graphData.nodes.length,
-      totalEntities: graphData.nodes.filter(n => n.type === 'Entity').length,
-      totalDocuments: graphData.nodes.filter(n => n.type === 'Document').length,
-      totalChunks: graphData.nodes.filter(n => n.type === 'Chunk').length,
-      entities: graphData.nodes.filter(n => n.type === 'Entity').map(e => ({
-        id: e.id,
-        name: e.label,
-        category: e.category
-      }))
+      totalEntities: graphData.nodes.filter((n) => n.type === 'Entity').length,
+      totalDocuments: graphData.nodes.filter((n) => n.type === 'Document')
+        .length,
+      totalChunks: graphData.nodes.filter((n) => n.type === 'Chunk').length,
+      entities: graphData.nodes
+        .filter((n) => n.type === 'Entity')
+        .map((e) => ({
+          id: e.id,
+          name: e.label,
+          category: e.category,
+        })),
     });
-
   } catch (error) {
     console.error('❌ Debug get entities error:', error);
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

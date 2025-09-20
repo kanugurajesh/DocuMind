@@ -30,7 +30,7 @@ export function GraphVisualization({
     // Transform data for Cytoscape
     const elements = [
       // Nodes
-      ...graphData.nodes.map(node => ({
+      ...graphData.nodes.map((node) => ({
         data: {
           id: node.id,
           label: getNodeLabel(node),
@@ -39,7 +39,7 @@ export function GraphVisualization({
         },
       })),
       // Edges
-      ...graphData.edges.map(edge => ({
+      ...graphData.edges.map((edge) => ({
         data: {
           id: `${edge.startNodeId}-${edge.endNodeId}`,
           source: edge.startNodeId,
@@ -61,15 +61,15 @@ export function GraphVisualization({
           selector: 'node',
           style: {
             'background-color': '#666',
-            'label': 'data(label)',
+            label: 'data(label)',
             'text-valign': 'center',
             'text-halign': 'center',
             'font-size': '12px',
             'font-weight': 'bold',
             'text-outline-width': 2,
             'text-outline-color': '#fff',
-            'width': '60px',
-            'height': '60px',
+            width: '60px',
+            height: '60px',
           },
         },
         // Document nodes
@@ -77,8 +77,8 @@ export function GraphVisualization({
           selector: 'node[type="Document"]',
           style: {
             'background-color': '#3B82F6',
-            'width': '80px',
-            'height': '80px',
+            width: '80px',
+            height: '80px',
             'font-size': '14px',
           },
         },
@@ -87,8 +87,8 @@ export function GraphVisualization({
           selector: 'node[type="Chunk"]',
           style: {
             'background-color': '#10B981',
-            'width': '50px',
-            'height': '50px',
+            width: '50px',
+            height: '50px',
             'font-size': '10px',
           },
         },
@@ -97,8 +97,8 @@ export function GraphVisualization({
           selector: 'node[type="Entity"]',
           style: {
             'background-color': '#8B5CF6',
-            'width': '65px',
-            'height': '65px',
+            width: '65px',
+            height: '65px',
             'font-size': '12px',
           },
         },
@@ -107,7 +107,7 @@ export function GraphVisualization({
           selector: 'node[type="Entity"][category="PERSON"]',
           style: {
             'background-color': '#F59E0B',
-            'shape': 'round-rectangle',
+            shape: 'round-rectangle',
           },
         },
         // Organization entities
@@ -115,7 +115,7 @@ export function GraphVisualization({
           selector: 'node[type="Entity"][category="ORGANIZATION"]',
           style: {
             'background-color': '#EF4444',
-            'shape': 'round-rectangle',
+            shape: 'round-rectangle',
           },
         },
         // Location entities
@@ -123,7 +123,7 @@ export function GraphVisualization({
           selector: 'node[type="Entity"][category="LOCATION"]',
           style: {
             'background-color': '#06B6D4',
-            'shape': 'round-rectangle',
+            shape: 'round-rectangle',
           },
         },
         // Topic nodes
@@ -131,10 +131,10 @@ export function GraphVisualization({
           selector: 'node[type="Topic"]',
           style: {
             'background-color': '#9333EA',
-            'width': '70px',
-            'height': '70px',
+            width: '70px',
+            height: '70px',
             'font-size': '11px',
-            'shape': 'hexagon',
+            shape: 'hexagon',
           },
         },
         // Selected node
@@ -150,12 +150,12 @@ export function GraphVisualization({
         {
           selector: 'edge',
           style: {
-            'width': 2,
+            width: 2,
             'line-color': '#9CA3AF',
             'target-arrow-color': '#9CA3AF',
             'target-arrow-shape': 'triangle',
             'curve-style': 'bezier',
-            'label': 'data(label)',
+            label: 'data(label)',
             'font-size': '10px',
             'text-rotation': 'autorotate',
             'text-margin-y': -10,
@@ -167,7 +167,7 @@ export function GraphVisualization({
           style: {
             'line-color': '#3B82F6',
             'target-arrow-color': '#3B82F6',
-            'width': 3,
+            width: 3,
           },
         },
         // MENTIONS relationships
@@ -176,7 +176,7 @@ export function GraphVisualization({
           style: {
             'line-color': '#8B5CF6',
             'target-arrow-color': '#8B5CF6',
-            'width': 2,
+            width: 2,
           },
         },
         // COOCCURS_WITH relationships
@@ -185,8 +185,8 @@ export function GraphVisualization({
           style: {
             'line-color': '#F59E0B',
             'target-arrow-color': '#F59E0B',
-            'width': 'data(count)',
-            'opacity': 'data(confidence)',
+            width: 'data(count)',
+            opacity: 'data(confidence)',
           },
         },
         // SIMILAR_TO relationships
@@ -195,8 +195,8 @@ export function GraphVisualization({
           style: {
             'line-color': '#06B6D4',
             'target-arrow-color': '#06B6D4',
-            'width': 2,
-            'opacity': 'data(similarity)',
+            width: 2,
+            opacity: 'data(similarity)',
           },
         },
         // SAME_AS relationships
@@ -205,7 +205,7 @@ export function GraphVisualization({
           style: {
             'line-color': '#DC2626',
             'target-arrow-color': '#DC2626',
-            'width': 3,
+            width: 3,
             'line-style': 'dashed',
           },
         },
@@ -215,8 +215,8 @@ export function GraphVisualization({
           style: {
             'line-color': '#059669',
             'target-arrow-color': '#059669',
-            'width': 'mapData(similarity, 0, 1, 2, 5)',
-            'opacity': 'data(similarity)',
+            width: 'mapData(similarity, 0, 1, 2, 5)',
+            opacity: 'data(similarity)',
             'line-style': 'dotted',
           },
         },
@@ -226,15 +226,15 @@ export function GraphVisualization({
           style: {
             'line-color': '#9333EA',
             'target-arrow-color': '#9333EA',
-            'width': 'mapData(relevance, 0, 1, 2, 4)',
-            'opacity': 'data(relevance)',
+            width: 'mapData(relevance, 0, 1, 2, 4)',
+            opacity: 'data(relevance)',
           },
         },
         // Selected edge
         {
           selector: 'edge:selected',
           style: {
-            'width': 4,
+            width: 4,
             'line-color': '#FCD34D',
             'target-arrow-color': '#FCD34D',
           },
@@ -335,8 +335,18 @@ export function GraphVisualization({
           className="bg-white shadow-md rounded-lg p-2 hover:bg-gray-50 transition-colors"
           title="Fit to view"
         >
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+          <svg
+            className="w-5 h-5 text-gray-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
+            />
           </svg>
         </button>
         <button
@@ -344,8 +354,18 @@ export function GraphVisualization({
           className="bg-white shadow-md rounded-lg p-2 hover:bg-gray-50 transition-colors"
           title="Center graph"
         >
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707" />
+          <svg
+            className="w-5 h-5 text-gray-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"
+            />
           </svg>
         </button>
         <button
@@ -353,8 +373,18 @@ export function GraphVisualization({
           className="bg-white shadow-md rounded-lg p-2 hover:bg-gray-50 transition-colors"
           title="Reset zoom"
         >
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+          <svg
+            className="w-5 h-5 text-gray-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"
+            />
           </svg>
         </button>
       </div>
@@ -404,7 +434,13 @@ export function GraphVisualization({
               <span>People</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-purple-600" style={{ clipPath: 'polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)' }}></div>
+              <div
+                className="w-4 h-4 bg-purple-600"
+                style={{
+                  clipPath:
+                    'polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)',
+                }}
+              ></div>
               <span>Topics</span>
             </div>
           </div>
@@ -412,7 +448,9 @@ export function GraphVisualization({
 
         {/* Relationship Types */}
         <div>
-          <h5 className="text-xs font-medium text-gray-700 mb-2">Relationships</h5>
+          <h5 className="text-xs font-medium text-gray-700 mb-2">
+            Relationships
+          </h5>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
             <div className="flex items-center space-x-2">
               <div className="w-4 h-0.5 bg-blue-500"></div>
