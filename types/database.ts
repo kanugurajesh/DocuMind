@@ -79,7 +79,15 @@ export interface TopicNode {
 // Neo4j Relationship Types
 export interface Relationship {
   id: string;
-  type: 'CONTAINS' | 'MENTIONS' | 'RELATED_TO' | 'COOCCURS_WITH' | 'SIMILAR_TO' | 'SAME_AS' | 'DOCUMENT_SIMILAR_TO' | 'CATEGORIZES';
+  type:
+    | 'CONTAINS'
+    | 'MENTIONS'
+    | 'RELATED_TO'
+    | 'COOCCURS_WITH'
+    | 'SIMILAR_TO'
+    | 'SAME_AS'
+    | 'DOCUMENT_SIMILAR_TO'
+    | 'CATEGORIZES';
   startNodeId: string;
   endNodeId: string;
   properties?: {

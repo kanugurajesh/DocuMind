@@ -4,7 +4,16 @@ import { SignInButton, SignUpButton } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, FileText, MessageSquare, BarChart3, Upload, Sparkles, Shield, Zap } from 'lucide-react';
+import {
+  ArrowRight,
+  FileText,
+  MessageSquare,
+  BarChart3,
+  Upload,
+  Sparkles,
+  Shield,
+  Zap,
+} from 'lucide-react';
 
 export default async function Home() {
   const user = await currentUser();
@@ -31,8 +40,9 @@ export default async function Home() {
           </h1>
 
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8 leading-relaxed">
-            Upload documents, extract insights, and interact using natural language queries.
-            Documind turns your files into a searchable, intelligent knowledge base powered by AI.
+            Upload documents, extract insights, and interact using natural
+            language queries. Documind turns your files into a searchable,
+            intelligent knowledge base powered by AI.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
@@ -63,7 +73,8 @@ export default async function Home() {
               Powerful features for document intelligence
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Everything you need to turn your documents into actionable insights
+              Everything you need to turn your documents into actionable
+              insights
             </p>
           </div>
 
@@ -75,8 +86,9 @@ export default async function Home() {
                 </div>
                 <h3 className="text-xl font-semibold mb-3">Smart Upload</h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  Upload PDFs, Word docs, and text files. Our AI automatically extracts,
-                  processes, and indexes your content for intelligent search.
+                  Upload PDFs, Word docs, and text files. Our AI automatically
+                  extracts, processes, and indexes your content for intelligent
+                  search.
                 </p>
               </CardContent>
             </Card>
@@ -116,7 +128,8 @@ export default async function Home() {
                 </div>
                 <h3 className="text-xl font-semibold mb-3">Lightning Fast</h3>
                 <p className="text-muted-foreground">
-                  Get instant results with our optimized search and AI processing pipeline.
+                  Get instant results with our optimized search and AI
+                  processing pipeline.
                 </p>
               </CardContent>
             </Card>
@@ -128,7 +141,8 @@ export default async function Home() {
                 </div>
                 <h3 className="text-xl font-semibold mb-3">Secure & Private</h3>
                 <p className="text-muted-foreground">
-                  Your documents are encrypted and stored securely with enterprise-grade security.
+                  Your documents are encrypted and stored securely with
+                  enterprise-grade security.
                 </p>
               </CardContent>
             </Card>
@@ -140,7 +154,8 @@ export default async function Home() {
                 </div>
                 <h3 className="text-xl font-semibold mb-3">Multi-Format</h3>
                 <p className="text-muted-foreground">
-                  Support for PDF, Word, text files, and more with intelligent content extraction.
+                  Support for PDF, Word, text files, and more with intelligent
+                  content extraction.
                 </p>
               </CardContent>
             </Card>
@@ -163,32 +178,35 @@ export default async function Home() {
           <div className="grid md:grid-cols-4 gap-8">
             {[
               {
-                step: "01",
-                title: "Upload",
-                description: "Securely upload your documents to our platform",
-                color: "bg-blue-500"
+                step: '01',
+                title: 'Upload',
+                description: 'Securely upload your documents to our platform',
+                color: 'bg-blue-500',
               },
               {
-                step: "02",
-                title: "Process",
-                description: "AI extracts knowledge and creates searchable indexes",
-                color: "bg-green-500"
+                step: '02',
+                title: 'Process',
+                description:
+                  'AI extracts knowledge and creates searchable indexes',
+                color: 'bg-green-500',
               },
               {
-                step: "03",
-                title: "Query",
-                description: "Ask questions using natural language",
-                color: "bg-purple-500"
+                step: '03',
+                title: 'Query',
+                description: 'Ask questions using natural language',
+                color: 'bg-purple-500',
               },
               {
-                step: "04",
-                title: "Discover",
-                description: "Get intelligent insights and visualizations",
-                color: "bg-orange-500"
-              }
+                step: '04',
+                title: 'Discover',
+                description: 'Get intelligent insights and visualizations',
+                color: 'bg-orange-500',
+              },
             ].map((item, index) => (
               <div key={index} className="text-center">
-                <div className={`w-16 h-16 ${item.color} text-white rounded-full flex items-center justify-center mx-auto mb-6 text-lg font-bold shadow-lg`}>
+                <div
+                  className={`w-16 h-16 ${item.color} text-white rounded-full flex items-center justify-center mx-auto mb-6 text-lg font-bold shadow-lg`}
+                >
                   {item.step}
                 </div>
                 <h3 className="text-lg font-semibold mb-3">{item.title}</h3>
@@ -206,7 +224,8 @@ export default async function Home() {
             Ready to transform your documents?
           </h2>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join thousands of users who have unlocked the power of their documents with Documind.
+            Join thousands of users who have unlocked the power of their
+            documents with Documind.
           </p>
           <SignUpButton mode="modal">
             <Button size="lg" className="text-base px-8">

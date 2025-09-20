@@ -20,7 +20,10 @@ if (process.env.NODE_ENV === 'development') {
   clientPromise = client.connect();
 }
 
-export async function connectToDatabase(): Promise<{ client: MongoClient; db: Db }> {
+export async function connectToDatabase(): Promise<{
+  client: MongoClient;
+  db: Db;
+}> {
   const client = await clientPromise;
   const db = client.db(process.env.MONGODB_DB_NAME);
   return { client, db };

@@ -1,6 +1,10 @@
 import { OpenAI } from 'openai';
 import { v4 as uuidv4 } from 'uuid';
-import { createTopicNode, createTopicDocumentRelationship, getUserDocuments } from '../db/neo4j';
+import {
+  createTopicNode,
+  createTopicDocumentRelationship,
+  getUserDocuments,
+} from '../db/neo4j';
 import { getDocumentsCollection } from '../db/mongodb';
 
 const openai = new OpenAI({
@@ -42,13 +46,22 @@ export async function extractTopicsFromDocuments(
 
     for (const doc of documents) {
       try {
-        const docData = await documentsCollection.findOne({ docId: doc.docId, userId });
+        const docData = await documentsCollection.findOne({
+          docId: doc.docId,
+          userId,
+        });
         if (docData?.metadata?.title || doc.filename) {
           // Use title/filename as a proxy for document content for topic extraction
-          documentTexts.set(doc.docId, docData?.metadata?.title || doc.filename);
+          documentTexts.set(
+            doc.docId,
+            docData?.metadata?.title || doc.filename
+          );
         }
       } catch (error) {
-        console.error(`Error fetching document content for ${doc.docId}:`, error);
+        console.error(
+          `Error fetching document content for ${doc.docId}:`,
+          error
+        );
       }
     }
 
@@ -57,7 +70,10 @@ export async function extractTopicsFromDocuments(
     }
 
     // Extract topics using OpenAI
-    const topics = await extractTopicsUsingLLM(Array.from(documentTexts.values()), maxTopics);
+    const topics = await extractTopicsUsingLLM(
+      Array.from(documentTexts.values()),
+      maxTopics
+    );
 
     // Assign documents to topics
     const documentTopics = await assignDocumentsToTopics(documentTexts, topics);
@@ -70,7 +86,10 @@ export async function extractTopicsFromDocuments(
 }
 
 // Extract topics using OpenAI LLM
-async function extractTopicsUsingLLM(documentTexts: string[], maxTopics: number): Promise<ExtractedTopic[]> {
+async function extractTopicsUsingLLM(
+  documentTexts: string[],
+  maxTopics: number
+): Promise<ExtractedTopic[]> {
   try {
     const prompt = `
 You are an expert topic modeling system. Analyze the following document titles/names and identify the main topics they represent.
@@ -121,16 +140,23 @@ Topic examples: "Technology & Software", "Business & Finance", "Research & Acade
 
     try {
       // Clean content by removing markdown code blocks if present
-      const cleanContent = content.replace(/^```json\s*/, '').replace(/\s*```$/, '').trim();
+      const cleanContent = content
+        .replace(/^```json\s*/, '')
+        .replace(/\s*```$/, '')
+        .trim();
       const result = JSON.parse(cleanContent);
 
-      const topics: ExtractedTopic[] = (result.topics || []).map((topic: any) => ({
-        id: uuidv4(),
-        name: topic.name?.trim() || 'Untitled Topic',
-        description: topic.description?.trim() || '',
-        keywords: Array.isArray(topic.keywords) ? topic.keywords.slice(0, 10) : [],
-        confidence: Math.max(0, Math.min(1, Number(topic.confidence) || 0.5)),
-      })).filter((topic: ExtractedTopic) => topic.name !== 'Untitled Topic');
+      const topics: ExtractedTopic[] = (result.topics || [])
+        .map((topic: any) => ({
+          id: uuidv4(),
+          name: topic.name?.trim() || 'Untitled Topic',
+          description: topic.description?.trim() || '',
+          keywords: Array.isArray(topic.keywords)
+            ? topic.keywords.slice(0, 10)
+            : [],
+          confidence: Math.max(0, Math.min(1, Number(topic.confidence) || 0.5)),
+        }))
+        .filter((topic: ExtractedTopic) => topic.name !== 'Untitled Topic');
 
       return topics;
     } catch (parseError) {
@@ -148,7 +174,11 @@ async function assignDocumentsToTopics(
   documentTexts: Map<string, string>,
   topics: ExtractedTopic[]
 ): Promise<Array<{ docId: string; topicId: string; relevance: number }>> {
-  const assignments: Array<{ docId: string; topicId: string; relevance: number }> = [];
+  const assignments: Array<{
+    docId: string;
+    topicId: string;
+    relevance: number;
+  }> = [];
 
   for (const [docId, docText] of documentTexts) {
     for (const topic of topics) {
@@ -169,7 +199,10 @@ async function assignDocumentsToTopics(
 }
 
 // Calculate how relevant a document is to a specific topic
-function calculateTopicRelevance(documentText: string, topic: ExtractedTopic): number {
+function calculateTopicRelevance(
+  documentText: string,
+  topic: ExtractedTopic
+): number {
   const docLower = documentText.toLowerCase();
   const topicNameLower = topic.name.toLowerCase();
   const topicDescLower = topic.description.toLowerCase();
@@ -253,7 +286,9 @@ export async function processTopicModeling(userId: string): Promise<void> {
       }
     }
 
-    console.log(`Topic modeling completed: ${result.topics.length} topics, ${result.documentTopics.length} document-topic relationships`);
+    console.log(
+      `Topic modeling completed: ${result.topics.length} topics, ${result.documentTopics.length} document-topic relationships`
+    );
   } catch (error) {
     console.error('Error processing topic modeling:', error);
   }

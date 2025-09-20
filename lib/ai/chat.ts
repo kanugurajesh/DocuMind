@@ -17,7 +17,9 @@ export interface ChatContext {
 }
 
 // Main chat function that combines search and LLM reasoning
-export async function generateChatResponse(context: ChatContext): Promise<ChatResponse> {
+export async function generateChatResponse(
+  context: ChatContext
+): Promise<ChatResponse> {
   try {
     // Step 1: Generate embedding for the user query
     const queryEmbedding = await generateQueryEmbedding(context.query);
@@ -33,7 +35,8 @@ export async function generateChatResponse(context: ChatContext): Promise<ChatRe
 
     if (searchResults.length === 0) {
       return {
-        answer: "I couldn't find any relevant information in your documents to answer this question. Try asking about topics covered in your uploaded documents.",
+        answer:
+          "I couldn't find any relevant information in your documents to answer this question. Try asking about topics covered in your uploaded documents.",
         sources: [],
         confidence: 0,
         relatedEntities: [],
@@ -41,7 +44,10 @@ export async function generateChatResponse(context: ChatContext): Promise<ChatRe
     }
 
     // Step 3: Generate answer using LLM with retrieved context
-    const llmResponse = await generateAnswerWithContext(context.query, searchResults);
+    const llmResponse = await generateAnswerWithContext(
+      context.query,
+      searchResults
+    );
 
     return {
       answer: llmResponse.answer,
@@ -85,14 +91,18 @@ async function performSemanticSearch({
 
     // Build document map for quick lookup
     if (qdrantResults.length > 0) {
-      const uniqueDocIds = [...new Set(qdrantResults.map(r => r.payload?.docId).filter(Boolean))];
+      const uniqueDocIds = [
+        ...new Set(qdrantResults.map((r) => r.payload?.docId).filter(Boolean)),
+      ];
 
-      const documents = await documentsCollection.find({
-        docId: { $in: uniqueDocIds },
-        userId,
-      }).toArray();
+      const documents = await documentsCollection
+        .find({
+          docId: { $in: uniqueDocIds },
+          userId,
+        })
+        .toArray();
 
-      documents.forEach(doc => {
+      documents.forEach((doc) => {
         docMap.set(doc.docId, {
           filename: doc.filename,
           uploadedAt: doc.uploadedAt,
@@ -132,9 +142,12 @@ async function generateAnswerWithContext(
 ): Promise<{ answer: string; confidence: number }> {
   try {
     // Prepare context from search results
-    const contextChunks = searchResults.map((result, index) =>
-      `[Source ${index + 1} - ${result.document.filename}]:\n${result.text}`
-    ).join('\n\n');
+    const contextChunks = searchResults
+      .map(
+        (result, index) =>
+          `[Source ${index + 1} - ${result.document.filename}]:\n${result.text}`
+      )
+      .join('\n\n');
 
     const prompt = `
 You are an intelligent document assistant. Answer the user's question based on the provided context from their documents.
@@ -159,7 +172,8 @@ Answer:`;
       messages: [
         {
           role: 'system',
-          content: 'You are a helpful assistant that answers questions based on provided document context. Always cite your sources and be truthful about the limitations of your knowledge.',
+          content:
+            'You are a helpful assistant that answers questions based on provided document context. Always cite your sources and be truthful about the limitations of your knowledge.',
         },
         {
           role: 'user',
@@ -170,11 +184,18 @@ Answer:`;
       max_tokens: 1000,
     });
 
-    const answer = response.choices[0]?.message?.content || 'I was unable to generate an answer.';
+    const answer =
+      response.choices[0]?.message?.content ||
+      'I was unable to generate an answer.';
 
     // Calculate confidence based on search result scores and answer length
-    const avgScore = searchResults.reduce((sum, result) => sum + result.score, 0) / searchResults.length;
-    const confidence = Math.min(avgScore * 0.8 + (answer.length > 50 ? 0.2 : 0), 1.0);
+    const avgScore =
+      searchResults.reduce((sum, result) => sum + result.score, 0) /
+      searchResults.length;
+    const confidence = Math.min(
+      avgScore * 0.8 + (answer.length > 50 ? 0.2 : 0),
+      1.0
+    );
 
     return { answer, confidence };
   } catch (error) {

@@ -5,7 +5,7 @@ import {
   DeleteObjectCommand,
   HeadObjectCommand,
   ListObjectsV2Command,
-  PutObjectCommandOutput
+  PutObjectCommandOutput,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
@@ -35,10 +35,12 @@ export async function initializeBucket() {
 
   try {
     // Check if bucket exists by trying to get its location
-    await s3.send(new HeadObjectCommand({
-      Bucket: bucketName,
-      Key: '.test'
-    }));
+    await s3.send(
+      new HeadObjectCommand({
+        Bucket: bucketName,
+        Key: '.test',
+      })
+    );
   } catch (error: any) {
     if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
       console.log('S3 bucket exists and is accessible');

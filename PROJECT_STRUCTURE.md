@@ -1,6 +1,7 @@
 # Documind Project Structure
 
 ## Root Structure
+
 ```
 documind/
 ├── app/                    # Next.js App Router
@@ -12,6 +13,7 @@ documind/
 ```
 
 ## App Router Structure
+
 ```
 app/
 ├── api/                    # API Routes
@@ -28,6 +30,7 @@ app/
 ```
 
 ## Components Structure
+
 ```
 components/
 ├── ui/                    # Reusable UI components
@@ -37,6 +40,7 @@ components/
 ```
 
 ## Lib Structure
+
 ```
 lib/
 ├── db/                   # Database connections & utils
@@ -54,6 +58,7 @@ lib/
 ```
 
 ## Types Structure
+
 ```
 types/
 ├── index.ts              # Main type definitions

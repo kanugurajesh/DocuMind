@@ -98,7 +98,9 @@ export interface ErrorResponse {
 }
 
 // Generic API Response Wrapper
-export type ApiResponse<T> = {
-  success: true;
-  data: T;
-} | ErrorResponse;
+export type ApiResponse<T> =
+  | {
+      success: true;
+      data: T;
+    }
+  | ErrorResponse;

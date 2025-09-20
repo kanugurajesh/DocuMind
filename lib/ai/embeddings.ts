@@ -31,15 +31,15 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
 
       const response = await openai.embeddings.create({
         model: 'text-embedding-3-small',
-        input: batch.map(text => text.trim()),
+        input: batch.map((text) => text.trim()),
       });
 
-      const batchEmbeddings = response.data.map(item => item.embedding);
+      const batchEmbeddings = response.data.map((item) => item.embedding);
       embeddings.push(...batchEmbeddings);
 
       // Small delay between batches to respect rate limits
       if (i + batchSize < texts.length) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
     }
 

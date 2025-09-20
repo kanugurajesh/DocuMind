@@ -6,7 +6,13 @@ import { DocumentUpload } from '@/components/documents/DocumentUpload';
 import { DocumentList } from '@/components/documents/DocumentList';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Document } from '@/types';
 import axios from 'axios';
@@ -22,7 +28,7 @@ import {
   RefreshCw,
   Plus,
   AlertCircle,
-  X
+  X,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -57,7 +63,7 @@ export default function DashboardPage() {
   };
 
   const handleUploadComplete = (document: Document) => {
-    setDocuments(prev => [document, ...prev]);
+    setDocuments((prev) => [document, ...prev]);
     setError(null);
   };
 
@@ -66,13 +72,13 @@ export default function DashboardPage() {
   };
 
   const handleDocumentDelete = async (docId: string) => {
-    const deletingDocument = documents.find(doc => doc.docId === docId);
+    const deletingDocument = documents.find((doc) => doc.docId === docId);
     const documentName = deletingDocument?.filename || 'document';
 
     try {
       const response = await axios.delete(`/api/documents?docId=${docId}`);
       if (response.data.success) {
-        setDocuments(prev => prev.filter(doc => doc.docId !== docId));
+        setDocuments((prev) => prev.filter((doc) => doc.docId !== docId));
         showToast.dismiss(); // Dismiss any loading toast
         showToast.success(`"${documentName}" deleted successfully`);
       } else {
@@ -83,7 +89,8 @@ export default function DashboardPage() {
       }
     } catch (error: any) {
       console.error('Error deleting document:', error);
-      const errorMsg = error.response?.data?.error || 'Failed to delete document';
+      const errorMsg =
+        error.response?.data?.error || 'Failed to delete document';
       setError(errorMsg);
       showToast.dismiss();
       showToast.error(errorMsg);
@@ -101,9 +108,16 @@ export default function DashboardPage() {
   }
 
   // Calculate statistics
-  const completedDocs = documents.filter(doc => doc.processingStatus === 'completed').length;
-  const processingDocs = documents.filter(doc => doc.processingStatus === 'processing').length;
-  const totalWords = documents.reduce((sum, doc) => sum + (doc.metadata?.wordCount || 0), 0);
+  const completedDocs = documents.filter(
+    (doc) => doc.processingStatus === 'completed'
+  ).length;
+  const processingDocs = documents.filter(
+    (doc) => doc.processingStatus === 'processing'
+  ).length;
+  const totalWords = documents.reduce(
+    (sum, doc) => sum + (doc.metadata?.wordCount || 0),
+    0
+  );
 
   return (
     <AppLayout>
@@ -114,7 +128,8 @@ export default function DashboardPage() {
             Welcome back, {user.firstName}!
           </h1>
           <p className="text-muted-foreground">
-            Manage your documents and explore your knowledge base with AI-powered insights.
+            Manage your documents and explore your knowledge base with
+            AI-powered insights.
           </p>
         </div>
 
@@ -143,7 +158,9 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Documents</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Documents
+              </CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -173,7 +190,9 @@ export default function DashboardPage() {
               <BarChart3 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalWords.toLocaleString()}</div>
+              <div className="text-2xl font-bold">
+                {totalWords.toLocaleString()}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Across all documents
               </p>
@@ -187,16 +206,17 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">Free</div>
-              <p className="text-xs text-muted-foreground">
-                Plan
-              </p>
+              <p className="text-xs text-muted-foreground">Plan</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => setShowUpload(!showUpload)}>
+          <Card
+            className="hover:shadow-lg transition-shadow cursor-pointer group"
+            onClick={() => setShowUpload(!showUpload)}
+          >
             <CardHeader>
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center group-hover:bg-blue-600 transition-colors">
@@ -204,7 +224,9 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <CardTitle className="text-lg">Upload Documents</CardTitle>
-                  <CardDescription>Add new files to your knowledge base</CardDescription>
+                  <CardDescription>
+                    Add new files to your knowledge base
+                  </CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -219,7 +241,9 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <CardTitle className="text-lg">Ask Questions</CardTitle>
-                    <CardDescription>Query your documents with natural language</CardDescription>
+                    <CardDescription>
+                      Query your documents with natural language
+                    </CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -235,7 +259,9 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <CardTitle className="text-lg">Knowledge Graph</CardTitle>
-                    <CardDescription>Visualize document relationships</CardDescription>
+                    <CardDescription>
+                      Visualize document relationships
+                    </CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -251,7 +277,8 @@ export default function DashboardPage() {
                 <div>
                   <CardTitle>Upload Documents</CardTitle>
                   <CardDescription>
-                    Upload PDFs, Word documents, and text files to expand your knowledge base
+                    Upload PDFs, Word documents, and text files to expand your
+                    knowledge base
                   </CardDescription>
                 </div>
                 <Button
@@ -289,13 +316,12 @@ export default function DashboardPage() {
                   onClick={fetchDocuments}
                   disabled={loading}
                 >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                  <RefreshCw
+                    className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`}
+                  />
                   Refresh
                 </Button>
-                <Button
-                  size="sm"
-                  onClick={() => setShowUpload(true)}
-                >
+                <Button size="sm" onClick={() => setShowUpload(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Upload
                 </Button>

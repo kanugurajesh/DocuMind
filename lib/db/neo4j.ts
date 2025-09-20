@@ -6,10 +6,7 @@ export function getNeo4jDriver(): Driver {
   if (!driver) {
     driver = neo4j.driver(
       process.env.NEO4J_URI!,
-      neo4j.auth.basic(
-        process.env.NEO4J_USERNAME!,
-        process.env.NEO4J_PASSWORD!
-      )
+      neo4j.auth.basic(process.env.NEO4J_USERNAME!, process.env.NEO4J_PASSWORD!)
     );
   }
 
@@ -59,7 +56,11 @@ export async function initializeNeo4jConstraints() {
 }
 
 // Create document node
-export async function createDocumentNode(docId: string, userId: string, filename: string) {
+export async function createDocumentNode(
+  docId: string,
+  userId: string,
+  filename: string
+) {
   const session = getSession();
 
   try {
@@ -178,7 +179,7 @@ export async function getUserGraphData(userId: string, docIds?: string[]) {
     const nodes = new Map();
     const edges = new Set();
 
-    result.records.forEach(record => {
+    result.records.forEach((record) => {
       const document = record.get('d');
       const chunk = record.get('c');
       const entity = record.get('e');
@@ -257,7 +258,7 @@ export async function getUserGraphData(userId: string, docIds?: string[]) {
 
     return {
       nodes: Array.from(nodes.values()),
-      edges: Array.from(edges).map(edge => JSON.parse(edge as string)),
+      edges: Array.from(edges).map((edge) => JSON.parse(edge as string)),
     };
   } catch (error) {
     console.error('Error getting user graph data:', error);
@@ -330,7 +331,14 @@ export async function createEntityCooccurrenceRelationship(
           r.updatedAt = datetime()
       RETURN r
       `,
-      { sourceEntityId, targetEntityId, userId, confidence, cooccurrenceCount, context }
+      {
+        sourceEntityId,
+        targetEntityId,
+        userId,
+        confidence,
+        cooccurrenceCount,
+        context,
+      }
     );
 
     return result.records[0]?.get('r');
@@ -430,7 +438,7 @@ export async function getUserEntities(userId: string, category?: string) {
 
     const result = await session.run(query, params);
 
-    return result.records.map(record => ({
+    return result.records.map((record) => ({
       id: record.get('id'),
       name: record.get('name'),
       category: record.get('category'),
@@ -491,7 +499,7 @@ export async function getUserDocuments(userId: string) {
       { userId }
     );
 
-    return result.records.map(record => ({
+    return result.records.map((record) => ({
       docId: record.get('docId'),
       filename: record.get('filename'),
     }));
@@ -569,7 +577,11 @@ export async function createTopicDocumentRelationship(
 }
 
 // Get entities that co-occur with a specific entity
-export async function getEntityCooccurrences(entityId: string, userId: string, limit: number = 10) {
+export async function getEntityCooccurrences(
+  entityId: string,
+  userId: string,
+  limit: number = 10
+) {
   const session = getSession();
 
   try {
@@ -583,7 +595,7 @@ export async function getEntityCooccurrences(entityId: string, userId: string, l
       { entityId, userId, limit }
     );
 
-    return result.records.map(record => ({
+    return result.records.map((record) => ({
       entity: record.get('related').properties,
       confidence: record.get('confidence'),
       count: record.get('count'),

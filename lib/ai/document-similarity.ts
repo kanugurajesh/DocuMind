@@ -1,5 +1,8 @@
 import { generateEmbeddings } from './embeddings';
-import { createDocumentSimilarityRelationship, getUserDocuments } from '../db/neo4j';
+import {
+  createDocumentSimilarityRelationship,
+  getUserDocuments,
+} from '../db/neo4j';
 import { searchVectors } from '../db/qdrant';
 
 // Calculate cosine similarity between two vectors
@@ -51,7 +54,10 @@ export async function processDocumentSimilarity(userId: string): Promise<void> {
           documentEmbeddings.set(doc.docId, embedding);
         }
       } catch (error) {
-        console.error(`Error getting embedding for document ${doc.docId}:`, error);
+        console.error(
+          `Error getting embedding for document ${doc.docId}:`,
+          error
+        );
       }
     }
 
@@ -79,22 +85,32 @@ export async function processDocumentSimilarity(userId: string): Promise<void> {
               similarity
             );
 
-            console.log(`Created similarity relationship between ${docId1} and ${docId2}: ${similarity.toFixed(3)}`);
+            console.log(
+              `Created similarity relationship between ${docId1} and ${docId2}: ${similarity.toFixed(3)}`
+            );
           }
         } catch (error) {
-          console.error(`Error calculating similarity between ${docId1} and ${docId2}:`, error);
+          console.error(
+            `Error calculating similarity between ${docId1} and ${docId2}:`,
+            error
+          );
         }
       }
     }
 
-    console.log(`Document similarity analysis completed for ${documents.length} documents`);
+    console.log(
+      `Document similarity analysis completed for ${documents.length} documents`
+    );
   } catch (error) {
     console.error('Error processing document similarity:', error);
   }
 }
 
 // Get document embedding by averaging all chunk embeddings
-async function getDocumentEmbedding(docId: string, userId: string): Promise<number[] | null> {
+async function getDocumentEmbedding(
+  docId: string,
+  userId: string
+): Promise<number[] | null> {
   try {
     // Search for document chunks using a dummy query to get all chunks
     const results = await searchVectors(
@@ -119,7 +135,10 @@ async function getDocumentEmbedding(docId: string, userId: string): Promise<numb
         const embedding = await generateEmbeddings(result.text);
         chunkEmbeddings.push(embedding);
       } catch (error) {
-        console.error(`Error generating embedding for chunk ${result.chunkId}:`, error);
+        console.error(
+          `Error generating embedding for chunk ${result.chunkId}:`,
+          error
+        );
       }
     }
 
@@ -148,7 +167,11 @@ async function getDocumentEmbedding(docId: string, userId: string): Promise<numb
 }
 
 // Calculate document similarity based on shared entities
-export async function calculateEntityBasedSimilarity(docId1: string, docId2: string, userId: string): Promise<number> {
+export async function calculateEntityBasedSimilarity(
+  docId1: string,
+  docId2: string,
+  userId: string
+): Promise<number> {
   try {
     // This is a placeholder for entity-based similarity calculation
     // It would compare the entities extracted from both documents
@@ -163,7 +186,10 @@ export async function calculateEntityBasedSimilarity(docId1: string, docId2: str
 }
 
 // Create thematic document clusters based on similarity
-export async function createDocumentClusters(userId: string, similarityThreshold: number = 0.7): Promise<void> {
+export async function createDocumentClusters(
+  userId: string,
+  similarityThreshold: number = 0.7
+): Promise<void> {
   try {
     console.log('Creating document clusters...');
 

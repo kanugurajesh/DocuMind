@@ -1,7 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import { extractTextFromFile, chunkText, preprocessText } from './processing';
 import { generateEmbeddings } from './embeddings';
-import { processDocumentEntities, processCrossDocumentEntityResolution } from './entities';
+import {
+  processDocumentEntities,
+  processCrossDocumentEntityResolution,
+} from './entities';
 import { insertVectors, initializeQdrantCollection } from '../db/qdrant';
 import { createDocumentNode, createChunkNode } from '../db/neo4j';
 import { getDocumentsCollection } from '../db/mongodb';
@@ -48,7 +51,7 @@ export async function processDocument(
 
     // Step 3: Generate embeddings for all chunks
     console.log(`Step 3: Generating embeddings for ${chunks.length} chunks...`);
-    const chunkTexts = chunks.map(chunk => chunk.text);
+    const chunkTexts = chunks.map((chunk) => chunk.text);
     const embeddings = await generateEmbeddings(chunkTexts);
 
     // Step 4: Prepare vector data for Qdrant
@@ -109,16 +112,31 @@ export async function processDocument(
       text: chunk.text,
     }));
 
-    console.log('🔍 Chunk data sample:', chunkData.slice(0, 2).map(c => ({ id: c.id, textLength: c.text.length })));
+    console.log(
+      '🔍 Chunk data sample:',
+      chunkData
+        .slice(0, 2)
+        .map((c) => ({ id: c.id, textLength: c.text.length }))
+    );
     console.log('👤 User ID for entity processing:', userId);
     console.log('📄 Document ID for entity processing:', docId);
 
-    const extractedEntities = await processDocumentEntities(docId, userId, chunkData);
-    console.log(`🎯 Entity extraction completed: ${extractedEntities.length} entities extracted`);
+    const extractedEntities = await processDocumentEntities(
+      docId,
+      userId,
+      chunkData
+    );
+    console.log(
+      `🎯 Entity extraction completed: ${extractedEntities.length} entities extracted`
+    );
 
     // Step 8: Process cross-document entity resolution
     console.log('Step 8: Processing cross-document entity resolution...');
-    await processCrossDocumentEntityResolution(docId, userId, extractedEntities);
+    await processCrossDocumentEntityResolution(
+      docId,
+      userId,
+      extractedEntities
+    );
 
     // Step 9: Update document status to completed
     console.log('Step 9: Updating document status...');
@@ -134,12 +152,15 @@ export async function processDocument(
       chunksProcessed: chunks.length,
       entitiesExtracted: extractedEntities.length,
     };
-
   } catch (error) {
     console.error(`❌ Error processing document ${docId}:`, error);
 
     // Update document status to failed
-    await updateDocumentStatus(docId, 'failed', error instanceof Error ? error.message : 'Unknown error');
+    await updateDocumentStatus(
+      docId,
+      'failed',
+      error instanceof Error ? error.message : 'Unknown error'
+    );
 
     return {
       success: false,
@@ -174,15 +195,9 @@ async function updateDocumentStatus(
     if (status === 'completed' && updateData.$unset) {
       // Handle completed status with $unset separately
       const { $unset, ...setData } = updateData;
-      await documentsCollection.updateOne(
-        { docId },
-        { $set: setData, $unset }
-      );
+      await documentsCollection.updateOne({ docId }, { $set: setData, $unset });
     } else {
-      await documentsCollection.updateOne(
-        { docId },
-        { $set: updateData }
-      );
+      await documentsCollection.updateOne({ docId }, { $set: updateData });
     }
   } catch (error) {
     console.error('Error updating document status:', error);
@@ -208,7 +223,12 @@ async function updateDocumentMetadata(docId: string, metadata: any) {
 }
 
 // Process document with background job (can be called from API)
-export async function queueDocumentProcessing(docId: string, userId: string, filename: string, fileType: string) {
+export async function queueDocumentProcessing(
+  docId: string,
+  userId: string,
+  filename: string,
+  fileType: string
+) {
   // In a production environment, you would use a proper job queue like Bull or Agenda
   // For now, we'll process immediately in the background
   setImmediate(async () => {
