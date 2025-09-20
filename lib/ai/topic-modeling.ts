@@ -120,7 +120,9 @@ Topic examples: "Technology & Software", "Business & Finance", "Research & Acade
     }
 
     try {
-      const result = JSON.parse(content);
+      // Clean content by removing markdown code blocks if present
+      const cleanContent = content.replace(/^```json\s*/, '').replace(/\s*```$/, '').trim();
+      const result = JSON.parse(cleanContent);
 
       const topics: ExtractedTopic[] = (result.topics || []).map((topic: any) => ({
         id: uuidv4(),

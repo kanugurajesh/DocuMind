@@ -262,6 +262,10 @@ export async function processDocumentEntities(
   chunks: Array<{ id: string; text: string }>
 ): Promise<ExtractedEntity[]> {
   console.log(`🔍 Starting entity extraction for document ${docId} with ${chunks.length} chunks`);
+  console.log(`📋 Chunk details:`, chunks.map(c => ({ id: c.id, textLength: c.text.length, textPreview: c.text.substring(0, 100) + '...' })));
+  console.log(`👤 Processing for user: ${userId}`);
+  console.log(`📄 Document ID: ${docId}`);
+
   const allEntities: ExtractedEntity[] = [];
 
   // Process chunks in smaller batches to avoid rate limits
@@ -272,7 +276,7 @@ export async function processDocumentEntities(
     console.log(`📦 Processing entity batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(chunks.length/batchSize)} (chunks ${i}-${Math.min(i + batchSize - 1, chunks.length - 1)})`);
 
     const batchPromises = batch.map(chunk =>
-      processChunkEntities(`${docId}_${chunk.id}`, chunk.text, docId, userId)
+      processChunkEntities(chunk.id, chunk.text, docId, userId)
     );
 
     try {

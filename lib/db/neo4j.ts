@@ -294,7 +294,7 @@ export async function deleteDocumentGraph(docId: string, userId: string) {
       `
       MATCH (e:Entity {userId: $userId})
       WHERE NOT ()-[:MENTIONS]->(e)
-      DELETE e
+      DETACH DELETE e
       `,
       { userId }
     );

@@ -103,12 +103,18 @@ export async function processDocument(
 
     // Step 7: Extract entities and populate knowledge graph
     console.log('Step 7: Extracting entities and relationships...');
-    const chunkData = chunks.map(chunk => ({
-      id: chunk.id,
+    console.log(`📊 Processing ${chunks.length} chunks for entity extraction`);
+    const chunkData = chunks.map((chunk, index) => ({
+      id: vectorData[index].id, // Use the same UUID as the chunk node
       text: chunk.text,
     }));
 
+    console.log('🔍 Chunk data sample:', chunkData.slice(0, 2).map(c => ({ id: c.id, textLength: c.text.length })));
+    console.log('👤 User ID for entity processing:', userId);
+    console.log('📄 Document ID for entity processing:', docId);
+
     const extractedEntities = await processDocumentEntities(docId, userId, chunkData);
+    console.log(`🎯 Entity extraction completed: ${extractedEntities.length} entities extracted`);
 
     // Step 8: Process cross-document entity resolution
     console.log('Step 8: Processing cross-document entity resolution...');
