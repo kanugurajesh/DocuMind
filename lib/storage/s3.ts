@@ -63,15 +63,23 @@ export async function uploadFileBuffer(
   // Create a unique key with user and document context
   const key = `${userId}/${docId}/${fileName}`;
 
+  // Sanitize metadata values for HTTP headers - remove control characters and non-ASCII
+  const sanitizeHeaderValue = (value: string): string => {
+    return value
+      .replace(/[\x00-\x1F\x7F-\xFF]/g, '') // Remove control chars and non-ASCII
+      .replace(/[\r\n]/g, '') // Remove line breaks
+      .trim();
+  };
+
   const command = new PutObjectCommand({
     Bucket: bucketName,
     Key: key,
     Body: fileBuffer,
     ContentType: contentType,
     Metadata: {
-      userId,
-      docId,
-      originalName: fileName,
+      userId: sanitizeHeaderValue(userId),
+      docId: sanitizeHeaderValue(docId),
+      originalName: sanitizeHeaderValue(fileName),
       uploadedAt: new Date().toISOString(),
     },
   });

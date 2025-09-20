@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       query: body.query.trim(),
       userId,
       maxResults: body.limit || 20,
-      minScore: body.minScore || 0.6,
+      minScore: body.minScore || 0.2,
       docIds: body.docIds,
     });
 
