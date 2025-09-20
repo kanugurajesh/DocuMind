@@ -4,6 +4,7 @@ import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
 import { DocumentUploadProps, Document } from '@/types';
+import { showToast } from '@/lib/toast';
 
 export function DocumentUpload({
   onUploadComplete,
@@ -27,13 +28,17 @@ export function DocumentUpload({
         try {
           // Validate file size
           if (file.size > maxSizeKB * 1024) {
-            onUploadError(`File "${file.name}" exceeds ${maxSizeKB / 1024}MB limit`);
+            const errorMsg = `File "${file.name}" exceeds ${maxSizeKB / 1024}MB limit`;
+            showToast.error(errorMsg);
+            onUploadError(errorMsg);
             continue;
           }
 
           // Validate file type
           if (!acceptedTypes.includes(file.type)) {
-            onUploadError(`File "${file.name}" has unsupported format`);
+            const errorMsg = `File "${file.name}" has unsupported format`;
+            showToast.error(errorMsg);
+            onUploadError(errorMsg);
             continue;
           }
 
@@ -71,13 +76,18 @@ export function DocumentUpload({
               processingStatus: 'pending',
             };
 
+            showToast.success(`"${file.name}" uploaded successfully!`);
             onUploadComplete(document as Document);
           } else {
-            onUploadError(response.data.error || 'Upload failed');
+            const errorMsg = response.data.error || 'Upload failed';
+            showToast.error(`Failed to upload "${file.name}": ${errorMsg}`);
+            onUploadError(errorMsg);
           }
         } catch (error: any) {
           const errorMessage = error.response?.data?.error || error.message || 'Upload failed';
-          onUploadError(`Failed to upload "${file.name}": ${errorMessage}`);
+          const fullErrorMsg = `Failed to upload "${file.name}": ${errorMessage}`;
+          showToast.error(fullErrorMsg);
+          onUploadError(fullErrorMsg);
         }
 
         // Remove from progress tracking

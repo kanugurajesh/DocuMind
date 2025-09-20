@@ -143,10 +143,14 @@ export async function processChunkEntities(
   try {
     // Skip very short text chunks
     if (chunkText.length < 50) {
+      console.log(`⏭️ Skipping short chunk ${chunkId} (${chunkText.length} chars)`);
       return [];
     }
 
+    console.log(`🧠 Extracting entities from chunk ${chunkId} (${chunkText.length} chars)`);
     const result = await extractEntities(chunkText);
+    console.log(`📋 LLM extracted ${result.entities.length} entities from chunk ${chunkId}`);
+
     const processedEntities: ExtractedEntity[] = [];
 
     // Create entity nodes in Neo4j
@@ -154,6 +158,7 @@ export async function processChunkEntities(
       try {
         const entityId = `${docId}_${entity.id}`;
 
+        console.log(`🏗️ Creating entity node: ${entity.name} (${entity.category})`);
         await createEntityNode(
           entityId,
           chunkId,
@@ -168,16 +173,20 @@ export async function processChunkEntities(
           id: entityId,
         });
       } catch (error) {
-        console.error(`Error creating entity node for ${entity.name}:`, error);
+        console.error(`❌ Error creating entity node for ${entity.name}:`, error);
       }
     }
 
     // Process co-occurrence relationships between entities in the same chunk
-    await processEntityCooccurrences(processedEntities, userId, chunkText);
+    if (processedEntities.length > 1) {
+      console.log(`🔗 Creating co-occurrence relationships for ${processedEntities.length} entities in chunk ${chunkId}`);
+      await processEntityCooccurrences(processedEntities, userId, chunkText);
+    }
 
+    console.log(`✅ Chunk ${chunkId} processed: ${processedEntities.length} entities created`);
     return processedEntities;
   } catch (error) {
-    console.error('Error processing chunk entities:', error);
+    console.error(`❌ Error processing chunk entities for ${chunkId}:`, error);
     return [];
   }
 }

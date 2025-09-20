@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, KeyboardEvent } from 'react';
 import { ChatInputProps } from '@/types';
+import { showToast } from '@/lib/toast';
 
 export function ChatInput({
   onSend,
@@ -20,6 +21,8 @@ export function ChatInput({
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
       }
+    } else if (!trimmedMessage) {
+      showToast.error('Please enter a message');
     }
   };
 

@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Document } from '@/types';
 import axios from 'axios';
 import Link from 'next/link';
+import { showToast } from '@/lib/toast';
 import {
   Upload,
   MessageSquare,
@@ -47,7 +48,9 @@ export default function DashboardPage() {
       }
     } catch (error: any) {
       console.error('Error fetching documents:', error);
-      setError('Failed to load documents');
+      const errorMsg = 'Failed to load documents';
+      setError(errorMsg);
+      showToast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -63,16 +66,27 @@ export default function DashboardPage() {
   };
 
   const handleDocumentDelete = async (docId: string) => {
+    const deletingDocument = documents.find(doc => doc.docId === docId);
+    const documentName = deletingDocument?.filename || 'document';
+
     try {
       const response = await axios.delete(`/api/documents?docId=${docId}`);
       if (response.data.success) {
         setDocuments(prev => prev.filter(doc => doc.docId !== docId));
+        showToast.dismiss(); // Dismiss any loading toast
+        showToast.success(`"${documentName}" deleted successfully`);
       } else {
-        setError(response.data.error || 'Failed to delete document');
+        const errorMsg = response.data.error || 'Failed to delete document';
+        setError(errorMsg);
+        showToast.dismiss();
+        showToast.error(errorMsg);
       }
     } catch (error: any) {
       console.error('Error deleting document:', error);
-      setError(error.response?.data?.error || 'Failed to delete document');
+      const errorMsg = error.response?.data?.error || 'Failed to delete document';
+      setError(errorMsg);
+      showToast.dismiss();
+      showToast.error(errorMsg);
     }
   };
 

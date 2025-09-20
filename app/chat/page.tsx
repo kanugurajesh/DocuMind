@@ -10,6 +10,7 @@ import { ChatMessage } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import Link from 'next/link';
+import { showToast } from '@/lib/toast';
 import { Trash2, ArrowLeft } from 'lucide-react';
 
 export default function ChatPage() {
@@ -96,6 +97,7 @@ export default function ChatPage() {
 
       setMessages(prev => [...prev, errorAssistantMessage]);
       setError(errorMessage);
+      showToast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -117,6 +119,7 @@ export default function ChatPage() {
           sources: [],
         },
       ]);
+      showToast.success('Chat cleared successfully');
     }
     setError(null);
   };

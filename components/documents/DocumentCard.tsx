@@ -5,6 +5,7 @@ import { DocumentCardProps } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { showToast } from '@/lib/toast';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -98,6 +99,7 @@ export function DocumentCard({ document, onDelete, onClick }: DocumentCardProps)
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (showDeleteConfirm) {
+      showToast.loading(`Deleting "${document.filename}"...`);
       onDelete(document.docId);
       setShowDeleteConfirm(false);
     } else {

@@ -5,6 +5,7 @@ import { useUser } from '@clerk/nextjs';
 import { GraphVisualization } from '@/components/graph/GraphVisualization';
 import { GraphData } from '@/types';
 import axios from 'axios';
+import { showToast } from '@/lib/toast';
 
 export default function GraphPage() {
   const { user, isLoaded } = useUser();
@@ -46,7 +47,9 @@ export default function GraphPage() {
       }
     } catch (error: any) {
       console.error('Error fetching graph data:', error);
-      setError(error.response?.data?.error || error.message || 'Failed to load graph data');
+      const errorMsg = error.response?.data?.error || error.message || 'Failed to load graph data';
+      setError(errorMsg);
+      showToast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -55,9 +58,12 @@ export default function GraphPage() {
   const triggerEntityClustering = async () => {
     try {
       setLoading(true);
+      showToast.loading('Clustering entities...');
       const response = await axios.post('/api/graph/cluster');
 
       if (response.data.success) {
+        showToast.dismiss();
+        showToast.success('Entity clustering completed!');
         // Refresh graph data after clustering
         await fetchGraphData();
       } else {
@@ -65,7 +71,10 @@ export default function GraphPage() {
       }
     } catch (error: any) {
       console.error('Error clustering entities:', error);
-      setError(error.response?.data?.error || error.message || 'Failed to cluster entities');
+      const errorMsg = error.response?.data?.error || error.message || 'Failed to cluster entities';
+      setError(errorMsg);
+      showToast.dismiss();
+      showToast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -74,9 +83,12 @@ export default function GraphPage() {
   const triggerDocumentSimilarity = async () => {
     try {
       setLoading(true);
+      showToast.loading('Analyzing document similarity...');
       const response = await axios.post('/api/graph/similarity');
 
       if (response.data.success) {
+        showToast.dismiss();
+        showToast.success('Document similarity analysis completed!');
         // Refresh graph data after similarity analysis
         await fetchGraphData();
       } else {
@@ -84,7 +96,10 @@ export default function GraphPage() {
       }
     } catch (error: any) {
       console.error('Error analyzing document similarity:', error);
-      setError(error.response?.data?.error || error.message || 'Failed to analyze document similarity');
+      const errorMsg = error.response?.data?.error || error.message || 'Failed to analyze document similarity';
+      setError(errorMsg);
+      showToast.dismiss();
+      showToast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -93,9 +108,12 @@ export default function GraphPage() {
   const triggerTopicModeling = async () => {
     try {
       setLoading(true);
+      showToast.loading('Extracting topics...');
       const response = await axios.post('/api/graph/topics');
 
       if (response.data.success) {
+        showToast.dismiss();
+        showToast.success('Topic extraction completed!');
         // Refresh graph data after topic modeling
         await fetchGraphData();
       } else {
@@ -103,7 +121,10 @@ export default function GraphPage() {
       }
     } catch (error: any) {
       console.error('Error extracting topics:', error);
-      setError(error.response?.data?.error || error.message || 'Failed to extract topics');
+      const errorMsg = error.response?.data?.error || error.message || 'Failed to extract topics';
+      setError(errorMsg);
+      showToast.dismiss();
+      showToast.error(errorMsg);
     } finally {
       setLoading(false);
     }
