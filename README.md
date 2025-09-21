@@ -20,11 +20,13 @@ Documind is a cutting-edge document intelligence platform that transforms your d
 ### ✨ Key Features
 
 - **🤖 AI-Powered Q&A**: Ask questions in natural language and get intelligent answers with source citations
-- **📊 Knowledge Graph**: Visualize relationships between entities and concepts across all documents
+- **📊 Interactive Knowledge Graph**: Visualize relationships between entities with advanced filtering and layout options
 - **🔍 Semantic Search**: Find relevant information using vector-based similarity search
 - **📄 Multi-Format Support**: Process PDFs, Word documents, and text files seamlessly
 - **🔐 Secure & Private**: Complete user data isolation with enterprise-grade security
 - **⚡ Real-time Processing**: Background document processing with live status updates
+- **🎛️ Smart Filtering**: Customizable graph views with entity type filters and confidence thresholds
+- **🔧 Resilient Architecture**: Graceful error handling with fallback options for all services
 
 ## 🏗️ Architecture
 
@@ -148,8 +150,11 @@ mongod --dbpath /path/to/data/db
 
 #### Qdrant
 ```bash
-# Using Docker
-docker run -p 6333:6333 qdrant/qdrant
+# Using Docker (recommended for development)
+docker run -p 6333:6333 -p 6334:6334 qdrant/qdrant
+
+# Or use our provided Docker Compose setup
+docker-compose -f docker-compose.qdrant.yml up -d
 
 # Or use Qdrant Cloud
 ```
@@ -213,6 +218,7 @@ documind/
 │   │   └── qdrant.ts             # Qdrant client
 │   └── storage/                  # File storage
 ├── types/                        # TypeScript definitions
+├── docker-compose.qdrant.yml     # Local Qdrant Docker setup
 ├── middleware.ts                 # Clerk middleware
 └── next.config.ts               # Next.js configuration
 ```
@@ -232,10 +238,12 @@ documind/
 - **Storage**: Store vectors in Qdrant with user scoping
 
 ### 3. Knowledge Graph Construction
-- **Entity Extraction**: Identify people, organizations, locations, dates
-- **Relationship Mapping**: Create connections between entities
-- **Graph Storage**: Build knowledge graph in Neo4j
-- **User Isolation**: Ensure complete data privacy
+- **Entity Extraction**: Identify people, organizations, locations, dates using AI
+- **Relationship Mapping**: Create co-occurrence and semantic similarity connections
+- **Quality Filtering**: Filter relationships by confidence thresholds (>0.3 for co-occurrence, >0.5 for similarity)
+- **Cross-Document Resolution**: Link same entities across different documents
+- **Graph Storage**: Build optimized knowledge graph in Neo4j with proper indexing
+- **User Isolation**: Ensure complete data privacy with user-scoped queries
 
 ### 4. Status Updates
 - **Real-time**: Live processing status updates
@@ -254,10 +262,13 @@ documind/
 
 ### Knowledge Graph Exploration
 
-- **Interactive Visualization**: Cytoscape.js powered graphs
-- **Entity Relationships**: Explore connections between concepts
-- **Document Mapping**: See how documents relate to each other
-- **Filter Options**: Customize views by entity types and relationships
+- **Interactive Visualization**: Cytoscape.js powered graphs with optimized layouts
+- **Smart Edge Rendering**: Clean visualization with hover-to-reveal labels for reduced clutter
+- **Advanced Filtering**: Filter by entity types, confidence thresholds, and relationship strengths
+- **Customizable Display**: Toggle edge labels, adjust node limits, and control visual density
+- **Entity Relationships**: Explore connections between people, organizations, locations, and concepts
+- **Document Mapping**: Visualize how documents relate through shared entities and topics
+- **Graph Statistics**: Real-time metrics showing nodes, edges, and entity distributions
 
 ## 🔐 Security & Privacy
 
@@ -328,6 +339,57 @@ npm run format
 - [ ] Authentication flows verified
 - [ ] Error monitoring enabled
 - [ ] Performance optimization applied
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+#### Qdrant Connection Errors
+
+If you encounter `ENOTFOUND` errors with Qdrant:
+
+1. **Check Instance Status**: Verify your Qdrant Cloud instance is running
+2. **Use Local Fallback**: Switch to local Docker setup:
+   ```bash
+   # Start local Qdrant
+   docker-compose -f docker-compose.qdrant.yml up -d
+
+   # Update .env.local
+   QDRANT_URL=http://localhost:6333
+   # Remove QDRANT_API_KEY for local instance
+   ```
+3. **Network Issues**: Check firewall/VPN settings
+4. **Graceful Degradation**: The app continues working with limited functionality if Qdrant is unavailable
+
+#### Graph Visualization Issues
+
+- **No Connections Visible**: Check that documents have been processed and entities extracted
+- **Cluttered Graph**: Use the "Show Connection Labels" toggle to reduce visual noise
+- **Performance Issues**: Reduce max nodes limit in the filters panel
+- **Layout Problems**: Use graph controls (fit to view, center, reset zoom) to optimize display
+
+#### Database Connection Issues
+
+- **MongoDB**: Ensure connection string is correct and database is accessible
+- **Neo4j**: Verify bolt:// URL and credentials are valid
+- **Azure Storage**: Check connection string and container permissions
+
+### Development Setup
+
+#### Quick Local Development
+```bash
+# Start all services with Docker
+docker-compose -f docker-compose.qdrant.yml up -d
+
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+```
+
+#### Environment Validation
+The application includes built-in connection testing and will provide clear error messages for misconfigured services.
 
 ## 📊 Performance Optimizations
 
