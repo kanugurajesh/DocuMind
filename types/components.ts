@@ -5,6 +5,7 @@ export interface DocumentListProps {
   documents: Document[];
   onDocumentDelete: (docId: string) => void;
   onDocumentSelect?: (document: Document) => void;
+  onUploadClick?: () => void;
   loading?: boolean;
 }
 

@@ -441,6 +441,7 @@ export default function DashboardPage() {
                   <DocumentList
                     documents={currentPageItems as Document[]}
                     onDocumentDelete={handleDocumentDelete}
+                    onUploadClick={() => setShowUpload(true)}
                     loading={false}
                   />
                 )}

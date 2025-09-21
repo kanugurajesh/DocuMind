@@ -11,6 +11,7 @@ export function DocumentList({
   documents,
   onDocumentDelete,
   onDocumentSelect,
+  onUploadClick,
   loading = false,
 }: DocumentListProps) {
   if (loading) {
@@ -51,7 +52,10 @@ export function DocumentList({
           Upload your first document to get started with intelligent document
           analysis and AI-powered insights.
         </p>
-        <Button className="gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
+        <Button
+          onClick={onUploadClick}
+          className="gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+        >
           <Upload className="h-4 w-4" />
           Upload Documents
         </Button>
