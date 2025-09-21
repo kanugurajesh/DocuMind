@@ -18,7 +18,7 @@ export function ChatInterface({
   // Auto-scroll to bottom when new messages are added
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, []);
+  }, [messages, loading]);
 
   return (
     <Card className="flex flex-col h-full card-enhanced border border-white/50 shadow-xl bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 backdrop-blur-sm">
