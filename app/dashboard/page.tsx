@@ -404,8 +404,8 @@ export default function DashboardPage() {
                     ) : (
                       currentPageItems.map((result, index) => (
                         <SearchResultCard
-                          key={`${result.docId}-${result.chunkIndex}-${index}`}
-                          result={result}
+                          key={`${result.docId}-${(result as SearchResult).chunkIndex || index}`}
+                          result={result as SearchResult}
                           searchQuery={searchQuery}
                         />
                       ))

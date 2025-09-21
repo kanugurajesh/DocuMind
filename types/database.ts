@@ -109,8 +109,12 @@ export interface GraphData {
 // Search Results
 export interface SearchResult {
   chunkId: string;
+  chunkIndex: number;
   docId: string;
   text: string;
+  content?: string;
+  documentTitle?: string;
+  createdAt?: string;
   score: number;
   document: {
     filename: string;

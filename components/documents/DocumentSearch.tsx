@@ -28,12 +28,18 @@ export function DocumentSearch({ documents, onSearchResults }: DocumentSearchPro
           return 0;
         })
         .map(doc => ({
+          chunkId: `${doc.docId}-0`,
+          chunkIndex: 0,
           docId: doc.docId,
-          content: doc.metadata?.content?.substring(0, 200) || "No content preview available",
-          score: 0.8,
+          text: doc.metadata?.title || "No content preview available",
+          content: doc.metadata?.title?.substring(0, 200) || "No content preview available",
           documentTitle: doc.filename,
-          createdAt: doc.createdAt,
-          chunkIndex: 0
+          createdAt: doc.uploadedAt.toISOString(),
+          score: 0.8,
+          document: {
+            filename: doc.filename,
+            uploadedAt: doc.uploadedAt
+          }
         }));
       onSearchResults?.(results, false, query);
     } else {
