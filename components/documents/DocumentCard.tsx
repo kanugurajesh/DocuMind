@@ -49,9 +49,10 @@ export function DocumentCard({
   onDelete,
   onClick,
 }: DocumentCardProps) {
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const StatusIcon = getStatusIcon(document.processingStatus);
   const { icon: FileIconComponent, className: fileIconClass } = getFileIcon(
@@ -68,20 +69,37 @@ export function DocumentCard({
     return <StatusIcon {...iconProps} />;
   };
 
-  const handleDelete = (e: React.MouseEvent) => {
+  const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (showDeleteConfirm) {
-      showToast.loading(`Deleting "${document.filename}"...`);
-      onDelete(document.docId);
-      setShowDeleteConfirm(false);
-    } else {
-      setShowDeleteConfirm(true);
+    setShowDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    let loadingToastId: string | undefined;
+
+    try {
+      setIsDeleting(true);
+      loadingToastId = showToast.loading(`Deleting "${document.filename}"...`);
+      await onDelete(document.docId);
+
+      // Dismiss loading toast
+      showToast.dismiss(loadingToastId);
+      setShowDeleteDialog(false);
+      showToast.success(`Deleted "${document.filename}"`);
+    } catch (error) {
+      console.error('Delete error:', error);
+      // Dismiss loading toast if it exists
+      if (loadingToastId) {
+        showToast.dismiss(loadingToastId);
+      }
+      showToast.error(`Failed to delete "${document.filename}"`);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
-  const handleCancelDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setShowDeleteConfirm(false);
+  const handleCancelDelete = () => {
+    setShowDeleteDialog(false);
   };
 
   const handleViewDetails = (e: React.MouseEvent) => {
@@ -93,11 +111,16 @@ export function DocumentCard({
     e.stopPropagation();
     if (isDownloading) return;
 
+    let loadingToastId: string | undefined;
+
     try {
       setIsDownloading(true);
-      showToast.loading(`Preparing download for "${document.filename}"...`);
+      loadingToastId = showToast.loading(`Preparing download for "${document.filename}"...`);
 
       const response = await axios.get(`/api/documents/${document.docId}/download`);
+
+      // Dismiss the loading toast
+      showToast.dismiss(loadingToastId);
 
       if (response.data.success) {
         // Create a temporary anchor element to trigger download
@@ -115,6 +138,10 @@ export function DocumentCard({
       }
     } catch (error: any) {
       console.error('Download error:', error);
+      // Dismiss the loading toast if it exists
+      if (loadingToastId) {
+        showToast.dismiss(loadingToastId);
+      }
       showToast.error(`Failed to download "${document.filename}"`);
     } finally {
       setIsDownloading(false);
@@ -231,29 +258,13 @@ export function DocumentCard({
                 <span className="font-medium">{isDownloading ? 'Downloading...' : 'Download'}</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              {showDeleteConfirm ? (
-                <>
-                  <DropdownMenuItem
-                    onClick={handleDelete}
-                    className="text-destructive focus:text-destructive"
-                  >
-                    <CheckCircle className="mr-2 h-4 w-4" />
-                    Confirm Delete
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleCancelDelete}>
-                    <X className="mr-2 h-4 w-4" />
-                    Cancel
-                  </DropdownMenuItem>
-                </>
-              ) : (
-                <DropdownMenuItem
-                  onClick={handleDelete}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </DropdownMenuItem>
-              )}
+              <DropdownMenuItem
+                onClick={handleDeleteClick}
+                className="text-destructive focus:text-destructive hover:bg-red-50 focus:bg-red-50"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                <span className="font-medium">Delete</span>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -381,6 +392,58 @@ export function DocumentCard({
               >
                 <ExternalLink className="h-4 w-4" />
                 Open Document
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="max-w-md card-enhanced border-0 shadow-xl">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="flex items-center gap-3 text-xl font-semibold text-enhanced">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-red-50 to-pink-100">
+                <Trash2 className="w-6 h-6 text-red-600" />
+              </div>
+              Delete Document
+            </DialogTitle>
+            <DialogDescription className="text-muted-enhanced">
+              This action cannot be undone. The document will be permanently removed.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-red-700 mb-1">Are you sure you want to delete?</p>
+                  <p className="text-sm text-red-600 leading-relaxed">
+                    <span className="font-medium">"{document.filename}"</span> will be permanently deleted from your document library.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={handleCancelDelete}
+                disabled={isDeleting}
+                className="gap-2 hover-lift focus-ring-enhanced px-6 py-2.5 font-medium border-2 border-gray-300 text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <X className="h-4 w-4" />
+                Cancel
+              </Button>
+              <Button
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+                className="gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-2.5 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Trash2 className="h-4 w-4" />
+                {isDeleting ? 'Deleting...' : 'Delete Document'}
               </Button>
             </div>
           </div>
