@@ -39,9 +39,9 @@ export async function testQdrantConnection(): Promise<boolean> {
     console.log("🏥 Testing Qdrant connection...");
     const client = getQdrantClient();
 
-    // Try to get cluster info (lightweight operation)
-    const clusterInfo = await client.cluster_info();
-    console.log("✅ Qdrant connection successful:", clusterInfo.status);
+    // Try to get collections (lightweight operation)
+    const collections = await client.getCollections();
+    console.log("✅ Qdrant connection successful:", collections.collections?.length || 0, "collections");
     return true;
   } catch (error) {
     console.error("❌ Qdrant connection failed:", error);

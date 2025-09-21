@@ -106,7 +106,6 @@ export default function ChatPage() {
 
   const _handleSourceClick = (docId: string) => {
     // TODO: Navigate to document view or open document details
-    console.log("Clicked source document:", docId);
   };
 
   const clearChat = () => {
