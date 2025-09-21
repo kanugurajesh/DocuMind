@@ -155,7 +155,6 @@ export default function GraphPage() {
   };
 
   const handleEdgeClick = (edgeId: string) => {
-    console.log("Edge clicked:", edgeId);
   };
 
   const toggleEntityTypeFilter = (entityType: string) => {

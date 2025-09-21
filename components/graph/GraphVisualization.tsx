@@ -47,16 +47,6 @@ export function GraphVisualization({
 
     setLoading(true);
 
-    // Debug logging
-    console.log("🔍 GraphVisualization: Raw graph data:", graphData);
-    console.log("📊 Nodes:", graphData.nodes.map(n => ({ id: n.id, type: n.type })));
-    console.log("🔗 Edges:", graphData.edges.map(e => ({
-      type: e.type,
-      start: e.start,
-      end: e.end,
-      startNodeId: e.startNodeId,
-      endNodeId: e.endNodeId
-    })));
 
     // Transform data for Cytoscape
     const elements = [
@@ -79,23 +69,14 @@ export function GraphVisualization({
       })),
     ];
 
-    console.log("🎯 Transformed elements for Cytoscape:", elements);
 
     // Validate edges - check for missing source/target nodes
-    const nodeIds = new Set(elements.filter(el => !el.data.source).map(el => el.data.id));
-    const invalidEdges = elements.filter(el => el.data.source &&
-      (!nodeIds.has(el.data.source) || !nodeIds.has(el.data.target))
+    const nodeIds = new Set(graphData.nodes.map(node => node.id));
+    const invalidEdges = graphData.edges.filter(edge =>
+      (!nodeIds.has(edge.startNodeId) || !nodeIds.has(edge.endNodeId))
     );
 
-    if (invalidEdges.length > 0) {
-      console.warn("⚠️ Found edges with missing source/target nodes:", invalidEdges);
-      console.warn("📋 Available node IDs:", Array.from(nodeIds));
-    }
 
-    console.log(`✅ Graph elements summary:
-      - Nodes: ${elements.filter(el => !el.data.source).length}
-      - Edges: ${elements.filter(el => el.data.source).length}
-      - Invalid edges: ${invalidEdges.length}`);
 
     // Initialize Cytoscape
     const cy = cytoscape({
@@ -201,7 +182,7 @@ export function GraphVisualization({
             "line-color": "#9CA3AF", // Subtle gray color
             "target-arrow-color": "#9CA3AF",
             "target-arrow-shape": "triangle",
-            "target-arrow-size": 6,
+            "arrow-scale": 1.2,
             "curve-style": "bezier",
             label: showEdgeLabels ? "data(label)" : "", // Conditional labels
             "font-size": "9px",
@@ -360,15 +341,6 @@ export function GraphVisualization({
     setTimeout(() => {
       const renderedNodes = cy.nodes().length;
       const renderedEdges = cy.edges().length;
-      console.log(`🎨 Cytoscape rendered: ${renderedNodes} nodes, ${renderedEdges} edges`);
-
-      if (renderedEdges === 0 && graphData.edges.length > 0) {
-        console.error("❌ NO EDGES RENDERED! Check node ID mismatches");
-        console.error("🔍 Raw edge data:", graphData.edges.slice(0, 3));
-        console.error("🔍 Node IDs:", cy.nodes().map(n => n.id()));
-      } else {
-        console.log("✅ Graph rendering successful!");
-      }
     }, 100);
 
     setLoading(false);
