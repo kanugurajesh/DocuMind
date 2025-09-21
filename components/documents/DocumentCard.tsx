@@ -82,10 +82,9 @@ export function DocumentCard({
       loadingToastId = showToast.loading(`Deleting "${document.filename}"...`);
       await onDelete(document.docId);
 
-      // Dismiss loading toast
+      // Dismiss loading toast - success notification is handled by parent component
       showToast.dismiss(loadingToastId);
       setShowDeleteDialog(false);
-      showToast.success(`Deleted "${document.filename}"`);
     } catch (error) {
       console.error('Delete error:', error);
       // Dismiss loading toast if it exists
