@@ -46,9 +46,11 @@ export default function DashboardPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
 
-  const fetchDocuments = useCallback(async () => {
+  const fetchDocuments = useCallback(async (showLoadingState = true) => {
     try {
-      setLoading(true);
+      if (showLoadingState) {
+        setLoading(true);
+      }
       const response = await axios.get("/api/documents");
       if (response.data.success) {
         setDocuments(response.data.documents || []);
@@ -57,9 +59,13 @@ export default function DashboardPage() {
       console.error("Error fetching documents:", error);
       const errorMsg = "Failed to load documents";
       setError(errorMsg);
-      showToast.error(errorMsg);
+      if (showLoadingState) {
+        showToast.error(errorMsg);
+      }
     } finally {
-      setLoading(false);
+      if (showLoadingState) {
+        setLoading(false);
+      }
     }
   }, []);
 
@@ -69,6 +75,23 @@ export default function DashboardPage() {
       fetchDocuments();
     }
   }, [isLoaded, user, fetchDocuments]);
+
+  // Poll for document status updates when there are pending/processing documents
+  useEffect(() => {
+    const hasPendingOrProcessing = documents.some(
+      (doc) => doc.processingStatus === "pending" || doc.processingStatus === "processing"
+    );
+
+    if (!hasPendingOrProcessing) {
+      return;
+    }
+
+    const pollInterval = setInterval(() => {
+      fetchDocuments(false); // Don't show loading state during polling
+    }, 3000); // Poll every 3 seconds
+
+    return () => clearInterval(pollInterval);
+  }, [documents, fetchDocuments]);
 
   const handleUploadComplete = (document: Document) => {
     setDocuments((prev) => [document, ...prev]);
@@ -349,7 +372,7 @@ export default function DashboardPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={fetchDocuments}
+                  onClick={() => fetchDocuments(true)}
                   disabled={loading}
                 >
                   <RefreshCw
