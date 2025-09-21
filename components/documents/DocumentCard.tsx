@@ -93,11 +93,16 @@ export function DocumentCard({
     e.stopPropagation();
     if (isDownloading) return;
 
+    let loadingToastId: string | undefined;
+
     try {
       setIsDownloading(true);
-      showToast.loading(`Preparing download for "${document.filename}"...`);
+      loadingToastId = showToast.loading(`Preparing download for "${document.filename}"...`);
 
       const response = await axios.get(`/api/documents/${document.docId}/download`);
+
+      // Dismiss the loading toast
+      showToast.dismiss(loadingToastId);
 
       if (response.data.success) {
         // Create a temporary anchor element to trigger download
@@ -115,6 +120,10 @@ export function DocumentCard({
       }
     } catch (error: any) {
       console.error('Download error:', error);
+      // Dismiss the loading toast if it exists
+      if (loadingToastId) {
+        showToast.dismiss(loadingToastId);
+      }
       showToast.error(`Failed to download "${document.filename}"`);
     } finally {
       setIsDownloading(false);
