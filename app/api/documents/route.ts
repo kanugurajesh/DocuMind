@@ -88,7 +88,15 @@ export async function DELETE(request: NextRequest) {
     }
 
     try {
-      // Delete from all storage systems in parallel
+      // Delete vectors from Qdrant first (may fail due to connection issues)
+      const qdrantResult = await deleteVectorsByDocId(docId, userId);
+      const qdrantSkipped = qdrantResult?.status === 'skipped';
+
+      if (qdrantSkipped) {
+        console.warn("⚠️ Qdrant vector deletion skipped due to connection issues");
+      }
+
+      // Delete from other storage systems in parallel
       await Promise.all([
         // Delete from MongoDB
         documentsCollection.deleteOne({ docId, userId }),
@@ -96,16 +104,18 @@ export async function DELETE(request: NextRequest) {
         // Delete from AWS S3
         deleteFile(`${userId}/${docId}/${document.filename}`),
 
-        // Delete vectors from Qdrant
-        deleteVectorsByDocId(docId, userId),
-
         // Delete from Neo4j graph
         deleteDocumentGraph(docId, userId),
       ]);
 
+      const message = qdrantSkipped
+        ? "Document deleted successfully (vector deletion skipped due to Qdrant connection issues)"
+        : "Document deleted successfully";
+
       return NextResponse.json({
         success: true,
-        message: "Document deleted successfully",
+        message,
+        warnings: qdrantSkipped ? ["Qdrant vector deletion was skipped"] : [],
       });
     } catch (deleteError) {
       console.error("Error during document deletion:", deleteError);

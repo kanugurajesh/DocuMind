@@ -4,18 +4,58 @@ let client: QdrantClient | null = null;
 
 export function getQdrantClient(): QdrantClient {
   if (!client) {
+    const qdrantUrl = process.env.QDRANT_URL;
+
+    if (!qdrantUrl) {
+      throw new Error("QDRANT_URL environment variable is not set");
+    }
+
+    console.log(`🔗 Connecting to Qdrant at: ${qdrantUrl}`);
+
     const config: any = {
-      url: process.env.QDRANT_URL!,
+      url: qdrantUrl,
     };
 
     if (process.env.QDRANT_API_KEY) {
       config.apiKey = process.env.QDRANT_API_KEY;
+      console.log("🔑 Using Qdrant API key for authentication");
     }
 
-    client = new QdrantClient(config);
+    try {
+      client = new QdrantClient(config);
+      console.log("✅ Qdrant client initialized successfully");
+    } catch (error) {
+      console.error("❌ Failed to initialize Qdrant client:", error);
+      throw error;
+    }
   }
 
   return client;
+}
+
+// Health check function to test Qdrant connectivity
+export async function testQdrantConnection(): Promise<boolean> {
+  try {
+    console.log("🏥 Testing Qdrant connection...");
+    const client = getQdrantClient();
+
+    // Try to get cluster info (lightweight operation)
+    const clusterInfo = await client.cluster_info();
+    console.log("✅ Qdrant connection successful:", clusterInfo.status);
+    return true;
+  } catch (error) {
+    console.error("❌ Qdrant connection failed:", error);
+
+    if (error instanceof Error) {
+      if (error.message.includes('ENOTFOUND')) {
+        console.error("🌐 DNS resolution failed - check if Qdrant instance exists");
+      } else if (error.message.includes('fetch failed')) {
+        console.error("🔌 Network connection failed - check internet connectivity");
+      }
+    }
+
+    return false;
+  }
 }
 
 // Collection name for document chunks
@@ -162,9 +202,11 @@ export async function insertVectors(vectors: any[]) {
 
 // Delete vectors by document ID
 export async function deleteVectorsByDocId(docId: string, userId: string) {
-  const client = getQdrantClient();
-
   try {
+    console.log(`🗑️ Attempting to delete vectors for document: ${docId}, user: ${userId}`);
+
+    const client = getQdrantClient();
+
     const response = await client.delete(COLLECTION_NAME, {
       filter: {
         must: [
@@ -184,9 +226,21 @@ export async function deleteVectorsByDocId(docId: string, userId: string) {
       },
     });
 
+    console.log("✅ Successfully deleted vectors for document:", docId);
     return response;
   } catch (error) {
-    console.error("Error deleting vectors:", error);
+    console.error(`❌ Error deleting vectors for document ${docId}:`, error);
+
+    // Check if it's a connection error
+    if (error instanceof Error) {
+      if (error.message.includes('ENOTFOUND') || error.message.includes('fetch failed')) {
+        console.error("🌐 Qdrant connection failed - instance may be unreachable");
+        // Gracefully handle the error instead of throwing
+        console.warn("⚠️ Skipping vector deletion due to connection issues");
+        return { status: 'skipped', reason: 'connection_failed' };
+      }
+    }
+
     throw error;
   }
 }
