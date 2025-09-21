@@ -432,7 +432,7 @@ export function DocumentCard({
                 variant="outline"
                 onClick={handleCancelDelete}
                 disabled={isDeleting}
-                className="gap-2 hover-lift focus-ring-enhanced px-6 py-2.5 font-medium"
+                className="gap-2 hover-lift focus-ring-enhanced px-6 py-2.5 font-medium border-2 border-gray-300 text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <X className="h-4 w-4" />
                 Cancel
