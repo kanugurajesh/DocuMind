@@ -120,6 +120,7 @@ async function performSemanticSearch({
 
       return {
         chunkId: result.id?.toString() || `result_${index}`,
+        chunkIndex: (payload.chunkIndex as number) || index,
         docId: (payload.docId as string) || "",
         text: (payload.text as string) || "",
         score: result.score || 0,
