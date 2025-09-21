@@ -168,13 +168,13 @@ export async function getUserGraphData(userId: string, docIds?: string[]) {
 
     query += `
       RETURN d, c, e, t,
-             [(d)-[:CONTAINS]->(c) | {type: 'CONTAINS', start: d.docId, end: c.chunkId}] as containsRels,
-             [(c)-[:MENTIONS]->(e) | {type: 'MENTIONS', start: c.chunkId, end: e.entityId}] as mentionsRels,
-             [(e)-[r:COOCCURS_WITH]-(e2:Entity {userId: $userId}) | {type: 'COOCCURS_WITH', start: e.entityId, end: e2.entityId, confidence: r.confidence, count: r.count}] as cooccurrenceRels,
-             [(e)-[r:SIMILAR_TO]-(e2:Entity {userId: $userId}) | {type: 'SIMILAR_TO', start: e.entityId, end: e2.entityId, similarity: r.similarity}] as similarityRels,
-             [(e)-[r:SAME_AS]->(e2:Entity {userId: $userId}) | {type: 'SAME_AS', start: e.entityId, end: e2.entityId, confidence: r.confidence}] as sameAsRels,
-             [(d)-[r:SIMILAR_TO]-(d2:Document {userId: $userId}) | {type: 'DOCUMENT_SIMILAR_TO', start: d.docId, end: d2.docId, similarity: r.similarity}] as docSimilarityRels,
-             [(t)-[r:CATEGORIZES]->(d) | {type: 'CATEGORIZES', start: t.topicId, end: d.docId, relevance: r.relevance}] as topicRels
+             [(d)-[:CONTAINS]->(c) | {type: 'CONTAINS', startNodeId: d.docId, endNodeId: c.chunkId}] as containsRels,
+             [(c)-[:MENTIONS]->(e) | {type: 'MENTIONS', startNodeId: c.chunkId, endNodeId: e.entityId}] as mentionsRels,
+             [(e)-[r:COOCCURS_WITH]-(e2:Entity {userId: $userId}) WHERE r.confidence > 0.3 | {type: 'COOCCURS_WITH', startNodeId: e.entityId, endNodeId: e2.entityId, confidence: r.confidence, count: r.count}] as cooccurrenceRels,
+             [(e)-[r:SIMILAR_TO]-(e2:Entity {userId: $userId}) WHERE r.similarity > 0.5 | {type: 'SIMILAR_TO', startNodeId: e.entityId, endNodeId: e2.entityId, similarity: r.similarity}] as similarityRels,
+             [(e)-[r:SAME_AS]->(e2:Entity {userId: $userId}) | {type: 'SAME_AS', startNodeId: e.entityId, endNodeId: e2.entityId, confidence: r.confidence}] as sameAsRels,
+             [(d)-[r:SIMILAR_TO]-(d2:Document {userId: $userId}) | {type: 'DOCUMENT_SIMILAR_TO', startNodeId: d.docId, endNodeId: d2.docId, similarity: r.similarity}] as docSimilarityRels,
+             [(t)-[r:CATEGORIZES]->(d) | {type: 'CATEGORIZES', startNodeId: t.topicId, endNodeId: d.docId, relevance: r.relevance}] as topicRels
     `;
 
     const result = await session.run(query, params);

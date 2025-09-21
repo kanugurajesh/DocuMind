@@ -17,6 +17,8 @@ export default function GraphPage() {
   const [filters, setFilters] = useState({
     entityTypes: [] as string[],
     maxNodes: 100,
+    showEdgeLabels: false,
+    minConfidence: 0.3,
   });
 
   const fetchGraphData = useCallback(async () => {
@@ -414,6 +416,37 @@ export default function GraphPage() {
                 </select>
               </div>
 
+              {/* Display Options */}
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold text-indigo-700 mb-3 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
+                  Display Options
+                </h4>
+                <div className="space-y-3">
+                  <label className="flex items-center p-2 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={filters.showEdgeLabels}
+                      onChange={(e) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          showEdgeLabels: e.target.checked,
+                        }))
+                      }
+                      className="rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span className="ml-3 text-sm text-gray-800 font-semibold">
+                      Show Connection Labels
+                    </span>
+                  </label>
+                </div>
+                <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-xs text-blue-800 font-medium">
+                    💡 <strong>Tip:</strong> Keep labels off for cleaner view. Hover over connections to see their types.
+                  </p>
+                </div>
+              </div>
+
               {/* Graph Stats */}
               {graphData && (
                 <div className="border-t border-orange-200 pt-4">
@@ -552,6 +585,7 @@ export default function GraphPage() {
                   onNodeClick={handleNodeClick}
                   onEdgeClick={handleEdgeClick}
                   height={600}
+                  showEdgeLabels={filters.showEdgeLabels}
                 />
               )}
             </div>

@@ -20,7 +20,8 @@ export function GraphVisualization({
   onEdgeClick,
   height = 600,
   width,
-}: GraphVisualizationProps) {
+  showEdgeLabels = false,
+}: GraphVisualizationProps & { showEdgeLabels?: boolean }) {
   const cyRef = useRef<HTMLDivElement>(null);
   const cyInstanceRef = useRef<Core | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,6 +47,17 @@ export function GraphVisualization({
 
     setLoading(true);
 
+    // Debug logging
+    console.log("🔍 GraphVisualization: Raw graph data:", graphData);
+    console.log("📊 Nodes:", graphData.nodes.map(n => ({ id: n.id, type: n.type })));
+    console.log("🔗 Edges:", graphData.edges.map(e => ({
+      type: e.type,
+      start: e.start,
+      end: e.end,
+      startNodeId: e.startNodeId,
+      endNodeId: e.endNodeId
+    })));
+
     // Transform data for Cytoscape
     const elements = [
       // Nodes
@@ -55,7 +67,7 @@ export function GraphVisualization({
           label: getNodeLabel(node),
         },
       })),
-      // Edges
+      // Edges - Now using consistent startNodeId/endNodeId from Neo4j
       ...graphData.edges.map((edge) => ({
         data: {
           ...edge,
@@ -66,6 +78,24 @@ export function GraphVisualization({
         },
       })),
     ];
+
+    console.log("🎯 Transformed elements for Cytoscape:", elements);
+
+    // Validate edges - check for missing source/target nodes
+    const nodeIds = new Set(elements.filter(el => !el.data.source).map(el => el.data.id));
+    const invalidEdges = elements.filter(el => el.data.source &&
+      (!nodeIds.has(el.data.source) || !nodeIds.has(el.data.target))
+    );
+
+    if (invalidEdges.length > 0) {
+      console.warn("⚠️ Found edges with missing source/target nodes:", invalidEdges);
+      console.warn("📋 Available node IDs:", Array.from(nodeIds));
+    }
+
+    console.log(`✅ Graph elements summary:
+      - Nodes: ${elements.filter(el => !el.data.source).length}
+      - Edges: ${elements.filter(el => el.data.source).length}
+      - Invalid edges: ${invalidEdges.length}`);
 
     // Initialize Cytoscape
     const cy = cytoscape({
@@ -163,23 +193,39 @@ export function GraphVisualization({
             "border-opacity": 1,
           },
         },
-        // Edge styles
+        // Edge styles - Conditional labels
         {
           selector: "edge",
           style: {
-            width: 2,
-            "line-color": "#9CA3AF",
+            width: 2, // Slightly thinner for less clutter
+            "line-color": "#9CA3AF", // Subtle gray color
             "target-arrow-color": "#9CA3AF",
             "target-arrow-shape": "triangle",
+            "target-arrow-size": 6,
             "curve-style": "bezier",
+            label: showEdgeLabels ? "data(label)" : "", // Conditional labels
+            "font-size": "9px",
+            "font-weight": "bold",
+            "text-outline-width": 2,
+            "text-outline-color": "#fff",
+            color: "#4B5563",
+            opacity: 0.7,
+          },
+        },
+        // Edge styles on hover - Show labels
+        {
+          selector: "edge:hover",
+          style: {
+            width: 3,
+            "line-color": "#6366F1",
+            "target-arrow-color": "#6366F1",
             label: "data(label)",
             "font-size": "10px",
             "font-weight": "bold",
-            "text-rotation": "autorotate",
-            "text-margin-y": -10,
             "text-outline-width": 2,
             "text-outline-color": "#fff",
-            color: "#374151",
+            color: "#1E293B",
+            opacity: 1,
           },
         },
         // CONTAINS relationships
@@ -264,18 +310,25 @@ export function GraphVisualization({
       layout: {
         name: "cose-bilkent",
         animate: true,
-        animationDuration: 1000,
+        animationDuration: 2000,
         fit: true,
-        padding: 50,
+        padding: 50, // More padding for breathing room
         nodeDimensionsIncludeLabels: true,
-        idealEdgeLength: 100,
-        edgeElasticity: 0.45,
+        idealEdgeLength: 120, // Longer edges for better spacing
+        edgeElasticity: 0.3, // Less elastic for cleaner layout
         nestingFactor: 0.1,
-        gravity: 0.4,
-        numIter: 2500,
-        tile: true,
-        tilingPaddingVertical: 10,
-        tilingPaddingHorizontal: 10,
+        gravity: 0.4, // Moderate gravity
+        numIter: 4000, // More iterations for better layout
+        tile: false,
+        randomize: false,
+        nodeRepulsion: 8000, // Higher repulsion to prevent overlap
+        // Quality settings
+        quality: "default",
+        step: "all",
+        // Additional spacing controls
+        gravityRangeCompound: 1.5,
+        gravityCompound: 1.0,
+        gravityRange: 3.8,
       } as any,
     });
 
@@ -302,6 +355,22 @@ export function GraphVisualization({
     });
 
     cyInstanceRef.current = cy;
+
+    // Final verification after rendering
+    setTimeout(() => {
+      const renderedNodes = cy.nodes().length;
+      const renderedEdges = cy.edges().length;
+      console.log(`🎨 Cytoscape rendered: ${renderedNodes} nodes, ${renderedEdges} edges`);
+
+      if (renderedEdges === 0 && graphData.edges.length > 0) {
+        console.error("❌ NO EDGES RENDERED! Check node ID mismatches");
+        console.error("🔍 Raw edge data:", graphData.edges.slice(0, 3));
+        console.error("🔍 Node IDs:", cy.nodes().map(n => n.id()));
+      } else {
+        console.log("✅ Graph rendering successful!");
+      }
+    }, 100);
+
     setLoading(false);
 
     // Cleanup
@@ -311,7 +380,7 @@ export function GraphVisualization({
         cyInstanceRef.current = null;
       }
     };
-  }, [graphData, onNodeClick, onEdgeClick, getNodeLabel]);
+  }, [graphData, onNodeClick, onEdgeClick, getNodeLabel, showEdgeLabels]);
 
 
   const fitToView = () => {
