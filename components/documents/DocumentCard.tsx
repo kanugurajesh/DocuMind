@@ -12,9 +12,11 @@ import {
   MoreVertical,
   Trash2,
   X,
+  ExternalLink,
 } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
+import axios from "axios";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,6 +27,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { showToast } from "@/lib/toast";
 import {
   formatDate,
@@ -41,6 +50,8 @@ export function DocumentCard({
   onClick,
 }: DocumentCardProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const StatusIcon = getStatusIcon(document.processingStatus);
   const { icon: FileIconComponent, className: fileIconClass } = getFileIcon(
@@ -71,6 +82,43 @@ export function DocumentCard({
   const handleCancelDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowDeleteConfirm(false);
+  };
+
+  const handleViewDetails = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowDetails(true);
+  };
+
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isDownloading) return;
+
+    try {
+      setIsDownloading(true);
+      showToast.loading(`Preparing download for "${document.filename}"...`);
+
+      const response = await axios.get(`/api/documents/${document.docId}/download`);
+
+      if (response.data.success) {
+        // Create a temporary anchor element to trigger download
+        const link = globalThis.document.createElement('a');
+        link.href = response.data.downloadUrl;
+        link.download = response.data.filename;
+        link.target = '_blank';
+        globalThis.document.body.appendChild(link);
+        link.click();
+        globalThis.document.body.removeChild(link);
+
+        showToast.success(`Downloaded "${document.filename}"`);
+      } else {
+        throw new Error(response.data.error || 'Download failed');
+      }
+    } catch (error: any) {
+      console.error('Download error:', error);
+      showToast.error(`Failed to download "${document.filename}"`);
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -170,18 +218,16 @@ export function DocumentCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onClick?.();
-                }}
-              >
+              <DropdownMenuItem onClick={handleViewDetails}>
                 <Eye className="mr-2 h-4 w-4" />
                 View Details
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+              <DropdownMenuItem
+                onClick={handleDownload}
+                disabled={isDownloading}
+              >
                 <Download className="mr-2 h-4 w-4" />
-                Download
+                {isDownloading ? 'Downloading...' : 'Download'}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               {showDeleteConfirm ? (
@@ -211,6 +257,124 @@ export function DocumentCard({
           </DropdownMenu>
         </div>
       </CardContent>
+
+      {/* Document Details Modal */}
+      <Dialog open={showDetails} onOpenChange={setShowDetails}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileIconComponent className={`w-5 h-5 ${fileIconClass}`} />
+              {document.filename}
+            </DialogTitle>
+            <DialogDescription>
+              Document details and metadata
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Basic Information */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">File Size</label>
+                <p className="text-sm font-mono">{formatFileSize(document.fileSize)}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">File Type</label>
+                <p className="text-sm font-mono">{document.fileType}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Uploaded</label>
+                <p className="text-sm">{formatDate(document.uploadedAt)}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Status</label>
+                <Badge className={`${
+                  document.processingStatus === "completed"
+                    ? "badge-success"
+                    : document.processingStatus === "processing"
+                    ? "badge-processing"
+                    : document.processingStatus === "failed"
+                    ? "badge-failed"
+                    : "badge-warning"
+                }`}>
+                  {renderStatusIcon()}
+                  <span className="ml-1 capitalize">{document.processingStatus}</span>
+                </Badge>
+              </div>
+            </div>
+
+            {/* Metadata */}
+            {document.metadata && (
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Document Information</label>
+                <div className="mt-2 grid grid-cols-2 gap-4">
+                  {document.metadata.title && (
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">Title</label>
+                      <p className="text-sm">{document.metadata.title}</p>
+                    </div>
+                  )}
+                  {document.metadata.author && (
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">Author</label>
+                      <p className="text-sm">{document.metadata.author}</p>
+                    </div>
+                  )}
+                  {document.metadata.pageCount && (
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">Pages</label>
+                      <p className="text-sm">{document.metadata.pageCount}</p>
+                    </div>
+                  )}
+                  {document.metadata.wordCount && (
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">Words</label>
+                      <p className="text-sm">{document.metadata.wordCount.toLocaleString()}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Error Message */}
+            {document.processingStatus === "failed" && document.errorMessage && (
+              <div className="p-3 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                  <div>
+                    <p className="text-sm font-medium text-red-700">Processing Error</p>
+                    <p className="text-sm text-red-600">{document.errorMessage}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={handleDownload}
+                disabled={isDownloading}
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                {isDownloading ? 'Downloading...' : 'Download'}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowDetails(false);
+                  onClick?.();
+                }}
+                className="gap-2"
+              >
+                <ExternalLink className="h-4 w-4" />
+                Open
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
