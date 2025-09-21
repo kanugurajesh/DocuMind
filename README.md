@@ -30,12 +30,56 @@ Documind is a cutting-edge document intelligence platform that transforms your d
 
 Documind employs a sophisticated multi-database architecture designed for scalability and performance:
 
-### 🗄️ Database Stack
+### 📐 High-Level Architecture Overview
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Frontend Layer                           │
+├─────────────────────────────────────────────────────────────────┤
+│  • Next.js 15 with App Router (React 19)                        │
+│  • TypeScript for type safety                                   │
+│  • Tailwind CSS v4 for styling                                  │
+│  • Radix UI components                                          │
+│  • Clerk for authentication                                     │
+│  • Cytoscape.js for graph visualization                         │
+└─────────────────────────────────────────────────────────────────┘
+                                 ║
+                                 ║ API Routes
+                                 ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        Backend Layer                            │
+├─────────────────────────────────────────────────────────────────┤
+│  • Next.js API Routes                                           │
+│  • Middleware for authentication                                │
+│  • AI Processing Pipeline (LangChain + OpenAI)                  │
+│  • File processing (PDF, Word, Text)                            │
+└─────────────────────────────────────────────────────────────────┘
+                                 ║
+         ┌---------------────────╫────────--------------┐
+         ▼                       ║                      ▼
+┌─────────────────┐    ┌─────────╫───────┐      ┌─────────────────┐
+│   File Storage  │    │    AI Services  │      │   Databases     │
+│                 │    │                 │      │                 │
+│  • AWS S3       │    │  • OpenAI GPT   │      │  • MongoDB      │
+│  • Presigned    │    │  • Embeddings   │      │  • Qdrant       │
+│    URLs         │    │  • LangChain    │      │  • Neo4j        │
+│  • Secure       │    │  • Text         │      │  • Multi-DB     │
+│    Storage      │    │    Processing   │      │    Architecture │
+└─────────────────┘    └─────────────────┘      └─────────────────┘
+```
 
-- **MongoDB**: Document metadata, user profiles, and processing status
-- **Qdrant**: Vector embeddings for semantic similarity search
-- **Neo4j**: Knowledge graph with entities and relationships
-- **AWS S3**: Secure raw document file storage
+### 🗄️ Database Architecture
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│    MongoDB      │    │     Qdrant      │    │     Neo4j       │
+│                 │    │                 │    │                 │
+│  • Documents    │    │  • Vector       │    │  • Knowledge    │
+│    metadata     │    │    embeddings   │    │    Graph        │
+│  • User data    │    │  • Semantic     │    │  • Entities     │
+│  • Processing   │    │    search       │    │  • Relations    │
+│    status       │    │  • Similarity   │    │  • Topics       │
+│  • File refs    │    │    matching     │    │  • Clusters     │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
 
 ### 🔧 Technology Stack
 
@@ -58,6 +102,73 @@ Documind employs a sophisticated multi-database architecture designed for scalab
 - **PDF-Parse**: PDF text extraction
 - **Text Chunking**: Intelligent content segmentation
 - **Entity Extraction**: NER with relationship mapping
+
+### 🌊 Data Flow Architecture
+```
+1. User Authentication (Clerk)
+   ↓
+2. File Upload to S3
+   ↓
+3. Background Processing:
+   • Text extraction
+   • AI analysis (OpenAI)
+   • Vector generation (Qdrant)
+   • Entity extraction (Neo4j)
+   • Metadata storage (MongoDB)
+   ↓
+4. Real-time Status Updates
+   ↓
+5. Interactive Features:
+   • Semantic search
+   • AI chat
+   • Graph visualization
+   • Document management
+```
+
+### 🔄 Document Processing Flow
+```
+File Upload → Text Extraction → AI Processing → Multi-DB Storage
+     │              │               │              │
+     │              │               │              └─→ Vector embeddings (Qdrant)
+     │              │               │                 Entity extraction (Neo4j)
+     │              │               │                 Metadata storage (MongoDB)
+     │              │               │
+     │              │               └─→ LangChain + OpenAI processing
+     │              │                   Topic modeling
+     │              │                   Entity recognition
+     │              │
+     │              └─→ PDF/Word/Text extraction
+     │                  Mammoth.js for Word docs
+     │                  pdf-parse for PDFs
+     │
+     └─→ AWS S3 secure storage
+         Presigned URLs
+```
+
+### 🏛️ Component Architecture
+```
+Frontend Structure:
+├── Pages:
+│   ├── / (Landing page)
+│   ├── /dashboard (Main interface)
+│   ├── /chat (AI Q&A interface)
+│   ├── /graph (Knowledge graph visualization)
+│   └── /sign-in & /sign-up (Authentication)
+│
+├── Components:
+│   ├── ui/ (Radix UI components)
+│   ├── chat/ (Chat interface)
+│   ├── documents/ (File management)
+│   ├── graph/ (Cytoscape visualization)
+│   └── layout/ (Navigation, headers)
+│
+└── API Routes:
+    ├── /upload (File upload & processing)
+    ├── /documents (CRUD operations)
+    ├── /search (Semantic search)
+    ├── /chat (AI Q&A)
+    └── /graph (Graph data & operations)
+```
 
 ## 📋 Prerequisites
 
