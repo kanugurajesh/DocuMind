@@ -2,8 +2,6 @@
 
 <div align="center">
 
-![Documind Logo](https://via.placeholder.com/120x120/6366f1/ffffff?text=DM)
-
 **Transform documents into intelligent knowledge with AI-powered semantic search and graph visualization**
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.3-black.svg)](https://nextjs.org/)
