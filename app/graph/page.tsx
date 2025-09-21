@@ -203,26 +203,29 @@ export default function GraphPage() {
     <AppLayout>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              Knowledge Graph
-            </h1>
-            <p className="text-gray-700 mt-1 text-lg font-semibold">
-              Visualize relationships between your documents, entities, and
-              concepts
-            </p>
+        <div className="mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                Knowledge Graph
+              </h1>
+              <p className="text-gray-700 mt-1 text-base lg:text-lg font-semibold">
+                Visualize relationships between your documents, entities, and
+                concepts
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center space-x-4">
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-3 sm:gap-4">
             {/* Cluster Entities */}
             <button
               onClick={triggerEntityClustering}
               disabled={loading}
-              className="bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300 hover:text-purple-700 text-sm font-medium flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md"
+              className="bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300 hover:text-purple-700 text-xs sm:text-sm font-medium flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md flex-shrink-0"
             >
               <svg
-                className="w-4 h-4"
+                className="w-3 h-3 sm:w-4 sm:h-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -234,17 +237,18 @@ export default function GraphPage() {
                   d="M19 11H5m14-4l3 3-3 3M9 8l3 3-3 3"
                 />
               </svg>
-              <span>Cluster Entities</span>
+              <span className="hidden sm:inline">Cluster Entities</span>
+              <span className="sm:hidden">Cluster</span>
             </button>
 
             {/* Document Similarity */}
             <button
               onClick={triggerDocumentSimilarity}
               disabled={loading}
-              className="bg-white border border-green-200 text-green-600 hover:bg-green-50 hover:border-green-300 hover:text-green-700 text-sm font-medium flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md"
+              className="bg-white border border-green-200 text-green-600 hover:bg-green-50 hover:border-green-300 hover:text-green-700 text-xs sm:text-sm font-medium flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md flex-shrink-0"
             >
               <svg
-                className="w-4 h-4"
+                className="w-3 h-3 sm:w-4 sm:h-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -256,17 +260,18 @@ export default function GraphPage() {
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
               </svg>
-              <span>Analyze Doc Similarity</span>
+              <span className="hidden sm:inline">Analyze Doc Similarity</span>
+              <span className="sm:hidden">Analyze</span>
             </button>
 
             {/* Topic Modeling */}
             <button
               onClick={triggerTopicModeling}
               disabled={loading}
-              className="bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 text-sm font-medium flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md"
+              className="bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 text-xs sm:text-sm font-medium flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md flex-shrink-0"
             >
               <svg
-                className="w-4 h-4"
+                className="w-3 h-3 sm:w-4 sm:h-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -278,17 +283,18 @@ export default function GraphPage() {
                   d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
                 />
               </svg>
-              <span>Extract Topics</span>
+              <span className="hidden sm:inline">Extract Topics</span>
+              <span className="sm:hidden">Topics</span>
             </button>
 
             {/* Refresh */}
             <button
               onClick={fetchGraphData}
               disabled={loading}
-              className="bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 text-sm font-medium flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md"
+              className="bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 text-xs sm:text-sm font-medium flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md flex-shrink-0"
             >
               <svg
-                className="w-4 h-4"
+                className="w-3 h-3 sm:w-4 sm:h-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -300,15 +306,17 @@ export default function GraphPage() {
                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                 />
               </svg>
-              <span>Refresh</span>
+              <span className="hidden sm:inline">Refresh</span>
+              <span className="sm:hidden">↻</span>
             </button>
 
             {/* Back to Dashboard */}
             <a
               href="/dashboard"
-              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl text-sm font-medium"
+              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-3 sm:px-6 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl text-xs sm:text-sm font-medium flex-shrink-0"
             >
-              Back to Dashboard
+              <span className="hidden sm:inline">Back to Dashboard</span>
+              <span className="sm:hidden">Dashboard</span>
             </a>
           </div>
         </div>
