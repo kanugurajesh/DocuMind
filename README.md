@@ -37,7 +37,7 @@ Documind employs a sophisticated multi-database architecture designed for scalab
 - **MongoDB**: Document metadata, user profiles, and processing status
 - **Qdrant**: Vector embeddings for semantic similarity search
 - **Neo4j**: Knowledge graph with entities and relationships
-- **Azure Blob Storage**: Secure raw document file storage
+- **AWS S3**: Secure raw document file storage
 
 ### 🔧 Technology Stack
 
@@ -70,7 +70,7 @@ Before running Documind, ensure you have:
 - **MongoDB** instance (local or cloud)
 - **Qdrant** vector database
 - **Neo4j** graph database
-- **Azure Storage** account
+- **AWS S3** bucket
 - **OpenAI API** key
 - **Clerk** account for authentication
 
@@ -121,9 +121,11 @@ NEO4J_URI=bolt://localhost:7687
 NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=your_neo4j_password
 
-# Azure Blob Storage
-AZURE_STORAGE_CONNECTION_STRING=DefaultEndpointsProtocol=https;AccountName=xxx;AccountKey=xxx;EndpointSuffix=core.windows.net
-AZURE_STORAGE_CONTAINER_NAME=documents
+# AWS S3 Storage
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=your_aws_access_key_id
+AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key
+AWS_S3_BUCKET_NAME=your-bucket-name
 
 # OpenAI API
 OPENAI_API_KEY=sk-your_openai_key
@@ -227,7 +229,7 @@ documind/
 
 ### 1. Upload Phase
 - **Authentication**: Verify user via Clerk
-- **Storage**: Save file to Azure Blob Storage
+- **Storage**: Save file to AWS S3
 - **Metadata**: Create document record in MongoDB
 - **Queue**: Initiate background processing
 
@@ -283,7 +285,7 @@ documind/
 - **Access Control**: Document ownership verification
 
 ### Security Features
-- **Encrypted Storage**: Secure file storage in Azure
+- **Encrypted Storage**: Secure file storage in AWS S3
 - **API Security**: Protected routes with authentication
 - **Error Handling**: Safe error messages without data leakage
 
@@ -321,7 +323,7 @@ npm run format
 
 1. **Database Services**: Ensure all databases are accessible
 2. **Environment Variables**: Configure production credentials
-3. **File Storage**: Set up Azure Blob Storage container
+3. **File Storage**: Set up AWS S3 bucket
 4. **Authentication**: Configure Clerk for production
 
 ### Recommended Platforms
@@ -372,7 +374,7 @@ If you encounter `ENOTFOUND` errors with Qdrant:
 
 - **MongoDB**: Ensure connection string is correct and database is accessible
 - **Neo4j**: Verify bolt:// URL and credentials are valid
-- **Azure Storage**: Check connection string and container permissions
+- **AWS S3**: Check access credentials and bucket permissions
 
 ### Development Setup
 
