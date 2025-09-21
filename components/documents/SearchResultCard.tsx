@@ -14,7 +14,9 @@ export function SearchResultCard({ result, searchQuery }: SearchResultCardProps)
   const highlightText = (text: string | null | undefined, searchTerm: string) => {
     if (!text || !searchTerm) return text || '';
 
-    const parts = text.split(new RegExp(`(${searchTerm})`, 'gi'));
+    // Escape special regex characters in search term
+    const escapedTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const parts = text.split(new RegExp(`(${escapedTerm})`, 'gi'));
     return parts.map((part, index) =>
       part.toLowerCase() === searchTerm.toLowerCase() ?
         <mark key={index} className="bg-yellow-200 px-1 rounded">{part}</mark> :
