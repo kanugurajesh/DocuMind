@@ -225,9 +225,10 @@ export function DocumentCard({
               <DropdownMenuItem
                 onClick={handleDownload}
                 disabled={isDownloading}
+                className={`${isDownloading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-50 focus:bg-blue-50'} transition-colors`}
               >
-                <Download className="mr-2 h-4 w-4" />
-                {isDownloading ? 'Downloading...' : 'Download'}
+                <Download className="mr-2 h-4 w-4 text-blue-600" />
+                <span className="font-medium">{isDownloading ? 'Downloading...' : 'Download'}</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               {showDeleteConfirm ? (
@@ -260,116 +261,126 @@ export function DocumentCard({
 
       {/* Document Details Modal */}
       <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FileIconComponent className={`w-5 h-5 ${fileIconClass}`} />
+        <DialogContent className="max-w-2xl card-enhanced border-0 shadow-xl">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="flex items-center gap-3 text-xl font-semibold text-enhanced">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-100">
+                <FileIconComponent className={`w-6 h-6 ${fileIconClass} icon-blue`} />
+              </div>
               {document.filename}
             </DialogTitle>
-            <DialogDescription>
-              Document details and metadata
+            <DialogDescription className="text-muted-enhanced">
+              Comprehensive document details and metadata information
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-6">
             {/* Basic Information */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">File Size</label>
-                <p className="text-sm font-mono">{formatFileSize(document.fileSize)}</p>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-muted-enhanced">File Size</label>
+                <p className="text-base font-mono text-enhanced bg-gray-50 rounded-md px-3 py-2 border">{formatFileSize(document.fileSize)}</p>
               </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">File Type</label>
-                <p className="text-sm font-mono">{document.fileType}</p>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-muted-enhanced">File Type</label>
+                <p className="text-base font-mono text-enhanced bg-gray-50 rounded-md px-3 py-2 border">{document.fileType}</p>
               </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Uploaded</label>
-                <p className="text-sm">{formatDate(document.uploadedAt)}</p>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-muted-enhanced">Uploaded</label>
+                <p className="text-base text-enhanced bg-gray-50 rounded-md px-3 py-2 border">{formatDate(document.uploadedAt)}</p>
               </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Status</label>
-                <Badge className={`${
-                  document.processingStatus === "completed"
-                    ? "badge-success"
-                    : document.processingStatus === "processing"
-                    ? "badge-processing"
-                    : document.processingStatus === "failed"
-                    ? "badge-failed"
-                    : "badge-warning"
-                }`}>
-                  {renderStatusIcon()}
-                  <span className="ml-1 capitalize">{document.processingStatus}</span>
-                </Badge>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-muted-enhanced">Status</label>
+                <div className="flex items-center">
+                  <Badge className={`${
+                    document.processingStatus === "completed"
+                      ? "badge-success"
+                      : document.processingStatus === "processing"
+                      ? "badge-processing"
+                      : document.processingStatus === "failed"
+                      ? "badge-failed"
+                      : "badge-warning"
+                  } px-3 py-1.5 text-sm font-medium`}>
+                    {renderStatusIcon()}
+                    <span className="ml-2 capitalize">{document.processingStatus}</span>
+                  </Badge>
+                </div>
               </div>
             </div>
 
             {/* Metadata */}
             {document.metadata && (
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Document Information</label>
-                <div className="mt-2 grid grid-cols-2 gap-4">
-                  {document.metadata.title && (
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground">Title</label>
-                      <p className="text-sm">{document.metadata.title}</p>
-                    </div>
-                  )}
-                  {document.metadata.author && (
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground">Author</label>
-                      <p className="text-sm">{document.metadata.author}</p>
-                    </div>
-                  )}
-                  {document.metadata.pageCount && (
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground">Pages</label>
-                      <p className="text-sm">{document.metadata.pageCount}</p>
-                    </div>
-                  )}
-                  {document.metadata.wordCount && (
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground">Words</label>
-                      <p className="text-sm">{document.metadata.wordCount.toLocaleString()}</p>
-                    </div>
-                  )}
+              <div className="space-y-4">
+                <div className="border-t pt-4">
+                  <h4 className="text-lg font-semibold text-enhanced mb-4 flex items-center gap-2">
+                    <FileText className="h-5 w-5 icon-blue" />
+                    Document Information
+                  </h4>
+                  <div className="grid grid-cols-2 gap-6">
+                    {document.metadata.title && (
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold text-muted-enhanced">Title</label>
+                        <p className="text-base text-enhanced bg-gray-50 rounded-md px-3 py-2 border">{document.metadata.title}</p>
+                      </div>
+                    )}
+                    {document.metadata.author && (
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold text-muted-enhanced">Author</label>
+                        <p className="text-base text-enhanced bg-gray-50 rounded-md px-3 py-2 border">{document.metadata.author}</p>
+                      </div>
+                    )}
+                    {document.metadata.pageCount && (
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold text-muted-enhanced">Pages</label>
+                        <p className="text-base text-enhanced bg-gray-50 rounded-md px-3 py-2 border">{document.metadata.pageCount}</p>
+                      </div>
+                    )}
+                    {document.metadata.wordCount && (
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold text-muted-enhanced">Words</label>
+                        <p className="text-base text-enhanced bg-gray-50 rounded-md px-3 py-2 border">{document.metadata.wordCount.toLocaleString()}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
 
             {/* Error Message */}
             {document.processingStatus === "failed" && document.errorMessage && (
-              <div className="p-3 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-red-600" />
-                  <div>
-                    <p className="text-sm font-medium text-red-700">Processing Error</p>
-                    <p className="text-sm text-red-600">{document.errorMessage}</p>
+              <div className="border-t pt-4">
+                <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-red-700 mb-1">Processing Error</p>
+                      <p className="text-sm text-red-600 leading-relaxed">{document.errorMessage}</p>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
             {/* Action Buttons */}
-            <div className="flex justify-end gap-2 pt-4 border-t">
+            <div className="flex justify-end gap-3 pt-6 border-t">
               <Button
                 variant="outline"
                 onClick={handleDownload}
                 disabled={isDownloading}
-                className="gap-2"
+                className="gap-2 hover-lift focus-ring-enhanced px-6 py-2.5 font-medium border-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Download className="h-4 w-4" />
                 {isDownloading ? 'Downloading...' : 'Download'}
               </Button>
               <Button
-                variant="outline"
                 onClick={() => {
                   setShowDetails(false);
                   onClick?.();
                 }}
-                className="gap-2"
+                className="gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-2.5 font-medium"
               >
                 <ExternalLink className="h-4 w-4" />
-                Open
+                Open Document
               </Button>
             </div>
           </div>
