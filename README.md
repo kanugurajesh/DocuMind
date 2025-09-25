@@ -26,6 +26,22 @@ Documind is a cutting-edge document intelligence platform that transforms your d
 - **🎛️ Smart Filtering**: Customizable graph views with entity type filters and confidence thresholds
 - **🔧 Resilient Architecture**: Graceful error handling with fallback options for all services
 
+## Photos
+
+<img width="1920" height="1080" alt="Screenshot 2025-09-25 093745" src="https://github.com/user-attachments/assets/4a6d220b-0bc1-4d93-a77a-e60374474ffa" />
+
+<img width="1920" height="1080" alt="Screenshot 2025-09-25 093751" src="https://github.com/user-attachments/assets/776bd593-a3b0-4f45-b173-4111570ac0b4" />
+
+<img width="1920" height="1080" alt="Screenshot 2025-09-25 093821" src="https://github.com/user-attachments/assets/21932850-baec-4bf3-8083-78458e2c38fc" />
+
+<img width="1920" height="1080" alt="Screenshot 2025-09-25 093828" src="https://github.com/user-attachments/assets/50526ec3-7969-4bb4-aa15-fad8a3c75fb6" />
+
+<img width="1920" height="1080" alt="Screenshot 2025-09-25 094350" src="https://github.com/user-attachments/assets/feec26ab-4e05-4bb1-b4cb-c1e6843970d7" />
+
+<img width="1920" height="1080" alt="Screenshot 2025-09-25 094401" src="https://github.com/user-attachments/assets/9b0a2f27-3dd3-4398-9d40-1e9878321a70" />
+
+<img width="1920" height="1080" alt="Screenshot 2025-09-25 093908" src="https://github.com/user-attachments/assets/f0088bc2-50aa-48f1-ba90-8f9caeaaa4c9" />
+
 ## 🏗️ Architecture
 
 Documind employs a sophisticated multi-database architecture designed for scalability and performance:
