@@ -193,9 +193,10 @@ Before running Documind, ensure you have:
 
 - **Node.js** (v18 or higher)
 - **npm** or **yarn** package manager
+- **Docker Desktop** (for running Qdrant and Neo4j locally)
 - **MongoDB** instance (local or cloud)
-- **Qdrant** vector database
-- **Neo4j** graph database
+- **Qdrant** vector database (local Docker or Qdrant Cloud)
+- **Neo4j** graph database (local Docker or Neo4j Aura)
 - **AWS S3** bucket
 - **OpenAI API** key
 - **Clerk** account for authentication
@@ -239,11 +240,16 @@ MONGODB_URI=mongodb://localhost:27017/documind
 MONGODB_DB_NAME=documind
 
 # Qdrant Vector Database
-QDRANT_URL=http://localhost:6333
+# Mode: "local" (Docker Desktop, http://localhost:6333) | "cloud" (uses QDRANT_URL + QDRANT_API_KEY)
+QDRANT_MODE=local
+QDRANT_URL=https://your-instance.cloud.qdrant.io:6333
 QDRANT_API_KEY=your_qdrant_api_key
 
 # Neo4j Graph Database
-NEO4J_URI=bolt://localhost:7687
+# Mode: "local" (Docker Desktop, bolt://localhost:7687) | "cloud" (uses NEO4J_URI + credentials)
+NEO4J_MODE=local
+NEO4J_LOCAL_PASSWORD=neo4j
+NEO4J_URI=neo4j+s://your-instance.databases.neo4j.io
 NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=your_neo4j_password
 
@@ -276,23 +282,66 @@ mongod --dbpath /path/to/data/db
 # Or use MongoDB Atlas (cloud)
 ```
 
-#### Qdrant
+#### Qdrant — Local or Cloud
+
+Qdrant supports two modes controlled by `QDRANT_MODE` in `.env.local`.
+
+**Local (Docker Desktop) — recommended for development:**
 ```bash
-# Using Docker (recommended for development)
-docker run -p 6333:6333 -p 6334:6334 qdrant/qdrant
+# Start Qdrant container
+docker compose -f docker-compose.qdrant.yml up -d
 
-# Or use our provided Docker Compose setup
-docker-compose -f docker-compose.qdrant.yml up -d
-
-# Or use Qdrant Cloud
+# Verify it's running
+curl http://localhost:6333/healthz
+```
+Set in `.env.local`:
+```env
+QDRANT_MODE=local
 ```
 
-#### Neo4j
-```bash
-# Using Docker
-docker run --publish=7474:7474 --publish=7687:7687 --env NEO4J_AUTH=neo4j/your_password neo4j
+**Cloud (Qdrant Cloud):**
 
-# Or use Neo4j Aura (cloud)
+1. Create a free cluster at [cloud.qdrant.io](https://cloud.qdrant.io)
+2. Copy the cluster URL and API key
+
+Set in `.env.local`:
+```env
+QDRANT_MODE=cloud
+QDRANT_URL=https://your-instance.cloud.qdrant.io:6333
+QDRANT_API_KEY=your_qdrant_api_key
+```
+
+#### Neo4j — Local or Cloud
+
+Neo4j supports two modes controlled by `NEO4J_MODE` in `.env.local`.
+
+**Local (Docker Desktop) — recommended for development:**
+```bash
+# Start Neo4j container
+docker compose -f docker-compose.neo4j.yml up -d
+
+# Open the browser UI (login: neo4j / neo4j)
+# http://localhost:7474
+```
+Set in `.env.local`:
+```env
+NEO4J_MODE=local
+NEO4J_LOCAL_PASSWORD=neo4j   # must match NEO4J_AUTH in docker-compose.neo4j.yml
+```
+
+> **Note:** On first login Neo4j may prompt you to change the default password. If you do, update `NEO4J_LOCAL_PASSWORD` to match and restart the dev server.
+
+**Cloud (Neo4j Aura):**
+
+1. Create a free instance at [console.neo4j.io](https://console.neo4j.io)
+2. Copy the connection URI, username, and password
+
+Set in `.env.local`:
+```env
+NEO4J_MODE=cloud
+NEO4J_URI=neo4j+s://your-instance.databases.neo4j.io
+NEO4J_USERNAME=neo4j
+NEO4J_PASSWORD=your_neo4j_password
 ```
 
 ### 5. Run the Application
@@ -347,6 +396,7 @@ documind/
 │   └── storage/                  # File storage
 ├── types/                        # TypeScript definitions
 ├── docker-compose.qdrant.yml     # Local Qdrant Docker setup
+├── docker-compose.neo4j.yml      # Local Neo4j Docker setup
 ├── middleware.ts                 # Clerk middleware
 └── next.config.ts               # Next.js configuration
 ```
@@ -474,20 +524,31 @@ npm run format
 
 #### Qdrant Connection Errors
 
-If you encounter `ENOTFOUND` errors with Qdrant:
+If you encounter `ENOTFOUND` or `fetch failed` errors with Qdrant:
 
-1. **Check Instance Status**: Verify your Qdrant Cloud instance is running
-2. **Use Local Fallback**: Switch to local Docker setup:
+1. **Switch to local mode** — start the Docker container and set `QDRANT_MODE=local` in `.env.local`:
    ```bash
-   # Start local Qdrant
-   docker-compose -f docker-compose.qdrant.yml up -d
-
-   # Update .env.local
-   QDRANT_URL=http://localhost:6333
-   # Remove QDRANT_API_KEY for local instance
+   docker compose -f docker-compose.qdrant.yml up -d
    ```
-3. **Network Issues**: Check firewall/VPN settings
-4. **Graceful Degradation**: The app continues working with limited functionality if Qdrant is unavailable
+2. **Verify the container is healthy:**
+   ```bash
+   curl http://localhost:6333/healthz
+   ```
+3. **Cloud mode issues** — check that `QDRANT_URL` and `QDRANT_API_KEY` are correct and the cluster is running at [cloud.qdrant.io](https://cloud.qdrant.io)
+4. **After changing `QDRANT_MODE`**, restart the dev server — the client is initialized once per process
+
+#### Neo4j Connection Errors
+
+If you encounter connection errors with Neo4j:
+
+1. **Switch to local mode** — start the Docker container and set `NEO4J_MODE=local` in `.env.local`:
+   ```bash
+   docker compose -f docker-compose.neo4j.yml up -d
+   ```
+2. **Verify the container is healthy** — open `http://localhost:7474` in your browser (login: `neo4j` / `neo4j`)
+3. **Password mismatch** — if you changed the default password in the browser UI, update `NEO4J_LOCAL_PASSWORD` in `.env.local` to match
+4. **Cloud mode issues** — verify `NEO4J_URI`, `NEO4J_USERNAME`, and `NEO4J_PASSWORD` match your Neo4j Aura instance
+5. **After changing `NEO4J_MODE`**, restart the dev server
 
 #### Graph Visualization Issues
 
@@ -506,8 +567,13 @@ If you encounter `ENOTFOUND` errors with Qdrant:
 
 #### Quick Local Development
 ```bash
-# Start all services with Docker
-docker-compose -f docker-compose.qdrant.yml up -d
+# Start Qdrant and Neo4j with Docker
+docker compose -f docker-compose.qdrant.yml up -d
+docker compose -f docker-compose.neo4j.yml up -d
+
+# Set both modes to local in .env.local
+# QDRANT_MODE=local
+# NEO4J_MODE=local
 
 # Install dependencies
 npm install
@@ -515,6 +581,17 @@ npm install
 # Run development server
 npm run dev
 ```
+
+#### Switching Between Local and Cloud
+
+To switch Qdrant or Neo4j between local Docker and cloud, update the mode variable in `.env.local` and restart the dev server:
+
+| Variable | `local` | `cloud` |
+|---|---|---|
+| `QDRANT_MODE` | Docker Desktop (`http://localhost:6333`) | Qdrant Cloud (`QDRANT_URL` + `QDRANT_API_KEY`) |
+| `NEO4J_MODE` | Docker Desktop (`bolt://localhost:7687`) | Neo4j Aura (`NEO4J_URI` + credentials) |
+
+The default for both is `cloud`, so omitting the variable falls back to cloud mode.
 
 #### Environment Validation
 The application includes built-in connection testing and will provide clear error messages for misconfigured services.

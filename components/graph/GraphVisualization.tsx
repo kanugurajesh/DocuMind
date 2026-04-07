@@ -26,6 +26,7 @@ export function GraphVisualization({
   const cyInstanceRef = useRef<Core | null>(null);
   const [loading, setLoading] = useState(true);
   const [_selectedNode, setSelectedNode] = useState<string | null>(null);
+  const [legendOpen, setLegendOpen] = useState(false);
 
   const getNodeLabel = useCallback((node: any) => {
     switch (node.type) {
@@ -48,6 +49,13 @@ export function GraphVisualization({
     setLoading(true);
 
 
+    // Compute degree for each node so important entities render larger
+    const degreeMap = new Map<string, number>();
+    for (const edge of graphData.edges) {
+      degreeMap.set(edge.startNodeId, (degreeMap.get(edge.startNodeId) || 0) + 1);
+      degreeMap.set(edge.endNodeId, (degreeMap.get(edge.endNodeId) || 0) + 1);
+    }
+
     // Transform data for Cytoscape
     const elements = [
       // Nodes
@@ -55,13 +63,14 @@ export function GraphVisualization({
         data: {
           ...node,
           label: getNodeLabel(node),
+          degree: degreeMap.get(node.id) || 1,
         },
       })),
       // Edges - Now using consistent startNodeId/endNodeId from Neo4j
       ...graphData.edges.map((edge) => ({
         data: {
           ...edge,
-          id: `${edge.startNodeId}-${edge.endNodeId}`,
+          id: `${edge.startNodeId}-${edge.endNodeId}-${edge.type}`,
           source: edge.startNodeId,
           target: edge.endNodeId,
           label: edge.type,
@@ -83,21 +92,29 @@ export function GraphVisualization({
       container: cyRef.current,
       elements,
       style: [
-        // Node styles
+        // Node styles — base (labels hidden by default for cleaner view)
         {
           selector: "node",
           style: {
             "background-color": "#666",
-            label: "data(label)",
+            label: "",
             "text-valign": "center",
             "text-halign": "center",
-            "font-size": "12px",
-            "font-weight": "bold",
+            "font-size": "11px",
+            "font-weight": "600",
             "text-outline-width": 2,
             "text-outline-color": "#fff",
             color: "#1f2937",
-            width: "60px",
-            height: "60px",
+            width: "45px",
+            height: "45px",
+            shape: "ellipse",
+          },
+        },
+        // Document and Topic nodes always show labels (fewer of them, high-level)
+        {
+          selector: 'node[type="Document"], node[type="Topic"]',
+          style: {
+            label: "data(label)",
           },
         },
         // Document nodes
@@ -105,9 +122,9 @@ export function GraphVisualization({
           selector: 'node[type="Document"]',
           style: {
             "background-color": "#3B82F6",
-            width: "80px",
-            height: "80px",
-            "font-size": "14px",
+            width: "60px",
+            height: "60px",
+            "font-size": "12px",
           },
         },
         // Chunk nodes
@@ -115,54 +132,40 @@ export function GraphVisualization({
           selector: 'node[type="Chunk"]',
           style: {
             "background-color": "#10B981",
-            width: "50px",
-            height: "50px",
-            "font-size": "10px",
+            width: "32px",
+            height: "32px",
           },
         },
-        // Entity nodes
+        // Entity nodes — scale size by degree (more connections = bigger)
         {
           selector: 'node[type="Entity"]',
           style: {
             "background-color": "#8B5CF6",
-            width: "65px",
-            height: "65px",
-            "font-size": "12px",
+            width: "mapData(degree, 1, 12, 32, 64)",
+            height: "mapData(degree, 1, 12, 32, 64)",
           },
         },
-        // Person entities
+        // Entity subcategories — color only, circles
         {
           selector: 'node[type="Entity"][category="PERSON"]',
-          style: {
-            "background-color": "#F59E0B",
-            shape: "round-rectangle",
-          },
+          style: { "background-color": "#F59E0B" },
         },
-        // Organization entities
         {
           selector: 'node[type="Entity"][category="ORGANIZATION"]',
-          style: {
-            "background-color": "#EF4444",
-            shape: "round-rectangle",
-          },
+          style: { "background-color": "#EF4444" },
         },
-        // Location entities
         {
           selector: 'node[type="Entity"][category="LOCATION"]',
-          style: {
-            "background-color": "#06B6D4",
-            shape: "round-rectangle",
-          },
+          style: { "background-color": "#06B6D4" },
         },
         // Topic nodes
         {
           selector: 'node[type="Topic"]',
           style: {
             "background-color": "#9333EA",
-            width: "70px",
-            height: "70px",
+            width: "55px",
+            height: "55px",
             "font-size": "11px",
-            shape: "hexagon",
           },
         },
         // Selected node
@@ -184,7 +187,7 @@ export function GraphVisualization({
             "target-arrow-shape": "triangle",
             "arrow-scale": 1.2,
             "curve-style": "bezier",
-            label: showEdgeLabels ? "data(label)" : "", // Conditional labels
+            label: "", // Controlled via separate effect for live updates
             "font-size": "9px",
             "font-weight": "bold",
             "text-outline-width": 2,
@@ -209,73 +212,25 @@ export function GraphVisualization({
             opacity: 1,
           },
         },
-        // CONTAINS relationships
+        // Structural edges — light, recede to background
         {
-          selector: 'edge[type="CONTAINS"]',
+          selector: 'edge[type="CONTAINS"], edge[type="MENTIONS"]',
           style: {
-            "line-color": "#3B82F6",
-            "target-arrow-color": "#3B82F6",
-            width: 3,
+            "line-color": "#CBD5E1",
+            "target-arrow-color": "#CBD5E1",
+            width: 1.5,
+            opacity: 0.6,
           },
         },
-        // MENTIONS relationships
+        // Semantic edges — meaningful relationships
         {
-          selector: 'edge[type="MENTIONS"]',
+          selector: 'edge[type="COOCCURS_WITH"], edge[type="SIMILAR_TO"], edge[type="SAME_AS"], edge[type="DOCUMENT_SIMILAR_TO"], edge[type="CATEGORIZES"]',
           style: {
-            "line-color": "#8B5CF6",
-            "target-arrow-color": "#8B5CF6",
+            "line-color": "#6366F1",
+            "target-arrow-color": "#6366F1",
             width: 2,
-          },
-        },
-        // COOCCURS_WITH relationships
-        {
-          selector: 'edge[type="COOCCURS_WITH"]',
-          style: {
-            "line-color": "#F59E0B",
-            "target-arrow-color": "#F59E0B",
-            width: "data(count)",
-            opacity: "data(confidence)" as any,
-          },
-        },
-        // SIMILAR_TO relationships
-        {
-          selector: 'edge[type="SIMILAR_TO"]',
-          style: {
-            "line-color": "#06B6D4",
-            "target-arrow-color": "#06B6D4",
-            width: 2,
-            opacity: "data(similarity)" as any,
-          },
-        },
-        // SAME_AS relationships
-        {
-          selector: 'edge[type="SAME_AS"]',
-          style: {
-            "line-color": "#DC2626",
-            "target-arrow-color": "#DC2626",
-            width: 3,
-            "line-style": "dashed",
-          },
-        },
-        // DOCUMENT_SIMILAR_TO relationships
-        {
-          selector: 'edge[type="DOCUMENT_SIMILAR_TO"]',
-          style: {
-            "line-color": "#059669",
-            "target-arrow-color": "#059669",
-            width: "mapData(similarity, 0, 1, 2, 5)",
-            opacity: "data(similarity)" as any,
-            "line-style": "dotted",
-          },
-        },
-        // CATEGORIZES relationships
-        {
-          selector: 'edge[type="CATEGORIZES"]',
-          style: {
-            "line-color": "#9333EA",
-            "target-arrow-color": "#9333EA",
-            width: "mapData(relevance, 0, 1, 2, 4)",
-            opacity: "data(relevance)" as any,
+            opacity: 0.75,
+            "line-style": "solid",
           },
         },
         // Selected edge
@@ -335,6 +290,16 @@ export function GraphVisualization({
       }
     });
 
+    // Show label on hover for Entity and Chunk nodes
+    cy.on("mouseover", 'node[type="Entity"], node[type="Chunk"]', (evt) => {
+      const node = evt.target as NodeSingular;
+      node.style("label", node.data("label"));
+    });
+    cy.on("mouseout", 'node[type="Entity"], node[type="Chunk"]', (evt) => {
+      const node = evt.target as NodeSingular;
+      node.style("label", "");
+    });
+
     cyInstanceRef.current = cy;
 
     // Final verification after rendering
@@ -352,7 +317,17 @@ export function GraphVisualization({
         cyInstanceRef.current = null;
       }
     };
-  }, [graphData, onNodeClick, onEdgeClick, getNodeLabel, showEdgeLabels]);
+  }, [graphData, onNodeClick, onEdgeClick, getNodeLabel]);
+
+  // Update edge labels on the live instance when the toggle changes — no need to recreate the graph
+  useEffect(() => {
+    if (!cyInstanceRef.current) return;
+    cyInstanceRef.current.edges().style("label", showEdgeLabels ? "data(label)" : "");
+    cyInstanceRef.current.edges().style("font-size", "10px");
+    cyInstanceRef.current.edges().style("color", "#1E293B");
+    cyInstanceRef.current.edges().style("text-outline-width", 2);
+    cyInstanceRef.current.edges().style("text-outline-color", "#fff");
+  }, [showEdgeLabels]);
 
 
   const fitToView = () => {
@@ -457,79 +432,45 @@ export function GraphVisualization({
         className="bg-gray-50 rounded-lg border border-gray-200"
       />
 
-      {/* Legend */}
-      <div className="mt-4 card-enhanced border-l-4 border-l-indigo-500 p-5">
-        <h4 className="text-lg font-bold text-gray-900 mb-4">Legend</h4>
-
-        {/* Node Types */}
-        <div className="mb-4">
-          <h5 className="text-sm font-bold text-gray-800 mb-3">Node Types</h5>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm font-semibold text-gray-800">
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-              <span>Documents</span>
+      {/* Legend — compact collapsible strip */}
+      <div className="mt-3 border border-gray-200 rounded-lg bg-white shadow-sm">
+        <button
+          onClick={() => setLegendOpen((v) => !v)}
+          className="w-full flex items-center justify-between px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-lg"
+        >
+          <span className="flex items-center gap-3">
+            <span className="flex gap-1.5 items-center">
+              <span className="w-3 h-3 rounded-full bg-blue-500 inline-block" title="Document" />
+              <span className="w-3 h-3 rounded-full bg-purple-500 inline-block" title="Entity" />
+              <span className="w-3 h-3 rounded-full bg-purple-700 inline-block" title="Topic" />
+              <span className="w-3 h-3 rounded-full bg-green-500 inline-block" title="Chunk" />
+            </span>
+            <span className="text-gray-500 font-normal">Legend</span>
+          </span>
+          <svg
+            className={`w-4 h-4 text-gray-400 transition-transform ${legendOpen ? "rotate-180" : ""}`}
+            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        {legendOpen && (
+          <div className="px-4 pb-4 pt-1 border-t border-gray-100">
+            <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-gray-700">
+              <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-blue-500 inline-block" />Document</div>
+              <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-purple-500 inline-block" />Entity</div>
+              <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-yellow-500 inline-block" />Person</div>
+              <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-red-500 inline-block" />Organization</div>
+              <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-cyan-500 inline-block" />Location</div>
+              <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-purple-700 inline-block" />Topic</div>
+              <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-green-500 inline-block" />Chunk</div>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-              <span>Text Chunks</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
-              <span>Entities</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
-              <span>People</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div
-                className="w-4 h-4 bg-purple-600"
-                style={{
-                  clipPath:
-                    "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)",
-                }}
-              ></div>
-              <span>Topics</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Relationship Types */}
-        <div>
-          <h5 className="text-sm font-bold text-gray-800 mb-3">
-            Relationships
-          </h5>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm font-semibold text-gray-800">
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-0.5 bg-blue-500"></div>
-              <span>Contains</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-0.5 bg-purple-500"></div>
-              <span>Mentions</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-0.5 bg-yellow-500"></div>
-              <span>Co-occurs</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-0.5 bg-cyan-500"></div>
-              <span>Similar</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-0.5 bg-red-500 border-dashed border-t"></div>
-              <span>Same Entity</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-0.5 bg-emerald-600 border-dotted border-t"></div>
-              <span>Doc Similarity</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-0.5 bg-purple-600"></div>
-              <span>Categorizes</span>
+            <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-gray-700 mt-2 pt-2 border-t border-gray-100">
+              <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-slate-300 inline-block" />Structural (Contains / Mentions)</div>
+              <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-indigo-500 inline-block" />Semantic (Co-occurs / Similar / Categorizes)</div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

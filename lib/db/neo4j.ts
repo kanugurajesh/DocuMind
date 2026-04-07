@@ -4,13 +4,29 @@ let driver: Driver | null = null;
 
 export function getNeo4jDriver(): Driver {
   if (!driver) {
-    driver = neo4j.driver(
-      process.env.NEO4J_URI!,
-      neo4j.auth.basic(
-        process.env.NEO4J_USERNAME!,
-        process.env.NEO4J_PASSWORD!,
-      ),
-    );
+    const mode = process.env.NEO4J_MODE ?? "cloud";
+
+    if (mode === "local") {
+      console.log("🔗 [Neo4j] Mode: LOCAL — connecting to bolt://localhost:7687");
+      driver = neo4j.driver(
+        "bolt://localhost:7687",
+        neo4j.auth.basic("neo4j", process.env.NEO4J_LOCAL_PASSWORD ?? "neo4j"),
+        { encrypted: false },
+      );
+    } else {
+      const uri = process.env.NEO4J_URI;
+      const username = process.env.NEO4J_USERNAME;
+      const password = process.env.NEO4J_PASSWORD;
+      if (!uri || !username || !password) {
+        throw new Error(
+          "NEO4J_URI, NEO4J_USERNAME, and NEO4J_PASSWORD are required for cloud mode",
+        );
+      }
+      console.log(`🔗 [Neo4j] Mode: CLOUD — connecting to ${uri}`);
+      driver = neo4j.driver(uri, neo4j.auth.basic(username, password));
+    }
+
+    console.log("✅ [Neo4j] Driver initialized successfully");
   }
 
   return driver;

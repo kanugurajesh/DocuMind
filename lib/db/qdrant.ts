@@ -4,30 +4,26 @@ let client: QdrantClient | null = null;
 
 export function getQdrantClient(): QdrantClient {
   if (!client) {
-    const qdrantUrl = process.env.QDRANT_URL;
+    const mode = process.env.QDRANT_MODE ?? "cloud";
 
-    if (!qdrantUrl) {
-      throw new Error("QDRANT_URL environment variable is not set");
-    }
-
-    console.log(`🔗 Connecting to Qdrant at: ${qdrantUrl}`);
-
-    const config: any = {
-      url: qdrantUrl,
-    };
-
-    if (process.env.QDRANT_API_KEY) {
-      config.apiKey = process.env.QDRANT_API_KEY;
-      console.log("🔑 Using Qdrant API key for authentication");
-    }
-
-    try {
+    if (mode === "local") {
+      console.log("🔗 [Qdrant] Mode: LOCAL — connecting to http://localhost:6333");
+      client = new QdrantClient({ url: "http://localhost:6333" });
+    } else {
+      const qdrantUrl = process.env.QDRANT_URL;
+      if (!qdrantUrl) {
+        throw new Error("QDRANT_URL environment variable is not set (required for cloud mode)");
+      }
+      console.log(`🔗 [Qdrant] Mode: CLOUD — connecting to ${qdrantUrl}`);
+      const config: any = { url: qdrantUrl };
+      if (process.env.QDRANT_API_KEY) {
+        config.apiKey = process.env.QDRANT_API_KEY;
+        console.log("🔑 [Qdrant] API key loaded for authentication");
+      }
       client = new QdrantClient(config);
-      console.log("✅ Qdrant client initialized successfully");
-    } catch (error) {
-      console.error("❌ Failed to initialize Qdrant client:", error);
-      throw error;
     }
+
+    console.log("✅ [Qdrant] Client initialized successfully");
   }
 
   return client;
@@ -231,11 +227,15 @@ export async function deleteVectorsByDocId(docId: string, userId: string) {
   } catch (error) {
     console.error(`❌ Error deleting vectors for document ${docId}:`, error);
 
-    // Check if it's a connection error
     if (error instanceof Error) {
+      // Collection doesn't exist yet — nothing to delete, treat as success
+      if ((error as any)?.status === 404 || error.message === 'Not Found') {
+        console.warn("⚠️ Qdrant collection not found, skipping deletion (no vectors exist yet)");
+        return { status: 'skipped', reason: 'collection_not_found' };
+      }
+      // Connection errors — degrade gracefully
       if (error.message.includes('ENOTFOUND') || error.message.includes('fetch failed')) {
         console.error("🌐 Qdrant connection failed - instance may be unreachable");
-        // Gracefully handle the error instead of throwing
         console.warn("⚠️ Skipping vector deletion due to connection issues");
         return { status: 'skipped', reason: 'connection_failed' };
       }

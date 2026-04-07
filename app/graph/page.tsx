@@ -2,7 +2,7 @@
 
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { GraphVisualization } from "@/components/graph/GraphVisualization";
 import { AppLayout } from "@/components/layout/app-layout";
 import { showToast } from "@/lib/toast";
@@ -16,10 +16,22 @@ export default function GraphPage() {
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [filters, setFilters] = useState({
     entityTypes: [] as string[],
-    maxNodes: 100,
+    maxNodes: 50,
     showEdgeLabels: false,
     minConfidence: 0.3,
+    showChunks: false,
+    showCooccurrence: false,
   });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
+
+  // Close tools menu when clicking outside
+  useEffect(() => {
+    if (!toolsOpen) return;
+    const close = () => setToolsOpen(false);
+    document.addEventListener("click", close, { capture: true, once: true });
+    return () => document.removeEventListener("click", close, { capture: true });
+  }, [toolsOpen]);
 
   const fetchGraphData = useCallback(async () => {
     try {
@@ -154,8 +166,71 @@ export default function GraphPage() {
     }
   };
 
-  const handleEdgeClick = (edgeId: string) => {
+  const handleEdgeClick = (_edgeId: string) => {
   };
+
+  const filteredGraphData = useMemo(() => {
+    if (!graphData) return null;
+    if (filters.showChunks) return graphData;
+
+    const chunkIds = new Set(graphData.nodes.filter(n => n.type === "Chunk").map(n => n.id));
+
+    // Collapse Doc→Chunk→Entity paths into direct Doc→Entity virtual edges
+    const chunkToDoc = new Map<string, string>();
+    const chunkToEntities = new Map<string, Set<string>>();
+    for (const edge of graphData.edges) {
+      if (edge.type === "CONTAINS" && chunkIds.has(edge.endNodeId)) {
+        chunkToDoc.set(edge.endNodeId, edge.startNodeId);
+      }
+      if (edge.type === "MENTIONS" && chunkIds.has(edge.startNodeId)) {
+        if (!chunkToEntities.has(edge.startNodeId)) chunkToEntities.set(edge.startNodeId, new Set());
+        chunkToEntities.get(edge.startNodeId)!.add(edge.endNodeId);
+      }
+    }
+
+    const virtualEdges: any[] = [];
+    const seen = new Set<string>();
+    for (const [chunkId, entityIds] of chunkToEntities) {
+      const docId = chunkToDoc.get(chunkId);
+      if (!docId) continue;
+      for (const entityId of entityIds) {
+        const key = `${docId}--${entityId}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          virtualEdges.push({ startNodeId: docId, endNodeId: entityId, type: "MENTIONS", id: key });
+        }
+      }
+    }
+
+    const nonChunkEdges = graphData.edges.filter(
+      e => !chunkIds.has(e.startNodeId) && !chunkIds.has(e.endNodeId)
+    );
+
+    // Split co-occurrence edges out — they explode into a full mesh
+    const coocEdges = nonChunkEdges.filter(e => e.type === "COOCCURS_WITH");
+    const otherEdges = nonChunkEdges.filter(e => e.type !== "COOCCURS_WITH");
+
+    let visibleCoocEdges: typeof coocEdges = [];
+    if (filters.showCooccurrence) {
+      // Keep only the top 3 strongest co-occurrence edges per node to prevent the full mesh
+      const nodeCoocCount = new Map<string, number>();
+      visibleCoocEdges = [...coocEdges]
+        .sort((a, b) => ((b as any).confidence || 0) - ((a as any).confidence || 0))
+        .filter(e => {
+          const srcCount = nodeCoocCount.get(e.startNodeId) || 0;
+          const tgtCount = nodeCoocCount.get(e.endNodeId) || 0;
+          if (srcCount >= 3 || tgtCount >= 3) return false;
+          nodeCoocCount.set(e.startNodeId, srcCount + 1);
+          nodeCoocCount.set(e.endNodeId, tgtCount + 1);
+          return true;
+        });
+    }
+
+    return {
+      nodes: graphData.nodes.filter(n => n.type !== "Chunk"),
+      edges: [...otherEdges, ...visibleCoocEdges, ...virtualEdges],
+    };
+  }, [graphData, filters.showChunks, filters.showCooccurrence]);
 
   const toggleEntityTypeFilter = (entityType: string) => {
     setFilters((prev) => ({
@@ -216,107 +291,86 @@ export default function GraphPage() {
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-wrap gap-3 sm:gap-4">
-            {/* Cluster Entities */}
-            <button
-              onClick={triggerEntityClustering}
-              disabled={loading}
-              className="bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300 hover:text-purple-700 text-xs sm:text-sm font-medium flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md flex-shrink-0"
-            >
-              <svg
-                className="w-3 h-3 sm:w-4 sm:h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 11H5m14-4l3 3-3 3M9 8l3 3-3 3"
-                />
-              </svg>
-              <span className="hidden sm:inline">Cluster Entities</span>
-              <span className="sm:hidden">Cluster</span>
-            </button>
-
-            {/* Document Similarity */}
-            <button
-              onClick={triggerDocumentSimilarity}
-              disabled={loading}
-              className="bg-white border border-green-200 text-green-600 hover:bg-green-50 hover:border-green-300 hover:text-green-700 text-xs sm:text-sm font-medium flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md flex-shrink-0"
-            >
-              <svg
-                className="w-3 h-3 sm:w-4 sm:h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <span className="hidden sm:inline">Analyze Doc Similarity</span>
-              <span className="sm:hidden">Analyze</span>
-            </button>
-
-            {/* Topic Modeling */}
-            <button
-              onClick={triggerTopicModeling}
-              disabled={loading}
-              className="bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 text-xs sm:text-sm font-medium flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md flex-shrink-0"
-            >
-              <svg
-                className="w-3 h-3 sm:w-4 sm:h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-                />
-              </svg>
-              <span className="hidden sm:inline">Extract Topics</span>
-              <span className="sm:hidden">Topics</span>
-            </button>
-
+            {/* Toolbar */}
+          <div className="flex items-center gap-2">
             {/* Refresh */}
             <button
               onClick={fetchGraphData}
               disabled={loading}
-              className="bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 text-xs sm:text-sm font-medium flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md flex-shrink-0"
+              title="Refresh"
+              className="bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-800 p-2 rounded-lg transition-colors shadow-sm"
             >
-              <svg
-                className="w-3 h-3 sm:w-4 sm:h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              <span className="hidden sm:inline">Refresh</span>
-              <span className="sm:hidden">↻</span>
+            </button>
+
+            {/* Tools dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setToolsOpen(v => !v)}
+                disabled={loading}
+                className="bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-800 flex items-center gap-1.5 px-3 py-2 rounded-lg transition-colors shadow-sm text-sm font-medium"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Tools
+              </button>
+              {toolsOpen && (
+                <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 shadow-lg rounded-lg py-1 z-20 min-w-48">
+                  <button
+                    onClick={() => { triggerEntityClustering(); setToolsOpen(false); }}
+                    disabled={loading}
+                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14-4l3 3-3 3M9 8l3 3-3 3" />
+                    </svg>
+                    Cluster Entities
+                  </button>
+                  <button
+                    onClick={() => { triggerDocumentSimilarity(); setToolsOpen(false); }}
+                    disabled={loading}
+                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Analyze Doc Similarity
+                  </button>
+                  <button
+                    onClick={() => { triggerTopicModeling(); setToolsOpen(false); }}
+                    disabled={loading}
+                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                    Extract Topics
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Filters toggle */}
+            <button
+              onClick={() => setSidebarOpen(v => !v)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-colors shadow-sm text-sm font-medium border ${sidebarOpen ? "bg-purple-50 border-purple-300 text-purple-700" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-800"}`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+              </svg>
+              Filters
             </button>
 
             {/* Back to Dashboard */}
             <a
               href="/dashboard"
-              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-3 sm:px-6 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl text-xs sm:text-sm font-medium flex-shrink-0"
+              className="ml-auto bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl text-sm font-medium"
             >
-              <span className="hidden sm:inline">Back to Dashboard</span>
-              <span className="sm:hidden">Dashboard</span>
+              Dashboard
             </a>
           </div>
         </div>
@@ -360,9 +414,9 @@ export default function GraphPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className={`grid grid-cols-1 gap-6 ${sidebarOpen ? "lg:grid-cols-4" : ""}`}>
           {/* Filters Sidebar */}
-          <div className="lg:col-span-1">
+          {sidebarOpen && <div className="lg:col-span-1">
             <div className="card-enhanced border-l-4 border-l-purple-500 p-6">
               <h3 className="text-lg font-semibold text-enhanced mb-4 flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-purple-500"></div>
@@ -446,6 +500,38 @@ export default function GraphPage() {
                       Show Connection Labels
                     </span>
                   </label>
+                  <label className="flex items-center p-2 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={filters.showChunks}
+                      onChange={(e) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          showChunks: e.target.checked,
+                        }))
+                      }
+                      className="rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span className="ml-3 text-sm text-gray-800 font-semibold">
+                      Show Chunk Nodes
+                    </span>
+                  </label>
+                  <label className="flex items-center p-2 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={filters.showCooccurrence}
+                      onChange={(e) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          showCooccurrence: e.target.checked,
+                        }))
+                      }
+                      className="rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span className="ml-3 text-sm text-gray-800 font-semibold">
+                      Show Co-occurrence
+                    </span>
+                  </label>
                 </div>
                 <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
                   <p className="text-xs text-blue-800 font-medium">
@@ -455,7 +541,7 @@ export default function GraphPage() {
               </div>
 
               {/* Graph Stats */}
-              {graphData && (
+              {filteredGraphData && (
                 <div className="border-t border-orange-200 pt-4">
                   <h4 className="text-sm font-semibold text-orange-700 mb-3 flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-orange-500"></div>
@@ -464,28 +550,22 @@ export default function GraphPage() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between items-center p-2 rounded-lg bg-blue-50">
                       <span className="font-medium text-blue-700">Nodes:</span>
-                      <span className="font-bold text-blue-800">{graphData.nodes.length}</span>
+                      <span className="font-bold text-blue-800">{filteredGraphData.nodes.length}</span>
                     </div>
                     <div className="flex justify-between items-center p-2 rounded-lg bg-green-50">
                       <span className="font-medium text-green-700">Edges:</span>
-                      <span className="font-bold text-green-800">{graphData.edges.length}</span>
+                      <span className="font-bold text-green-800">{filteredGraphData.edges.length}</span>
                     </div>
                     <div className="flex justify-between items-center p-2 rounded-lg bg-purple-50">
                       <span className="font-medium text-purple-700">Documents:</span>
                       <span className="font-bold text-purple-800">
-                        {
-                          graphData.nodes.filter((n) => n.type === "Document")
-                            .length
-                        }
+                        {filteredGraphData.nodes.filter((n) => n.type === "Document").length}
                       </span>
                     </div>
                     <div className="flex justify-between items-center p-2 rounded-lg bg-orange-50">
                       <span className="font-medium text-orange-700">Entities:</span>
                       <span className="font-bold text-orange-800">
-                        {
-                          graphData.nodes.filter((n) => n.type === "Entity")
-                            .length
-                        }
+                        {filteredGraphData.nodes.filter((n) => n.type === "Entity").length}
                       </span>
                     </div>
                   </div>
@@ -536,10 +616,10 @@ export default function GraphPage() {
                 </div>
               </div>
             )}
-          </div>
+          </div>}
 
           {/* Graph Visualization */}
-          <div className="lg:col-span-3">
+          <div className={sidebarOpen ? "lg:col-span-3" : "col-span-full"}>
             <div className="card-enhanced border-l-4 border-l-blue-500 p-6">
               {loading ? (
                 <div className="flex items-center justify-center h-96">
@@ -553,7 +633,7 @@ export default function GraphPage() {
                     </p>
                   </div>
                 </div>
-              ) : !graphData || graphData.nodes.length === 0 ? (
+              ) : !filteredGraphData || filteredGraphData.nodes.length === 0 ? (
                 <div className="flex items-center justify-center h-96">
                   <div className="text-center">
                     <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-blue-50 to-purple-100 flex items-center justify-center shadow-lg border border-blue-200">
@@ -588,7 +668,7 @@ export default function GraphPage() {
                 </div>
               ) : (
                 <GraphVisualization
-                  graphData={graphData}
+                  graphData={filteredGraphData!}
                   onNodeClick={handleNodeClick}
                   onEdgeClick={handleEdgeClick}
                   height={600}
