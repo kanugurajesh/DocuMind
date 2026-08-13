@@ -30,7 +30,6 @@
     "clsx": "^2.1.1",
     "cytoscape": "^3.33.1",
     "cytoscape-cose-bilkent": "^4.1.0",
-    "langchain": "^0.3.34",
     "lucide-react": "^0.544.0",
     "mammoth": "^1.10.0",
     "mongodb": "^6.19.0",

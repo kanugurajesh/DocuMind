@@ -7,23 +7,18 @@ export function getQdrantClient(): QdrantClient {
     const mode = process.env.QDRANT_MODE ?? "cloud";
 
     if (mode === "local") {
-      console.log("🔗 [Qdrant] Mode: LOCAL — connecting to http://localhost:6333");
       client = new QdrantClient({ url: "http://localhost:6333" });
     } else {
       const qdrantUrl = process.env.QDRANT_URL;
       if (!qdrantUrl) {
         throw new Error("QDRANT_URL environment variable is not set (required for cloud mode)");
       }
-      console.log(`🔗 [Qdrant] Mode: CLOUD — connecting to ${qdrantUrl}`);
       const config: any = { url: qdrantUrl };
       if (process.env.QDRANT_API_KEY) {
         config.apiKey = process.env.QDRANT_API_KEY;
-        console.log("🔑 [Qdrant] API key loaded for authentication");
       }
       client = new QdrantClient(config);
     }
-
-    console.log("✅ [Qdrant] Client initialized successfully");
   }
 
   return client;
@@ -32,24 +27,13 @@ export function getQdrantClient(): QdrantClient {
 // Health check function to test Qdrant connectivity
 export async function testQdrantConnection(): Promise<boolean> {
   try {
-    console.log("🏥 Testing Qdrant connection...");
     const client = getQdrantClient();
 
     // Try to get collections (lightweight operation)
-    const collections = await client.getCollections();
-    console.log("✅ Qdrant connection successful:", collections.collections?.length || 0, "collections");
+    await client.getCollections();
     return true;
   } catch (error) {
-    console.error("❌ Qdrant connection failed:", error);
-
-    if (error instanceof Error) {
-      if (error.message.includes('ENOTFOUND')) {
-        console.error("🌐 DNS resolution failed - check if Qdrant instance exists");
-      } else if (error.message.includes('fetch failed')) {
-        console.error("🔌 Network connection failed - check internet connectivity");
-      }
-    }
-
+    console.error("Qdrant connection failed:", error);
     return false;
   }
 }
@@ -153,18 +137,6 @@ export async function insertVectors(vectors: any[]) {
   const client = getQdrantClient();
 
   try {
-    // Log vector data structure for debugging
-    console.log("Inserting vectors:", {
-      count: vectors.length,
-      sampleVector: vectors[0]
-        ? {
-            id: vectors[0].id,
-            vectorLength: vectors[0].vector?.length,
-            payloadKeys: Object.keys(vectors[0].payload || {}),
-          }
-        : "No vectors to insert",
-    });
-
     // Validate vector format
     for (const vector of vectors) {
       if (!vector.id) {

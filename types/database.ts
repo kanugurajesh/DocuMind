@@ -120,7 +120,6 @@ export interface SearchResult {
     filename: string;
     uploadedAt: Date;
   };
-  entities?: EntityNode[];
 }
 
 // Chat/Q&A Types
@@ -136,5 +135,4 @@ export interface ChatResponse {
   answer: string;
   sources: SearchResult[];
   confidence: number;
-  relatedEntities: EntityNode[];
 }

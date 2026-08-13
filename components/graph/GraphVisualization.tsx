@@ -101,7 +101,7 @@ export function GraphVisualization({
             "text-valign": "center",
             "text-halign": "center",
             "font-size": "11px",
-            "font-weight": "600",
+            "font-weight": 600,
             "text-outline-width": 2,
             "text-outline-color": "#fff",
             color: "#1f2937",

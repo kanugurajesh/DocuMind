@@ -105,28 +105,15 @@ export async function processDocument(
 
     // Step 7: Extract entities and populate knowledge graph
     console.log("Step 7: Extracting entities and relationships...");
-    console.log(`📊 Processing ${chunks.length} chunks for entity extraction`);
     const chunkData = chunks.map((chunk, index) => ({
       id: vectorData[index].id, // Use the same UUID as the chunk node
       text: chunk.text,
     }));
 
-    console.log(
-      "🔍 Chunk data sample:",
-      chunkData
-        .slice(0, 2)
-        .map((c) => ({ id: c.id, textLength: c.text.length })),
-    );
-    console.log("👤 User ID for entity processing:", userId);
-    console.log("📄 Document ID for entity processing:", docId);
-
     const extractedEntities = await processDocumentEntities(
       docId,
       userId,
       chunkData,
-    );
-    console.log(
-      `🎯 Entity extraction completed: ${extractedEntities.length} entities extracted`,
     );
 
     // Step 8: Process cross-document entity resolution
@@ -141,9 +128,9 @@ export async function processDocument(
     console.log("Step 9: Updating document status...");
     await updateDocumentStatus(docId, "completed");
 
-    console.log(`✅ Document processing completed successfully for ${docId}`);
-    console.log(`   - Processed ${chunks.length} chunks`);
-    console.log(`   - Extracted ${extractedEntities.length} entities`);
+    console.log(
+      `Document processing completed for ${docId}: ${chunks.length} chunks, ${extractedEntities.length} entities`,
+    );
 
     return {
       success: true,
@@ -152,7 +139,7 @@ export async function processDocument(
       entitiesExtracted: extractedEntities.length,
     };
   } catch (error) {
-    console.error(`❌ Error processing document ${docId}:`, error);
+    console.error(`Error processing document ${docId}:`, error);
 
     // Update document status to failed
     await updateDocumentStatus(

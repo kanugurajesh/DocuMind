@@ -39,7 +39,6 @@ export async function generateChatResponse(
           "I couldn't find any relevant information in your documents to answer this question. Try asking about topics covered in your uploaded documents.",
         sources: [],
         confidence: 0,
-        relatedEntities: [],
       };
     }
 
@@ -53,7 +52,6 @@ export async function generateChatResponse(
       answer: llmResponse.answer,
       sources: searchResults,
       confidence: llmResponse.confidence,
-      relatedEntities: [], // TODO: Extract related entities from answer
     };
   } catch (error) {
     console.error("Error generating chat response:", error);
@@ -125,7 +123,6 @@ async function performSemanticSearch({
         text: (payload.text as string) || "",
         score: result.score || 0,
         document: docInfo,
-        entities: [], // TODO: Include related entities
       };
     });
 

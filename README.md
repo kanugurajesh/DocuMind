@@ -67,8 +67,8 @@ Documind employs a sophisticated multi-database architecture designed for scalab
 ├─────────────────────────────────────────────────────────────────┤
 │  • Next.js API Routes                                           │
 │  • Middleware for authentication                                │
-│  • AI Processing Pipeline (LangChain + OpenAI)                  │
-│  • File processing (PDF, Word, Text)                            │
+│  • AI Processing Pipeline (OpenAI)                               │
+│  • File processing (PDF via LangChain, Word, Text)              │
 └─────────────────────────────────────────────────────────────────┘
                                  ║
          ┌---------------────────╫────────--------------┐
@@ -78,9 +78,9 @@ Documind employs a sophisticated multi-database architecture designed for scalab
 │                 │    │                 │      │                 │
 │  • AWS S3       │    │  • OpenAI GPT   │      │  • MongoDB      │
 │  • Presigned    │    │  • Embeddings   │      │  • Qdrant       │
-│    URLs         │    │  • LangChain    │      │  • Neo4j        │
-│  • Secure       │    │  • Text         │      │  • Multi-DB     │
-│    Storage      │    │    Processing   │      │    Architecture │
+│    URLs         │    │  • Entity       │      │  • Neo4j        │
+│  • Secure       │    │    Extraction   │      │  • Multi-DB     │
+│    Storage      │    │                 │      │    Architecture │
 └─────────────────┘    └─────────────────┘      └─────────────────┘
 ```
 
@@ -111,12 +111,11 @@ Documind employs a sophisticated multi-database architecture designed for scalab
 #### Backend & APIs
 - **Next.js API Routes**: RESTful endpoints
 - **Clerk**: Authentication and user management
-- **OpenAI**: Embeddings and language model
-- **LangChain**: AI orchestration framework
+- **OpenAI**: Embeddings, chat completion, and entity extraction (called directly via the `openai` SDK)
 
 #### Processing Pipeline
 - **Mammoth.js**: Word document processing
-- **PDF-Parse**: PDF text extraction
+- **LangChain (`@langchain/community` PDFLoader)**: PDF text extraction
 - **Text Chunking**: Intelligent content segmentation
 - **Entity Extraction**: NER with relationship mapping
 
@@ -150,7 +149,7 @@ File Upload → Text Extraction → AI Processing → Multi-DB Storage
      │              │               │                 Entity extraction (Neo4j)
      │              │               │                 Metadata storage (MongoDB)
      │              │               │
-     │              │               └─→ LangChain + OpenAI processing
+     │              │               └─→ OpenAI processing
      │              │                   Topic modeling
      │              │                   Entity recognition
      │              │
@@ -206,15 +205,17 @@ Before running Documind, ensure you have:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/documind.git
-cd documind
+git clone https://github.com/kanugurajesh/DocuMind.git
+cd DocuMind
 ```
 
 ### 2. Install Dependencies
 
 ```bash
-npm install
+npm install --legacy-peer-deps
 ```
+
+> **Note:** `--legacy-peer-deps` is required because `@langchain/community` (used for PDF parsing) declares a peer dependency conflict with the `openai` SDK version this project uses.
 
 ### 3. Environment Configuration
 
@@ -636,25 +637,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆘 Support
 
-### Documentation
-- **API Reference**: `/docs/api`
-- **Component Library**: `/docs/components`
-- **Deployment Guide**: `/docs/deployment`
-
 ### Community
-- **Issues**: [GitHub Issues](https://github.com/yourusername/documind/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/documind/discussions)
-- **Discord**: [Join our community](https://discord.gg/documind)
-
-### Enterprise Support
-For enterprise deployments and custom integrations, contact us at [enterprise@documind.com](mailto:enterprise@documind.com)
+- **Issues**: [GitHub Issues](https://github.com/kanugurajesh/DocuMind/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/kanugurajesh/DocuMind/discussions)
 
 ---
 
 <div align="center">
 
-**Built with ❤️ by the Kanugu Rajesh**
-
-[Website](https://documind.com) • [Documentation](https://docs.documind.com) • [Blog](https://blog.documind.com)
+**Built with ❤️ by Kanugu Rajesh**
 
 </div>
