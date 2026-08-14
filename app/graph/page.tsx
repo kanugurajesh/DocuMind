@@ -18,6 +18,7 @@ export default function GraphPage() {
     entityTypes: [] as string[],
     maxNodes: 50,
     showEdgeLabels: false,
+    showNodeLabels: true,
     minConfidence: 0.3,
     showChunks: false,
     showCooccurrence: false,
@@ -439,7 +440,7 @@ export default function GraphPage() {
                         type="checkbox"
                         checked={filters.entityTypes.includes(type)}
                         onChange={() => toggleEntityTypeFilter(type)}
-                        className="rounded-sm border-input text-foreground focus:ring-ring"
+                        className="rounded-sm border-input accent-primary focus:ring-ring"
                       />
                       <span className="ml-3 text-sm text-foreground capitalize font-medium">
                         {type.toLowerCase()}
@@ -476,6 +477,22 @@ export default function GraphPage() {
                   <label className="flex items-center p-2 hover:bg-accent transition-colors cursor-pointer">
                     <input
                       type="checkbox"
+                      checked={filters.showNodeLabels}
+                      onChange={(e) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          showNodeLabels: e.target.checked,
+                        }))
+                      }
+                      className="rounded-sm border-input accent-primary focus:ring-ring"
+                    />
+                    <span className="ml-3 text-sm text-foreground font-medium">
+                      Show node names
+                    </span>
+                  </label>
+                  <label className="flex items-center p-2 hover:bg-accent transition-colors cursor-pointer">
+                    <input
+                      type="checkbox"
                       checked={filters.showEdgeLabels}
                       onChange={(e) =>
                         setFilters((prev) => ({
@@ -483,7 +500,7 @@ export default function GraphPage() {
                           showEdgeLabels: e.target.checked,
                         }))
                       }
-                      className="rounded-sm border-input text-foreground focus:ring-ring"
+                      className="rounded-sm border-input accent-primary focus:ring-ring"
                     />
                     <span className="ml-3 text-sm text-foreground font-medium">
                       Show connection labels
@@ -499,7 +516,7 @@ export default function GraphPage() {
                           showChunks: e.target.checked,
                         }))
                       }
-                      className="rounded-sm border-input text-foreground focus:ring-ring"
+                      className="rounded-sm border-input accent-primary focus:ring-ring"
                     />
                     <span className="ml-3 text-sm text-foreground font-medium">
                       Show chunk nodes
@@ -515,7 +532,7 @@ export default function GraphPage() {
                           showCooccurrence: e.target.checked,
                         }))
                       }
-                      className="rounded-sm border-input text-foreground focus:ring-ring"
+                      className="rounded-sm border-input accent-primary focus:ring-ring"
                     />
                     <span className="ml-3 text-sm text-foreground font-medium">
                       Show co-occurrence
@@ -656,6 +673,7 @@ export default function GraphPage() {
                   onEdgeClick={handleEdgeClick}
                   height={600}
                   showEdgeLabels={filters.showEdgeLabels}
+                  showNodeLabels={filters.showNodeLabels}
                 />
               )}
             </div>

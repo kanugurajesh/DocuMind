@@ -21,12 +21,18 @@ export function GraphVisualization({
   height = 600,
   width,
   showEdgeLabels = false,
-}: GraphVisualizationProps & { showEdgeLabels?: boolean }) {
+  showNodeLabels = true,
+}: GraphVisualizationProps & {
+  showEdgeLabels?: boolean;
+  showNodeLabels?: boolean;
+}) {
   const cyRef = useRef<HTMLDivElement>(null);
   const cyInstanceRef = useRef<Core | null>(null);
   const [loading, setLoading] = useState(true);
   const [_selectedNode, setSelectedNode] = useState<string | null>(null);
   const [legendOpen, setLegendOpen] = useState(false);
+  const showNodeLabelsRef = useRef(showNodeLabels);
+  const showEdgeLabelsRef = useRef(showEdgeLabels);
 
   const getNodeLabel = useCallback((node: any) => {
     switch (node.type) {
@@ -196,22 +202,8 @@ export function GraphVisualization({
             opacity: 0.7,
           },
         },
-        // Edge styles on hover - Show labels
-        {
-          selector: "edge:hover",
-          style: {
-            width: 3,
-            "line-color": "#6366F1",
-            "target-arrow-color": "#6366F1",
-            label: "data(label)",
-            "font-size": "10px",
-            "font-weight": "bold",
-            "text-outline-width": 2,
-            "text-outline-color": "#fff",
-            color: "#1E293B",
-            opacity: 1,
-          },
-        },
+        // (Edge hover highlighting is handled by real mouseover/mouseout
+        // listeners below — Cytoscape core has no ":hover" pseudo-selector.)
         // Structural edges — light, recede to background
         {
           selector: 'edge[type="CONTAINS"], edge[type="MENTIONS"]',
@@ -290,23 +282,46 @@ export function GraphVisualization({
       }
     });
 
-    // Show label on hover for Entity and Chunk nodes
+    // Entity/Chunk labels: shown always when the toggle is on, otherwise
+    // only while hovering (progressive disclosure for dense graphs). Bypass
+    // styles need the resolved value here, not the "data(label)" mapper
+    // syntax — that mapper form only resolves for stylesheet rules.
+    cy.nodes('[type="Entity"], [type="Chunk"]').forEach((node) => {
+      node.style("label", showNodeLabelsRef.current ? node.data("label") : "");
+    });
     cy.on("mouseover", 'node[type="Entity"], node[type="Chunk"]', (evt) => {
       const node = evt.target as NodeSingular;
       node.style("label", node.data("label"));
     });
     cy.on("mouseout", 'node[type="Entity"], node[type="Chunk"]', (evt) => {
+      if (showNodeLabelsRef.current) return;
       const node = evt.target as NodeSingular;
       node.style("label", "");
     });
 
-    cyInstanceRef.current = cy;
+    // Edge hover — highlight + reveal label. Cytoscape core has no real
+    // pointer-driven ":hover" pseudo-selector (an "edge:hover" stylesheet
+    // rule silently matches every edge, permanently), so this has to be
+    // done with genuine mouseover/mouseout listeners instead.
+    cy.on("mouseover", "edge", (evt) => {
+      const edge = evt.target as EdgeSingular;
+      edge.style({
+        width: 3,
+        "line-color": "#6366F1",
+        "target-arrow-color": "#6366F1",
+        opacity: 1,
+        label: edge.data("label"),
+        "font-size": "10px",
+        color: "#1E293B",
+      });
+    });
+    cy.on("mouseout", "edge", (evt) => {
+      const edge = evt.target as EdgeSingular;
+      edge.removeStyle("width line-color target-arrow-color opacity font-size color");
+      edge.style("label", showEdgeLabelsRef.current ? edge.data("label") : "");
+    });
 
-    // Final verification after rendering
-    setTimeout(() => {
-      const renderedNodes = cy.nodes().length;
-      const renderedEdges = cy.edges().length;
-    }, 100);
+    cyInstanceRef.current = cy;
 
     setLoading(false);
 
@@ -321,13 +336,30 @@ export function GraphVisualization({
 
   // Update edge labels on the live instance when the toggle changes — no need to recreate the graph
   useEffect(() => {
+    showEdgeLabelsRef.current = showEdgeLabels;
     if (!cyInstanceRef.current) return;
-    cyInstanceRef.current.edges().style("label", showEdgeLabels ? "data(label)" : "");
+    // Bypass styles need the resolved value, not the "data(label)" mapper
+    // syntax — that mapper form only resolves for stylesheet rules.
+    cyInstanceRef.current.edges().forEach((edge) => {
+      edge.style("label", showEdgeLabels ? edge.data("label") : "");
+    });
     cyInstanceRef.current.edges().style("font-size", "10px");
     cyInstanceRef.current.edges().style("color", "#1E293B");
     cyInstanceRef.current.edges().style("text-outline-width", 2);
     cyInstanceRef.current.edges().style("text-outline-color", "#fff");
   }, [showEdgeLabels]);
+
+  // Update Entity/Chunk node labels on the live instance when the toggle
+  // changes, and keep the hover handlers in sync via the ref they read.
+  useEffect(() => {
+    showNodeLabelsRef.current = showNodeLabels;
+    if (!cyInstanceRef.current) return;
+    cyInstanceRef.current
+      .nodes('[type="Entity"], [type="Chunk"]')
+      .forEach((node) => {
+        node.style("label", showNodeLabels ? node.data("label") : "");
+      });
+  }, [showNodeLabels]);
 
 
   const fitToView = () => {
