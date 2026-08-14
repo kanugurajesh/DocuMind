@@ -7,16 +7,32 @@ declare global {
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
+function getMongoUri(): string {
+  const mode = process.env.MONGODB_MODE === "local" ? "local" : "cloud";
+
+  if (mode === "local") {
+    return process.env.MONGODB_LOCAL_URI ?? "mongodb://localhost:27017/documind";
+  }
+
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    throw new Error("MONGODB_URI environment variable is not set (required for cloud mode)");
+  }
+  return uri;
+}
+
+const mongoUri = getMongoUri();
+
 if (process.env.NODE_ENV === "development") {
   // In development mode, use a global variable so the value is preserved across module reloads
   if (!global._mongoClientPromise) {
-    client = new MongoClient(process.env.MONGODB_URI!);
+    client = new MongoClient(mongoUri);
     global._mongoClientPromise = client.connect();
   }
   clientPromise = global._mongoClientPromise;
 } else {
   // In production mode, it's best to not use a global variable
-  client = new MongoClient(process.env.MONGODB_URI!);
+  client = new MongoClient(mongoUri);
   clientPromise = client.connect();
 }
 

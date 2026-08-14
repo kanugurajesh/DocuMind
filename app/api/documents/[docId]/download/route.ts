@@ -27,13 +27,13 @@ export async function GET(
       return NextResponse.json({ error: "Document not found" }, { status: 404 });
     }
 
-    // Extract S3 key from blobUrl
-    // Format: https://bucket.s3.region.amazonaws.com/userId/docId/filename
-    const urlParts = document.blobUrl.split('/');
-    const s3Key = urlParts.slice(3).join('/'); // Remove https://bucket.s3.region.amazonaws.com
+    // Storage key is always `${userId}/${docId}/${filename}` regardless of
+    // storage mode (see uploadFileBuffer) — reconstruct it rather than parsing
+    // blobUrl, since local (path-style) and cloud (virtual-hosted-style) URLs differ
+    const storageKey = `${userId}/${docId}/${document.filename}`;
 
     // Generate presigned download URL
-    const downloadUrl = await getFileDownloadUrl(s3Key, 10); // 10 minutes expiry
+    const downloadUrl = await getFileDownloadUrl(storageKey, 10); // 10 minutes expiry
 
     return NextResponse.json({
       success: true,

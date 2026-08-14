@@ -1,6 +1,8 @@
 import {
+  CreateBucketCommand,
   DeleteObjectCommand,
   GetObjectCommand,
+  HeadBucketCommand,
   HeadObjectCommand,
   ListObjectsV2Command,
   PutObjectCommand,
@@ -11,20 +13,43 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 let s3Client: S3Client | null = null;
 
+function getStorageMode(): "local" | "cloud" {
+  return process.env.STORAGE_MODE === "local" ? "local" : "cloud";
+}
+
+function getLocalEndpoint(): string {
+  return process.env.STORAGE_LOCAL_ENDPOINT ?? "http://localhost:9000";
+}
+
 export function getS3Client(): S3Client {
   if (!s3Client) {
-    s3Client = new S3Client({
-      region: process.env.AWS_REGION!,
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-      },
-    });
+    if (getStorageMode() === "local") {
+      s3Client = new S3Client({
+        region: "us-east-1",
+        endpoint: getLocalEndpoint(),
+        forcePathStyle: true,
+        credentials: {
+          accessKeyId: process.env.STORAGE_LOCAL_ACCESS_KEY ?? "minioadmin",
+          secretAccessKey: process.env.STORAGE_LOCAL_SECRET_KEY ?? "minioadmin",
+        },
+      });
+    } else {
+      s3Client = new S3Client({
+        region: process.env.AWS_REGION!,
+        credentials: {
+          accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+        },
+      });
+    }
   }
   return s3Client;
 }
 
 export function getBucketName(): string {
+  if (getStorageMode() === "local") {
+    return process.env.STORAGE_LOCAL_BUCKET_NAME ?? "documind";
+  }
   return process.env.AWS_S3_BUCKET_NAME!;
 }
 
@@ -34,18 +59,20 @@ export async function initializeBucket() {
   const bucketName = getBucketName();
 
   try {
-    // Check if bucket exists by trying to get its location
-    await s3.send(
-      new HeadObjectCommand({
-        Bucket: bucketName,
-        Key: ".test",
-      }),
-    );
+    await s3.send(new HeadBucketCommand({ Bucket: bucketName }));
+    console.log("Storage bucket exists and is accessible");
   } catch (error: any) {
-    if (error.name === "NotFound" || error.$metadata?.httpStatusCode === 404) {
-      console.log("S3 bucket exists and is accessible");
+    const notFound = error.name === "NotFound" || error.$metadata?.httpStatusCode === 404;
+
+    if (notFound && getStorageMode() === "local") {
+      // MinIO doesn't pre-provision buckets like AWS accounts typically do
+      await s3.send(new CreateBucketCommand({ Bucket: bucketName }));
+      console.log(`Local storage bucket "${bucketName}" created`);
+    } else if (notFound) {
+      console.error(`S3 bucket "${bucketName}" not found`);
+      throw error;
     } else {
-      console.error("Error accessing S3 bucket:", error);
+      console.error("Error accessing storage bucket:", error);
       throw error;
     }
   }
@@ -89,8 +116,11 @@ export async function uploadFileBuffer(
   try {
     const uploadResponse = await s3.send(command);
 
-    // Construct the S3 URL
-    const blobUrl = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    // Construct the storage URL (path-style for local MinIO, virtual-hosted-style for AWS)
+    const blobUrl =
+      getStorageMode() === "local"
+        ? `${getLocalEndpoint()}/${bucketName}/${key}`
+        : `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
 
     return {
       blobUrl,

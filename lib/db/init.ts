@@ -21,9 +21,9 @@ export async function initializeDatabases() {
     await initializeNeo4jConstraints();
     console.log("✅ Neo4j constraints and indexes created");
 
-    // Initialize AWS S3 bucket
+    // Initialize storage bucket (local MinIO or AWS S3, depending on STORAGE_MODE)
     await initializeBucket();
-    console.log("✅ AWS S3 bucket ready");
+    console.log("✅ Storage bucket ready");
 
     console.log("🎉 All databases initialized successfully!");
   } catch (error) {
@@ -39,6 +39,7 @@ export async function checkDatabaseHealth() {
     qdrant: false,
     neo4j: false,
     s3: false,
+    ai: false,
   };
 
   try {
@@ -72,7 +73,7 @@ export async function checkDatabaseHealth() {
   }
 
   try {
-    // Check S3
+    // Check storage (local MinIO or AWS S3, depending on STORAGE_MODE)
     const { getS3Client, getBucketName } = await import("../storage/s3");
     const { HeadBucketCommand } = await import("@aws-sdk/client-s3");
     const s3Client = getS3Client();
@@ -80,7 +81,16 @@ export async function checkDatabaseHealth() {
     await s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
     status.s3 = true;
   } catch (error) {
-    console.error("S3 health check failed:", error);
+    console.error("Storage health check failed:", error);
+  }
+
+  try {
+    // Check AI provider (local Ollama or OpenAI, depending on AI_MODE)
+    const { getOpenAIClient } = await import("../ai/client");
+    await getOpenAIClient().models.list();
+    status.ai = true;
+  } catch (error) {
+    console.error("AI provider health check failed:", error);
   }
 
   return status;

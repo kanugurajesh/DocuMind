@@ -1,4 +1,3 @@
-import { OpenAI } from "openai";
 import { v4 as uuidv4 } from "uuid";
 import { getDocumentsCollection } from "../db/mongodb";
 import {
@@ -6,10 +5,7 @@ import {
   createTopicNode,
   getUserDocuments,
 } from "../db/neo4j";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+import { getChatModel, getOpenAIClient } from "./client";
 
 export interface ExtractedTopic {
   id: string;
@@ -121,8 +117,8 @@ Guidelines:
 Topic examples: "Technology & Software", "Business & Finance", "Research & Academic", "Legal Documents", "Marketing & Communications", etc.
     `;
 
-    const response = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+    const response = await getOpenAIClient().chat.completions.create({
+      model: getChatModel(),
       messages: [
         {
           role: "user",

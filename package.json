@@ -8,7 +8,9 @@
     "lint": "biome check",
     "format": "biome format --write",
     "build": "next build",
-    "vercel-build": "next build"
+    "vercel-build": "next build",
+    "docker:up": "node scripts/docker-services.js up",
+    "docker:down": "node scripts/docker-services.js down"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.892.0",

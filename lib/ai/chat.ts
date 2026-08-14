@@ -1,12 +1,8 @@
-import { OpenAI } from "openai";
 import type { ChatResponse, SearchResult } from "@/types";
 import { getDocumentsCollection } from "../db/mongodb";
 import { searchVectors } from "../db/qdrant";
+import { getChatModel, getOpenAIClient } from "./client";
 import { generateQueryEmbedding } from "./embeddings";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
 
 export interface ChatContext {
   query: string;
@@ -165,8 +161,8 @@ Instructions:
 
 Answer:`;
 
-    const response = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+    const response = await getOpenAIClient().chat.completions.create({
+      model: getChatModel(),
       messages: [
         {
           role: "system",
