@@ -21,19 +21,19 @@ export function ChatMessage({
   const isUser = message.role === "user";
 
   return (
-    <div className={`flex gap-4 ${isUser ? "justify-end" : "justify-start"} animate-fadeIn`}>
+    <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"} animate-fadeIn`}>
       {/* Avatar */}
       {!isUser && (
-        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
-          <Bot className="h-5 w-5 text-white" />
+        <div className="flex-shrink-0 w-9 h-9 rounded-sm border border-border bg-primary flex items-center justify-center">
+          <Bot className="h-4 w-4 text-primary-foreground" />
         </div>
       )}
 
       <div
-        className={`max-w-3xl rounded-2xl p-4 shadow-lg transition-all duration-300 hover:shadow-xl ${
+        className={`max-w-3xl p-4 ${
           isUser
-            ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-sm"
-            : "bg-gradient-to-br from-white to-blue-50/30 text-gray-800 border border-blue-100 rounded-bl-sm"
+            ? "bg-primary text-primary-foreground"
+            : "card-index text-foreground"
         }`}
       >
         {/* Message Content */}
@@ -41,71 +41,64 @@ export function ChatMessage({
           {message.content}
         </div>
 
-        {/* Assistant Sources */}
+        {/* Assistant Sources — footnotes */}
         {!isUser &&
           message.sources &&
           message.sources.length > 0 &&
           showSources && (
-            <div className="mt-4 pt-4 border-t border-blue-200">
+            <div className="mt-4 pt-3 rule-ledger">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-semibold text-blue-700 flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  Sources ({message.sources.length})
+                <span className="catalog-number">
+                  REFERENCES ({message.sources.length})
                 </span>
                 <button
                   onClick={() => setShowSourcesExpanded(!showSourcesExpanded)}
-                  className="text-xs text-blue-600 hover:text-blue-800 font-medium px-2 py-1 rounded-md hover:bg-blue-50 transition-colors"
+                  className="text-xs text-foreground underline decoration-ledger font-medium"
                 >
-                  {showSourcesExpanded ? "Hide" : "Show"} sources
+                  {showSourcesExpanded ? "Collapse" : "Expand"}
                 </button>
               </div>
 
-              {showSourcesExpanded && (
-                <div className="space-y-3">
+              {showSourcesExpanded ? (
+                <div className="space-y-2">
                   {message.sources.map((source, index) => (
                     <div
                       key={`${source.docId}-${source.chunkId}`}
-                      className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-3 text-sm cursor-pointer hover:from-blue-100 hover:to-indigo-100 transition-all duration-300 hover:shadow-md"
+                      className="border border-border bg-background p-3 text-sm cursor-pointer hover:border-ledger transition-colors"
                       onClick={() => onSourceClick?.(source.docId)}
                     >
-                      <div className="flex items-start justify-between mb-2">
-                        <span className="font-semibold text-blue-700 flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-lg bg-blue-600 text-white text-xs flex items-center justify-center font-bold">
-                            {index + 1}
-                          </div>
+                      <div className="flex items-start justify-between mb-2 gap-2">
+                        <span className="font-medium text-foreground flex items-center gap-2">
+                          <span className="font-mono text-xs text-muted-foreground">
+                            [{index + 1}]
+                          </span>
                           {source.document.filename}
                         </span>
-                        <div className="flex items-center gap-1">
-                          <div className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
-                            {(source.score * 100).toFixed(0)}% match
-                          </div>
-                        </div>
+                        <span className="catalog-number shrink-0">
+                          {(source.score * 100).toFixed(0)}% match
+                        </span>
                       </div>
-                      <div className="text-gray-700 line-clamp-3 pl-8 text-sm leading-relaxed">
+                      <div className="text-muted-foreground line-clamp-3 pl-6 leading-relaxed">
                         "{source.text}"
                       </div>
                     </div>
                   ))}
                 </div>
-              )}
-
-              {!showSourcesExpanded && (
+              ) : (
                 <div className="flex flex-wrap gap-2">
                   {message.sources.slice(0, 3).map((source, index) => (
                     <button
                       key={`${source.docId}-${source.chunkId}`}
                       onClick={() => onSourceClick?.(source.docId)}
-                      className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 hover:from-blue-200 hover:to-indigo-200 transition-all duration-300 border border-blue-200 shadow-sm hover:shadow-md font-medium"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs border border-border hover:border-ledger transition-colors font-mono"
                     >
-                      <div className="w-4 h-4 rounded bg-blue-600 text-white text-xs flex items-center justify-center font-bold">
-                        {index + 1}
-                      </div>
+                      <span className="text-muted-foreground">[{index + 1}]</span>
                       {source.document.filename}
                     </button>
                   ))}
                   {message.sources.length > 3 && (
-                    <span className="text-xs text-gray-600 px-3 py-2 bg-gray-100 rounded-xl border border-gray-200 font-medium">
-                      +{message.sources.length - 3} more sources
+                    <span className="catalog-number px-2.5 py-1 border border-border">
+                      +{message.sources.length - 3} more
                     </span>
                   )}
                 </div>
@@ -115,19 +108,18 @@ export function ChatMessage({
 
         {/* Timestamp */}
         <div
-          className={`text-xs mt-3 flex items-center gap-2 ${
-            isUser ? "text-blue-100 justify-end" : "text-gray-500 justify-start"
+          className={`text-xs mt-3 font-mono ${
+            isUser ? "text-primary-foreground/70 text-right" : "text-muted-foreground"
           }`}
         >
-          <div className={`w-1 h-1 rounded-full ${isUser ? "bg-blue-200" : "bg-gray-400"}`}></div>
           {formatTimestamp(message.timestamp)}
         </div>
       </div>
 
       {/* User Avatar */}
       {isUser && (
-        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center shadow-lg">
-          <User className="h-5 w-5 text-white" />
+        <div className="flex-shrink-0 w-9 h-9 rounded-sm border border-border bg-secondary flex items-center justify-center">
+          <User className="h-4 w-4 text-secondary-foreground" />
         </div>
       )}
     </div>

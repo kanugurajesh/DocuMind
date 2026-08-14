@@ -149,21 +149,21 @@ export function DocumentCard({
 
   return (
     <Card
-      className="card-enhanced hover:shadow-xl transition-all duration-300 cursor-pointer group border-l-4 border-l-blue-500"
+      className="card-index cursor-pointer group"
       onClick={onClick}
     >
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
           <div className="flex items-start space-x-4 flex-1">
             {/* File Icon */}
-            <div className="flex-shrink-0 mt-1 p-2 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-100 group-hover:from-blue-100 group-hover:to-indigo-200 transition-all duration-300">
+            <div className="flex-shrink-0 mt-1 p-2 rounded-sm border border-border bg-background group-hover:border-ledger transition-colors">
               <FileIconComponent className={`w-6 h-6 ${fileIconClass} icon-blue`} />
             </div>
 
             {/* Document Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
-                <h3 className="text-lg font-semibold truncate text-enhanced group-hover:text-blue-700 transition-colors">
+                <h3 className="font-display text-lg font-semibold truncate text-enhanced transition-colors">
                   {document.filename}
                 </h3>
                 <Badge
@@ -184,33 +184,31 @@ export function DocumentCard({
                 </Badge>
               </div>
 
-              <div className="flex items-center space-x-4 text-sm text-muted-enhanced mb-3">
-                <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-gray-50 group-hover:bg-gray-100 transition-colors">
-                  <HardDrive className="h-3 w-3 icon-green" />
-                  <span className="font-medium">{formatFileSize(document.fileSize)}</span>
-                </div>
-                <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-gray-50 group-hover:bg-gray-100 transition-colors">
-                  <Calendar className="h-3 w-3 icon-purple" />
-                  <span className="font-medium">{formatDate(document.uploadedAt)}</span>
-                </div>
+              <div className="flex items-center gap-4 catalog-number mb-3">
+                <span className="flex items-center gap-1">
+                  <HardDrive className="h-3 w-3" />
+                  {formatFileSize(document.fileSize)}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  {formatDate(document.uploadedAt)}
+                </span>
               </div>
 
               {/* Metadata */}
               {document.metadata && (
-                <div className="flex items-center space-x-4 text-sm text-muted-enhanced mb-2">
+                <div className="flex items-center gap-4 catalog-number mb-2">
                   {document.metadata.pageCount && (
-                    <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-orange-50 group-hover:bg-orange-100 transition-colors">
-                      <FileType className="h-3 w-3 icon-orange" />
-                      <span className="font-medium">{document.metadata.pageCount} pages</span>
-                    </div>
+                    <span className="flex items-center gap-1">
+                      <FileType className="h-3 w-3" />
+                      {document.metadata.pageCount} pages
+                    </span>
                   )}
                   {document.metadata.wordCount && (
-                    <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-indigo-50 group-hover:bg-indigo-100 transition-colors">
-                      <FileText className="h-3 w-3 icon-indigo" />
-                      <span className="font-medium">
-                        {document.metadata.wordCount.toLocaleString()} words
-                      </span>
-                    </div>
+                    <span className="flex items-center gap-1">
+                      <FileText className="h-3 w-3" />
+                      {document.metadata.wordCount.toLocaleString()} words
+                    </span>
                   )}
                 </div>
               )}
@@ -218,10 +216,10 @@ export function DocumentCard({
               {/* Error Message */}
               {document.processingStatus === "failed" &&
                 document.errorMessage && (
-                  <div className="mt-2 p-3 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg">
+                  <div className="mt-2 p-3 bg-stamp-tint border border-destructive/40">
                     <div className="flex items-center gap-2">
-                      <AlertCircle className="h-4 w-4 text-red-600" />
-                      <p className="text-sm text-red-700 font-medium">
+                      <AlertCircle className="h-4 w-4 text-destructive" />
+                      <p className="text-sm text-destructive font-medium">
                         {document.errorMessage}
                       </p>
                     </div>
@@ -251,15 +249,15 @@ export function DocumentCard({
               <DropdownMenuItem
                 onClick={handleDownload}
                 disabled={isDownloading}
-                className={`${isDownloading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-50 focus:bg-blue-50'} transition-colors`}
+                className={isDownloading ? "opacity-50 cursor-not-allowed" : ""}
               >
-                <Download className="mr-2 h-4 w-4 text-blue-600" />
-                <span className="font-medium">{isDownloading ? 'Downloading...' : 'Download'}</span>
+                <Download className="mr-2 h-4 w-4 icon-blue" />
+                <span className="font-medium">{isDownloading ? 'Downloading…' : 'Download'}</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={handleDeleteClick}
-                className="text-destructive focus:text-destructive hover:bg-red-50 focus:bg-red-50"
+                className="text-destructive focus:text-destructive focus:bg-destructive/10"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 <span className="font-medium">Delete</span>
@@ -271,10 +269,10 @@ export function DocumentCard({
 
       {/* Document Details Modal */}
       <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent className="max-w-2xl card-enhanced border-0 shadow-xl">
+        <DialogContent className="max-w-2xl">
           <DialogHeader className="space-y-3">
             <DialogTitle className="flex items-center gap-3 text-xl font-semibold text-enhanced">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-100">
+              <div className="p-2 rounded-sm border border-border bg-background">
                 <FileIconComponent className={`w-6 h-6 ${fileIconClass} icon-blue`} />
               </div>
               {document.filename}
@@ -289,15 +287,15 @@ export function DocumentCard({
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-muted-enhanced">File Size</label>
-                <p className="text-base font-mono text-enhanced bg-gray-50 rounded-md px-3 py-2 border">{formatFileSize(document.fileSize)}</p>
+                <p className="text-base font-mono text-enhanced bg-muted rounded-sm px-3 py-2 border border-border">{formatFileSize(document.fileSize)}</p>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-muted-enhanced">File Type</label>
-                <p className="text-base font-mono text-enhanced bg-gray-50 rounded-md px-3 py-2 border">{document.fileType}</p>
+                <p className="text-base font-mono text-enhanced bg-muted rounded-sm px-3 py-2 border border-border">{document.fileType}</p>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-muted-enhanced">Uploaded</label>
-                <p className="text-base text-enhanced bg-gray-50 rounded-md px-3 py-2 border">{formatDate(document.uploadedAt)}</p>
+                <p className="text-base text-enhanced bg-muted rounded-sm px-3 py-2 border border-border">{formatDate(document.uploadedAt)}</p>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-muted-enhanced">Status</label>
@@ -321,8 +319,8 @@ export function DocumentCard({
             {/* Metadata */}
             {document.metadata && (
               <div className="space-y-4">
-                <div className="border-t pt-4">
-                  <h4 className="text-lg font-semibold text-enhanced mb-4 flex items-center gap-2">
+                <div className="rule-ledger pt-4">
+                  <h4 className="font-display text-lg font-semibold text-enhanced mb-4 flex items-center gap-2">
                     <FileText className="h-5 w-5 icon-blue" />
                     Document Information
                   </h4>
@@ -330,25 +328,25 @@ export function DocumentCard({
                     {document.metadata.title && (
                       <div className="space-y-2">
                         <label className="text-sm font-semibold text-muted-enhanced">Title</label>
-                        <p className="text-base text-enhanced bg-gray-50 rounded-md px-3 py-2 border">{document.metadata.title}</p>
+                        <p className="text-base text-enhanced bg-muted rounded-sm px-3 py-2 border border-border">{document.metadata.title}</p>
                       </div>
                     )}
                     {document.metadata.author && (
                       <div className="space-y-2">
                         <label className="text-sm font-semibold text-muted-enhanced">Author</label>
-                        <p className="text-base text-enhanced bg-gray-50 rounded-md px-3 py-2 border">{document.metadata.author}</p>
+                        <p className="text-base text-enhanced bg-muted rounded-sm px-3 py-2 border border-border">{document.metadata.author}</p>
                       </div>
                     )}
                     {document.metadata.pageCount && (
                       <div className="space-y-2">
                         <label className="text-sm font-semibold text-muted-enhanced">Pages</label>
-                        <p className="text-base text-enhanced bg-gray-50 rounded-md px-3 py-2 border">{document.metadata.pageCount}</p>
+                        <p className="text-base text-enhanced bg-muted rounded-sm px-3 py-2 border border-border">{document.metadata.pageCount}</p>
                       </div>
                     )}
                     {document.metadata.wordCount && (
                       <div className="space-y-2">
                         <label className="text-sm font-semibold text-muted-enhanced">Words</label>
-                        <p className="text-base text-enhanced bg-gray-50 rounded-md px-3 py-2 border">{document.metadata.wordCount.toLocaleString()}</p>
+                        <p className="text-base text-enhanced bg-muted rounded-sm px-3 py-2 border border-border">{document.metadata.wordCount.toLocaleString()}</p>
                       </div>
                     )}
                   </div>
@@ -358,13 +356,13 @@ export function DocumentCard({
 
             {/* Error Message */}
             {document.processingStatus === "failed" && document.errorMessage && (
-              <div className="border-t pt-4">
-                <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg shadow-sm">
+              <div className="rule-ledger pt-4">
+                <div className="p-4 bg-stamp-tint border border-destructive/40">
                   <div className="flex items-start gap-3">
-                    <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
+                    <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
                     <div className="flex-1">
-                      <p className="text-sm font-semibold text-red-700 mb-1">Processing Error</p>
-                      <p className="text-sm text-red-600 leading-relaxed">{document.errorMessage}</p>
+                      <p className="text-sm font-semibold text-destructive mb-1">Processing Error</p>
+                      <p className="text-sm text-destructive/90 leading-relaxed">{document.errorMessage}</p>
                     </div>
                   </div>
                 </div>
@@ -372,22 +370,22 @@ export function DocumentCard({
             )}
 
             {/* Action Buttons */}
-            <div className="flex justify-end gap-3 pt-6 border-t">
+            <div className="flex justify-end gap-3 pt-6 rule-ledger">
               <Button
                 variant="outline"
                 onClick={handleDownload}
                 disabled={isDownloading}
-                className="gap-2 hover-lift focus-ring-enhanced px-6 py-2.5 font-medium border-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="gap-2 px-6 py-2.5"
               >
                 <Download className="h-4 w-4" />
-                {isDownloading ? 'Downloading...' : 'Download'}
+                {isDownloading ? 'Downloading…' : 'Download'}
               </Button>
               <Button
                 onClick={() => {
                   setShowDetails(false);
                   onClick?.();
                 }}
-                className="gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-2.5 font-medium"
+                className="gap-2 px-6 py-2.5"
               >
                 <ExternalLink className="h-4 w-4" />
                 Open Document
@@ -399,11 +397,11 @@ export function DocumentCard({
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent className="max-w-md card-enhanced border-0 shadow-xl">
+        <DialogContent className="max-w-md">
           <DialogHeader className="space-y-3">
             <DialogTitle className="flex items-center gap-3 text-xl font-semibold text-enhanced">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-red-50 to-pink-100">
-                <Trash2 className="w-6 h-6 text-red-600" />
+              <div className="p-2 rounded-sm border border-destructive/40 bg-stamp-tint">
+                <Trash2 className="w-6 h-6 text-destructive" />
               </div>
               Delete Document
             </DialogTitle>
@@ -413,12 +411,12 @@ export function DocumentCard({
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg">
+            <div className="p-4 bg-stamp-tint border border-destructive/40">
               <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
+                <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-red-700 mb-1">Are you sure you want to delete?</p>
-                  <p className="text-sm text-red-600 leading-relaxed">
+                  <p className="text-sm font-semibold text-destructive mb-1">Are you sure you want to delete?</p>
+                  <p className="text-sm text-destructive/90 leading-relaxed">
                     <span className="font-medium">"{document.filename}"</span> will be permanently deleted from your document library.
                   </p>
                 </div>
@@ -426,23 +424,24 @@ export function DocumentCard({
             </div>
 
             {/* Action Buttons */}
-            <div className="flex justify-end gap-3 pt-4 border-t">
+            <div className="flex justify-end gap-3 pt-4 rule-ledger">
               <Button
                 variant="outline"
                 onClick={handleCancelDelete}
                 disabled={isDeleting}
-                className="gap-2 hover-lift focus-ring-enhanced px-6 py-2.5 font-medium border-2 border-gray-300 text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="gap-2 px-6 py-2.5"
               >
                 <X className="h-4 w-4" />
                 Cancel
               </Button>
               <Button
+                variant="destructive"
                 onClick={handleConfirmDelete}
                 disabled={isDeleting}
-                className="gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-2.5 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="gap-2 px-6 py-2.5"
               >
                 <Trash2 className="h-4 w-4" />
-                {isDeleting ? 'Deleting...' : 'Delete Document'}
+                {isDeleting ? 'Deleting…' : 'Delete Document'}
               </Button>
             </div>
           </div>

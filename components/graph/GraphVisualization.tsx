@@ -355,11 +355,11 @@ export function GraphVisualization({
       <div className="absolute top-4 right-4 z-10 flex flex-col space-y-2">
         <button
           onClick={fitToView}
-          className="bg-white shadow-md rounded-lg p-2 hover:bg-gray-50 transition-colors"
+          className="bg-background border border-border rounded-sm p-2 hover:border-ledger transition-colors"
           title="Fit to view"
         >
           <svg
-            className="w-5 h-5 text-gray-600"
+            className="w-5 h-5 text-muted-foreground"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -374,11 +374,11 @@ export function GraphVisualization({
         </button>
         <button
           onClick={centerGraph}
-          className="bg-white shadow-md rounded-lg p-2 hover:bg-gray-50 transition-colors"
+          className="bg-background border border-border rounded-sm p-2 hover:border-ledger transition-colors"
           title="Center graph"
         >
           <svg
-            className="w-5 h-5 text-gray-600"
+            className="w-5 h-5 text-muted-foreground"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -393,11 +393,11 @@ export function GraphVisualization({
         </button>
         <button
           onClick={resetZoom}
-          className="bg-white shadow-md rounded-lg p-2 hover:bg-gray-50 transition-colors"
+          className="bg-background border border-border rounded-sm p-2 hover:border-ledger transition-colors"
           title="Reset zoom"
         >
           <svg
-            className="w-5 h-5 text-gray-600"
+            className="w-5 h-5 text-muted-foreground"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -414,10 +414,10 @@ export function GraphVisualization({
 
       {/* Loading Overlay */}
       {loading && (
-        <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+        <div className="absolute inset-0 bg-background/75 flex items-center justify-center z-10">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-            <p className="text-sm text-gray-600">Loading graph...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground mx-auto mb-2"></div>
+            <p className="text-sm text-muted-foreground">Loading graph…</p>
           </div>
         </div>
       )}
@@ -429,14 +429,14 @@ export function GraphVisualization({
           height: `${height}px`,
           width: width ? `${width}px` : "100%",
         }}
-        className="bg-gray-50 rounded-lg border border-gray-200"
+        className="bg-secondary/30 rounded-sm border border-border"
       />
 
       {/* Legend — compact collapsible strip */}
-      <div className="mt-3 border border-gray-200 rounded-lg bg-white shadow-sm">
+      <div className="mt-3 border border-border rounded-sm bg-card">
         <button
           onClick={() => setLegendOpen((v) => !v)}
-          className="w-full flex items-center justify-between px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-lg"
+          className="w-full flex items-center justify-between px-4 py-2 text-sm font-semibold text-foreground hover:bg-accent"
         >
           <span className="flex items-center gap-3">
             <span className="flex gap-1.5 items-center">
@@ -445,18 +445,18 @@ export function GraphVisualization({
               <span className="w-3 h-3 rounded-full bg-purple-700 inline-block" title="Topic" />
               <span className="w-3 h-3 rounded-full bg-green-500 inline-block" title="Chunk" />
             </span>
-            <span className="text-gray-500 font-normal">Legend</span>
+            <span className="catalog-number">Legend</span>
           </span>
           <svg
-            className={`w-4 h-4 text-gray-400 transition-transform ${legendOpen ? "rotate-180" : ""}`}
+            className={`w-4 h-4 text-muted-foreground transition-transform ${legendOpen ? "rotate-180" : ""}`}
             fill="none" stroke="currentColor" viewBox="0 0 24 24"
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
         {legendOpen && (
-          <div className="px-4 pb-4 pt-1 border-t border-gray-100">
-            <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-gray-700">
+          <div className="px-4 pb-4 pt-1 border-t border-border">
+            <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-foreground">
               <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-blue-500 inline-block" />Document</div>
               <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-purple-500 inline-block" />Entity</div>
               <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-yellow-500 inline-block" />Person</div>
@@ -465,7 +465,7 @@ export function GraphVisualization({
               <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-purple-700 inline-block" />Topic</div>
               <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-green-500 inline-block" />Chunk</div>
             </div>
-            <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-gray-700 mt-2 pt-2 border-t border-gray-100">
+            <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-foreground mt-2 pt-2 border-t border-border">
               <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-slate-300 inline-block" />Structural (Contains / Mentions)</div>
               <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-indigo-500 inline-block" />Semantic (Co-occurs / Similar / Categorizes)</div>
             </div>

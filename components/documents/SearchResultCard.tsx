@@ -19,7 +19,7 @@ export function SearchResultCard({ result, searchQuery }: SearchResultCardProps)
     const parts = text.split(new RegExp(`(${escapedTerm})`, 'gi'));
     return parts.map((part, index) =>
       part.toLowerCase() === searchTerm.toLowerCase() ?
-        <mark key={index} className="bg-yellow-200 px-1 rounded">{part}</mark> :
+        <mark key={index} className="bg-manila-tint text-accent-foreground px-0.5">{part}</mark> :
         part
     );
   };
@@ -39,26 +39,26 @@ export function SearchResultCard({ result, searchQuery }: SearchResultCardProps)
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow duration-200">
+    <Card className="card-index">
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center space-x-2 flex-1">
-            <FileText className="h-5 w-5 text-blue-600 flex-shrink-0" />
-            <span className="font-medium text-gray-800 text-base">
+            <FileText className="h-5 w-5 icon-blue flex-shrink-0" />
+            <span className="font-display font-medium text-foreground text-base">
               {highlightText(result.documentTitle || "Untitled Document", searchQuery)}
             </span>
           </div>
-          <Badge variant="secondary" className="text-xs ml-2 flex-shrink-0">
+          <Badge variant="secondary" className="ml-2 flex-shrink-0">
             <Hash className="h-3 w-3 mr-1" />
             {Math.round((result.score || 0) * 100)}% match
           </Badge>
         </div>
 
-        <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+        <p className="text-sm text-muted-foreground mb-3 line-clamp-3">
           {highlightText(result.content || 'No content available', searchQuery)}
         </p>
 
-        <div className="flex items-center justify-between text-xs text-gray-500">
+        <div className="flex items-center justify-between catalog-number">
           <div className="flex items-center space-x-4">
             <span className="flex items-center">
               <Calendar className="h-3 w-3 mr-1" />
@@ -68,7 +68,7 @@ export function SearchResultCard({ result, searchQuery }: SearchResultCardProps)
               <span>Chunk {result.chunkIndex + 1}</span>
             )}
           </div>
-          <span>Document ID: {result.docId ? result.docId.slice(-8) : 'Unknown'}</span>
+          <span>No. {result.docId ? result.docId.slice(-8) : 'Unknown'}</span>
         </div>
       </CardContent>
     </Card>

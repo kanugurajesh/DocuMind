@@ -53,22 +53,22 @@ export function DocumentSearch({ documents, onSearchResults }: DocumentSearchPro
   return (
     <div className="relative">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <input
           type="text"
-          placeholder="Search documents..."
+          placeholder="Search the index…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 placeholder-gray-500 transition-all duration-200 text-sm"
+          className="w-full pl-10 pr-10 py-2.5 border border-input rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-background text-foreground placeholder-muted-foreground transition-colors text-sm"
         />
         {query && (
           <Button
             variant="ghost"
             size="icon"
             onClick={clearSearch}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 hover:bg-gray-100"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6"
           >
-            <X className="h-4 w-4 text-gray-500" />
+            <X className="h-4 w-4" />
           </Button>
         )}
       </div>

@@ -175,10 +175,11 @@ export default function DashboardPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2 text-gray-800">
-            Welcome back, {user.firstName}!
+          <p className="catalog-number mb-2">YOUR COLLECTION</p>
+          <h1 className="font-display text-3xl font-semibold mb-2 text-foreground">
+            Welcome back, {user.firstName}
           </h1>
-          <p className="text-gray-600 text-lg">
+          <p className="text-muted-foreground text-lg">
             Manage your documents and explore your knowledge base with
             AI-powered insights.
           </p>
@@ -186,8 +187,8 @@ export default function DashboardPage() {
 
         {/* Error Message */}
         {error && (
-          <Card className="mb-6 border-destructive/50 bg-destructive/5">
-            <CardContent className="flex items-start gap-3 p-4">
+          <div className="mb-6 border border-destructive/50 bg-stamp-tint">
+            <div className="flex items-start gap-3 p-4">
               <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
               <div className="flex-1">
                 <h3 className="font-medium text-destructive">Error</h3>
@@ -201,130 +202,95 @@ export default function DashboardPage() {
               >
                 <X className="h-4 w-4" />
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="card-enhanced border-l-4 border-l-blue-500 hover:border-l-blue-600 transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-enhanced">
-                Total Documents
-              </CardTitle>
-              <div className="p-2 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100">
-                <FileText className="h-4 w-4 icon-blue" />
+        {/* Stats Overview — a ledger totals strip, not four colorful tiles */}
+        <div className="card-index mb-8 grid grid-cols-2 md:grid-cols-4 divide-y divide-border md:divide-y-0 md:divide-x">
+          <div className="p-5 flex items-center gap-3">
+            <FileText className="h-4 w-4 icon-blue shrink-0" />
+            <div>
+              <div className="text-2xl font-display font-semibold text-foreground leading-none">
+                {documents.length}
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-700">{documents.length}</div>
-              <p className="text-xs text-muted-enhanced font-medium">
-                {completedDocs} processed
+              <p className="catalog-number mt-1">
+                Documents · {completedDocs} processed
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="card-enhanced border-l-4 border-l-orange-500 hover:border-l-orange-600 transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-enhanced">Processing</CardTitle>
-              <div className="p-2 rounded-lg bg-gradient-to-br from-orange-50 to-orange-100">
-                <TrendingUp className="h-4 w-4 icon-orange" />
+          <div className="p-5 flex items-center gap-3">
+            <TrendingUp className="h-4 w-4 icon-orange shrink-0" />
+            <div>
+              <div className="text-2xl font-display font-semibold text-foreground leading-none">
+                {processingDocs}
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-700">{processingDocs}</div>
-              <p className="text-xs text-muted-enhanced font-medium">
-                Documents in queue
-              </p>
-            </CardContent>
-          </Card>
+              <p className="catalog-number mt-1">In queue</p>
+            </div>
+          </div>
 
-          <Card className="card-enhanced border-l-4 border-l-green-500 hover:border-l-green-600 transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-enhanced">Total Words</CardTitle>
-              <div className="p-2 rounded-lg bg-gradient-to-br from-green-50 to-green-100">
-                <BarChart3 className="h-4 w-4 icon-green" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-700">
+          <div className="p-5 flex items-center gap-3">
+            <BarChart3 className="h-4 w-4 icon-green shrink-0" />
+            <div>
+              <div className="text-2xl font-display font-semibold text-foreground leading-none">
                 {totalWords.toLocaleString()}
               </div>
-              <p className="text-xs text-muted-enhanced font-medium">
-                Across all documents
-              </p>
-            </CardContent>
-          </Card>
+              <p className="catalog-number mt-1">Words on file</p>
+            </div>
+          </div>
 
-          <Card className="card-enhanced border-l-4 border-l-purple-500 hover:border-l-purple-600 transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-enhanced">Account</CardTitle>
-              <div className="p-2 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100">
-                <Users className="h-4 w-4 icon-purple" />
+          <div className="p-5 flex items-center gap-3">
+            <Users className="h-4 w-4 icon-purple shrink-0" />
+            <div>
+              <div className="text-2xl font-display font-semibold text-foreground leading-none">
+                Free
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-purple-700">Free</div>
-              <p className="text-xs text-muted-enhanced font-medium">Plan</p>
-            </CardContent>
-          </Card>
+              <p className="catalog-number mt-1">Plan</p>
+            </div>
+          </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card
-            className="card-enhanced hover:shadow-xl transition-all duration-300 cursor-pointer group border-l-4 border-l-blue-500 hover:border-l-blue-600"
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <button
+            type="button"
+            className="card-enhanced text-left p-5 flex items-center gap-4 group"
             onClick={() => setShowUpload(!showUpload)}
           >
-            <CardHeader>
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center group-hover:from-blue-600 group-hover:to-blue-700 transition-all duration-300 shadow-lg">
-                  <Upload className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg text-enhanced group-hover:text-blue-700 transition-colors">Upload Documents</CardTitle>
-                  <CardDescription className="text-muted-enhanced">
-                    Add new files to your knowledge base
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-          </Card>
+            <div className="w-11 h-11 rounded-sm border border-border bg-background flex items-center justify-center shrink-0 group-hover:border-ledger transition-colors">
+              <Upload className="w-5 h-5 icon-blue" />
+            </div>
+            <div>
+              <div className="font-display font-semibold text-enhanced">Upload Documents</div>
+              <p className="text-sm text-muted-enhanced">Add new files to your knowledge base</p>
+            </div>
+          </button>
 
-          <Link href="/chat">
-            <Card className="card-enhanced hover:shadow-xl transition-all duration-300 cursor-pointer group border-l-4 border-l-green-500 hover:border-l-green-600">
-              <CardHeader>
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center group-hover:from-green-600 group-hover:to-green-700 transition-all duration-300 shadow-lg">
-                    <MessageSquare className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg text-enhanced group-hover:text-green-700 transition-colors">Ask Questions</CardTitle>
-                    <CardDescription className="text-muted-enhanced">
-                      Query your documents with natural language
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-            </Card>
+          <Link
+            href="/chat"
+            className="card-enhanced p-5 flex items-center gap-4 group"
+          >
+            <div className="w-11 h-11 rounded-sm border border-border bg-background flex items-center justify-center shrink-0 group-hover:border-ledger transition-colors">
+              <MessageSquare className="w-5 h-5 icon-green" />
+            </div>
+            <div>
+              <div className="font-display font-semibold text-enhanced">Ask Questions</div>
+              <p className="text-sm text-muted-enhanced">Query your documents with natural language</p>
+            </div>
           </Link>
 
-          <Link href="/graph">
-            <Card className="card-enhanced hover:shadow-xl transition-all duration-300 cursor-pointer group border-l-4 border-l-purple-500 hover:border-l-purple-600">
-              <CardHeader>
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center group-hover:from-purple-600 group-hover:to-purple-700 transition-all duration-300 shadow-lg">
-                    <BarChart3 className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg text-enhanced group-hover:text-purple-700 transition-colors">Knowledge Graph</CardTitle>
-                    <CardDescription className="text-muted-enhanced">
-                      Visualize document relationships
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-            </Card>
+          <Link
+            href="/graph"
+            className="card-enhanced p-5 flex items-center gap-4 group"
+          >
+            <div className="w-11 h-11 rounded-sm border border-border bg-background flex items-center justify-center shrink-0 group-hover:border-ledger transition-colors">
+              <BarChart3 className="w-5 h-5 icon-purple" />
+            </div>
+            <div>
+              <div className="font-display font-semibold text-enhanced">Knowledge Graph</div>
+              <p className="text-sm text-muted-enhanced">Visualize document relationships</p>
+            </div>
           </Link>
         </div>
 
@@ -390,7 +356,7 @@ export default function DashboardPage() {
           <CardContent className="space-y-6">
             {/* Header with Search */}
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-800">
+              <h3 className="font-display text-lg font-semibold text-foreground">
                 {isSearchActive
                   ? `Search Results for "${searchQuery}" (${totalItems})`
                   : `All Documents (${totalItems})`}
@@ -406,9 +372,9 @@ export default function DashboardPage() {
             {/* Loading State */}
             {(loading || isSearching) && (
               <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                <span className="ml-3 text-gray-600">
-                  {isSearching ? "Searching..." : "Loading documents..."}
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
+                <span className="ml-3 text-muted-foreground">
+                  {isSearching ? "Searching…" : "Loading documents…"}
                 </span>
               </div>
             )}
@@ -421,8 +387,8 @@ export default function DashboardPage() {
                   <div className="space-y-4">
                     {searchResults.length === 0 ? (
                       <div className="text-center py-12">
-                        <div className="text-gray-500 mb-2">No documents found matching "{searchQuery}"</div>
-                        <div className="text-sm text-gray-400">Try different keywords or check your spelling</div>
+                        <div className="text-foreground mb-2">No documents on file match "{searchQuery}"</div>
+                        <div className="text-sm text-muted-foreground">Try different keywords, or check the spelling</div>
                       </div>
                     ) : (
                       currentPageItems.map((result, index) => (

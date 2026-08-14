@@ -47,7 +47,7 @@ export function ChatInput({
   return (
     <div className="flex items-end space-x-4">
       <div className="flex-1 relative">
-        <div className="relative bg-white rounded-2xl border-2 border-blue-200 focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-100 transition-all duration-300 shadow-lg hover:shadow-xl">
+        <div className="relative bg-background rounded-sm border border-input focus-within:border-ring transition-colors">
           <textarea
             ref={textareaRef}
             value={message}
@@ -57,9 +57,9 @@ export function ChatInput({
             disabled={disabled}
             rows={1}
             className={`
-              w-full resize-none bg-transparent px-3 py-2 pr-20 text-gray-800 placeholder-gray-500
+              w-full resize-none bg-transparent px-3 py-2 pr-20 text-foreground placeholder-muted-foreground
               focus:outline-none disabled:cursor-not-allowed disabled:opacity-50
-              text-sm leading-normal font-medium min-h-[36px]
+              text-sm leading-normal min-h-[36px]
             `}
             style={{ maxHeight: "100px" }}
           />
@@ -69,7 +69,7 @@ export function ChatInput({
             {/* Attachment Button */}
             <button
               type="button"
-              className="p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-700 transition-all duration-200 hover:scale-105"
+              className="p-1.5 rounded-sm text-muted-foreground hover:bg-accent transition-colors"
               title="Attach file (coming soon)"
               disabled
             >
@@ -81,7 +81,7 @@ export function ChatInput({
               <button
                 onClick={() => setMessage("")}
                 disabled={disabled}
-                className="p-1.5 rounded-lg bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-600 transition-all duration-200 hover:scale-105"
+                className="p-1.5 rounded-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
                 title="Clear input"
               >
                 <X className="w-3.5 h-3.5" />
@@ -93,14 +93,14 @@ export function ChatInput({
               onClick={handleSubmit}
               disabled={!message.trim() || disabled}
               className={`
-                p-1.5 rounded-lg transition-all duration-300 hover:scale-105
+                p-1.5 rounded-sm transition-colors
                 ${
                   !message.trim() || disabled
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl"
+                    ? "bg-muted text-muted-foreground cursor-not-allowed"
+                    : "bg-primary text-primary-foreground hover:bg-primary/85"
                 }
               `}
-              title={disabled ? "Please wait..." : "Send message (Enter)"}
+              title={disabled ? "Please wait…" : "Send message (Enter)"}
             >
               <Send className="w-3.5 h-3.5" />
             </button>
@@ -108,13 +108,9 @@ export function ChatInput({
         </div>
 
         {/* Input hint */}
-        <div className="flex items-center justify-between mt-2 px-1">
-          <span className="text-xs text-gray-500 font-medium">
-            Press Enter to send, Shift+Enter for new line
-          </span>
-          <span className="text-xs text-gray-400 font-medium">
-            {message.length}/2000
-          </span>
+        <div className="flex items-center justify-between mt-2 px-1 catalog-number">
+          <span>Press Enter to send, Shift+Enter for new line</span>
+          <span>{message.length}/2000</span>
         </div>
       </div>
     </div>

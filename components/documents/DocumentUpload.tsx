@@ -1,6 +1,7 @@
 "use client";
 
 import axios from "axios";
+import { Upload } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { showToast } from "@/lib/toast";
@@ -127,13 +128,13 @@ export function DocumentUpload({
       <div
         {...getRootProps()}
         className={`
-          border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer
+          border-2 border-dashed rounded-sm p-8 text-center transition-colors cursor-pointer
           ${
             isDragActive && !isDragReject
-              ? "border-blue-400 bg-blue-50"
+              ? "border-ledger bg-ledger-tint"
               : isDragReject
-                ? "border-red-400 bg-red-50"
-                : "border-gray-300 hover:border-gray-400"
+                ? "border-destructive bg-stamp-tint"
+                : "border-border hover:border-ledger"
           }
           ${uploading ? "cursor-not-allowed opacity-50" : ""}
         `}
@@ -142,38 +143,28 @@ export function DocumentUpload({
 
         <div className="space-y-4">
           {/* Upload Icon */}
-          <svg
-            className="mx-auto h-16 w-16 text-gray-400"
-            stroke="currentColor"
-            fill="none"
-            viewBox="0 0 48 48"
-          >
-            <path
-              d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <div className="mx-auto h-14 w-14 rounded-sm border border-border bg-background flex items-center justify-center">
+            <Upload className="h-6 w-6 text-muted-foreground" />
+          </div>
 
           {/* Upload Text */}
           <div>
-            <p className="text-lg font-medium text-gray-900">
+            <p className="font-display text-lg font-medium text-foreground">
               {isDragActive
                 ? isDragReject
                   ? "Unsupported file type"
                   : "Drop files here"
                 : "Upload your documents"}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               {uploading
-                ? "Processing uploads..."
-                : "Drag & drop files or click to browse"}
+                ? "Filing in progress…"
+                : "Drag and drop, or click to browse"}
             </p>
           </div>
 
           {/* File Type Info */}
-          <div className="text-xs text-gray-400">
+          <div className="catalog-number">
             <p>Supported formats: PDF, DOCX, DOC, TXT</p>
             <p>Maximum file size: {maxSizeKB / 1024}MB</p>
           </div>
@@ -183,18 +174,18 @@ export function DocumentUpload({
       {/* Upload Progress */}
       {progressFiles.length > 0 && (
         <div className="mt-4 space-y-2">
-          <p className="text-sm font-medium text-gray-900">
-            Uploading files...
+          <p className="text-sm font-medium text-foreground">
+            Uploading files…
           </p>
           {progressFiles.map((filename) => (
             <div key={filename} className="space-y-1">
-              <div className="flex justify-between text-sm text-gray-600">
+              <div className="flex justify-between text-sm text-muted-foreground">
                 <span className="truncate">{filename}</span>
                 <span>{uploadProgress[filename]}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-muted h-1.5">
                 <div
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  className="bg-ledger h-1.5 transition-all duration-300"
                   style={{ width: `${uploadProgress[filename]}%` }}
                 />
               </div>

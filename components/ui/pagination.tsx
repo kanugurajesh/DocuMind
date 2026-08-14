@@ -56,7 +56,7 @@ export function Pagination({
   if (totalPages <= 1) {
     return (
       <div className="flex items-center justify-between px-2">
-        <div className="text-sm text-gray-700">
+        <div className="catalog-number">
           Showing {totalItems} of {totalItems} results
         </div>
       </div>
@@ -65,7 +65,7 @@ export function Pagination({
 
   return (
     <div className="flex items-center justify-between px-2">
-      <div className="text-sm text-gray-700">
+      <div className="catalog-number">
         Showing {startItem} to {endItem} of {totalItems} results
       </div>
 

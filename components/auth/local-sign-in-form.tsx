@@ -6,9 +6,8 @@ import { signIn } from "next-auth/react";
 import { type FormEvent, useState } from "react";
 
 const inputClass =
-  "w-full rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500";
-const labelClass =
-  "block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1";
+  "w-full rounded-sm border border-input bg-background text-foreground px-3 py-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+const labelClass = "block text-sm font-medium text-foreground mb-1";
 
 export function LocalSignInForm() {
   const router = useRouter();
@@ -29,7 +28,7 @@ export function LocalSignInForm() {
     });
 
     if (result?.error) {
-      setError("Invalid email or password");
+      setError("That email and password don't match a record on file.");
       setSubmitting(false);
       return;
     }
@@ -41,7 +40,10 @@ export function LocalSignInForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+        <p
+          className="border border-destructive/50 bg-stamp-tint px-3 py-2 text-sm text-destructive"
+          role="alert"
+        >
           {error}
         </p>
       )}
@@ -76,15 +78,15 @@ export function LocalSignInForm() {
       <button
         type="submit"
         disabled={submitting}
-        className="w-full rounded-md bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-sm font-semibold py-2.5 transition-colors"
+        className="w-full rounded-sm border border-primary bg-primary hover:bg-primary/85 disabled:opacity-60 text-primary-foreground text-sm font-medium py-2.5 transition-colors"
       >
-        {submitting ? "Signing in..." : "Sign In"}
+        {submitting ? "Signing in…" : "Sign in"}
       </button>
-      <p className="text-sm text-center text-slate-600 dark:text-slate-300">
+      <p className="text-sm text-center text-muted-foreground">
         Don&apos;t have an account?{" "}
         <Link
           href="/sign-up"
-          className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium"
+          className="text-foreground underline decoration-ledger font-medium"
         >
           Sign up
         </Link>

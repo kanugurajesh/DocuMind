@@ -1,157 +1,196 @@
 @import "tailwindcss";
 
+/*
+  DESIGN SYSTEM — "Archive & Index"
+  DocuMind treats every upload like an accession into a library catalog:
+  paper surfaces, ledger rules, typed labels, and a rubber-stamp accent
+  for the moments that matter (status, calls to action). Committed to a
+  single paper-toned look — no dark mode, the way paper doesn't have one.
+*/
+
 @theme {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --radius: 0.625rem;
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+  --radius: 0.2rem;
 
-  /* Enhanced Colors with Better Contrast */
-  --color-background: #ffffff;
-  --color-foreground: #1f2937;
-  --color-card: #ffffff;
-  --color-card-foreground: #1f2937;
-  --color-popover: #ffffff;
-  --color-popover-foreground: #1f2937;
-  --color-primary: #3b82f6;
-  --color-primary-foreground: #ffffff;
-  --color-secondary: #f8fafc;
-  --color-secondary-foreground: #334155;
-  --color-muted: #f1f5f9;
-  --color-muted-foreground: #475569;
-  --color-accent: #e0e7ff;
-  --color-accent-foreground: #3730a3;
-  --color-destructive: #ef4444;
-  --color-destructive-foreground: #ffffff;
-  --color-border: #e2e8f0;
-  --color-input: #e2e8f0;
-  --color-ring: #3b82f6;
+  /* Paper & ink */
+  --color-background: #f5f2ea;
+  --color-foreground: #221f19;
+  --color-card: #fdfcf8;
+  --color-card-foreground: #221f19;
+  --color-popover: #fdfcf8;
+  --color-popover-foreground: #221f19;
 
-  /* Enhanced Status Colors */
-  --color-success: #10b981;
-  --color-success-foreground: #ffffff;
-  --color-warning: #f59e0b;
-  --color-warning-foreground: #ffffff;
-  --color-processing: #3b82f6;
-  --color-processing-foreground: #ffffff;
+  /* Ink is the primary action color — a pressed stamp, not a SaaS-blue button */
+  --color-primary: #221f19;
+  --color-primary-foreground: #f5f2ea;
 
-  /* Feature Colors */
-  --color-blue: #3b82f6;
-  --color-blue-light: #dbeafe;
-  --color-green: #10b981;
-  --color-green-light: #d1fae5;
-  --color-purple: #8b5cf6;
-  --color-purple-light: #ede9fe;
-  --color-orange: #f59e0b;
-  --color-orange-light: #fef3c7;
-  --color-indigo: #6366f1;
-  --color-indigo-light: #e0e7ff;
-  --color-pink: #ec4899;
-  --color-pink-light: #fce7f3;
+  /* Sage ledger tint for secondary surfaces */
+  --color-secondary: #e6e8dc;
+  --color-secondary-foreground: #2c3626;
 
-  /* Gradient Colors */
-  --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-  --gradient-secondary: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  --gradient-tertiary: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  --gradient-card: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  --gradient-accent: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+  --color-muted: #eae6d9;
+  --color-muted-foreground: #5c5646;
+
+  /* Manila folder tan for hover/accent surfaces */
+  --color-accent: #ecdfb8;
+  --color-accent-foreground: #6b4a12;
+
+  /* Rubber-stamp red — the one signature accent, used sparingly */
+  --color-destructive: #a8402c;
+  --color-destructive-foreground: #f5f2ea;
+
+  --color-border: #d9d2bd;
+  --color-input: #d9d2bd;
+  --color-ring: #221f19;
+
+  /* Named brand tokens for bespoke archive components */
+  --color-stamp: #a8402c;
+  --color-stamp-tint: #f1ded6;
+  --color-ledger: #6f8c68;
+  --color-ledger-tint: #e6e8dc;
+  --color-manila: #a97a1f;
+  --color-manila-tint: #ecdfb8;
+
+  /* Status */
+  --color-success: #4b6b3f;
+  --color-success-foreground: #f5f2ea;
+  --color-warning: #a97a1f;
+  --color-warning-foreground: #f5f2ea;
+  --color-processing: #4c5f8a;
+  --color-processing-foreground: #f5f2ea;
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #1f2937;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f172a;
-    --foreground: #f1f5f9;
-  }
+  --background: #f5f2ea;
+  --foreground: #221f19;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), Arial, Helvetica, sans-serif;
 }
 
-/* Custom Gradient Utilities */
-.gradient-primary {
-  background: var(--gradient-primary);
+h1, h2, h3, h4,
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+  letter-spacing: -0.01em;
 }
 
-.gradient-secondary {
-  background: var(--gradient-secondary);
+.font-catalog {
+  font-family: var(--font-mono), monospace;
+  letter-spacing: 0.06em;
 }
 
-.gradient-tertiary {
-  background: var(--gradient-tertiary);
-}
-
-.gradient-card {
-  background: var(--gradient-card);
-}
-
-.gradient-accent {
-  background: var(--gradient-accent);
-}
-
-/* Enhanced Card Styles */
+/* ---------------------------------------------------------------- */
+/* Index / catalog card — the base card surface throughout the app  */
+/* ---------------------------------------------------------------- */
 .card-enhanced {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border: 1px solid #e2e8f0;
-  transition: all 0.3s ease;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  box-shadow: 0 1px 0 0 rgba(34, 31, 25, 0.04);
 }
 
 .card-enhanced:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-color: #b9b096;
+  box-shadow: 2px 2px 0 0 var(--color-border);
 }
 
-/* Status Badge Enhancements */
+/* A card styled like a physical library index card: ruled line under
+   the header and a punched hole at the top edge. */
+.card-index {
+  position: relative;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-top: 3px solid var(--color-ledger);
+  border-radius: var(--radius);
+}
+
+/* Ledger rule — a thematic horizontal divider */
+.rule-ledger {
+  border: none;
+  border-top: 1px solid var(--color-ledger);
+  opacity: 0.55;
+}
+
+/* Catalog accession-number label */
+.catalog-number {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--color-muted-foreground);
+}
+
+/* Rubber-stamp treatment for emphasis: statuses, the hero CTA */
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+  padding: 0.2rem 0.55rem;
+  transform: rotate(-1.5deg);
+}
+
+/* Status Badge Treatments — flat, ink-bordered, not glossy gradients */
 .badge-success {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
+  background: var(--color-ledger-tint);
+  color: var(--color-success);
+  border: 1px solid currentColor;
 }
 
 .badge-warning {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  color: white;
+  background: var(--color-manila-tint);
+  color: var(--color-warning);
+  border: 1px solid currentColor;
 }
 
 .badge-processing {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
+  background: #dfe4f0;
+  color: var(--color-processing);
+  border: 1px solid currentColor;
 }
 
 .badge-failed {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: white;
+  background: var(--color-stamp-tint);
+  color: var(--color-stamp);
+  border: 1px solid currentColor;
 }
 
-/* Icon Color Classes */
-.icon-blue { color: #3b82f6; }
-.icon-green { color: #10b981; }
-.icon-purple { color: #8b5cf6; }
-.icon-orange { color: #f59e0b; }
-.icon-indigo { color: #6366f1; }
-.icon-pink { color: #ec4899; }
+/* Icon Color Classes — remapped to the archive palette */
+.icon-blue { color: var(--color-processing); }
+.icon-green { color: var(--color-ledger); }
+.icon-purple { color: var(--color-manila); }
+.icon-orange { color: var(--color-manila); }
+.icon-indigo { color: var(--color-processing); }
+.icon-pink { color: var(--color-stamp); }
 
 /* Text Enhancement */
 .text-enhanced {
-  color: #1f2937;
+  color: var(--color-foreground);
   font-weight: 600;
 }
 
 .text-muted-enhanced {
-  color: #4b5563;
+  color: var(--color-muted-foreground);
   font-weight: 500;
 }
 
 /* Custom Scrollbar Styles */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 #f1f5f9;
+  scrollbar-color: var(--color-border) var(--color-background);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -159,25 +198,23 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
+  background: var(--color-background);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--color-border);
   border-radius: 4px;
-  transition: background-color 0.2s ease;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #b9b096;
 }
 
-/* Animation Keyframes */
+/* Animation Keyframes — kept purposeful and few */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -188,7 +225,7 @@ body {
 @keyframes slideInLeft {
   from {
     opacity: 0;
-    transform: translateX(-20px);
+    transform: translateX(-16px);
   }
   to {
     opacity: 1;
@@ -199,7 +236,7 @@ body {
 @keyframes slideInRight {
   from {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateX(16px);
   }
   to {
     opacity: 1;
@@ -210,7 +247,7 @@ body {
 @keyframes scaleIn {
   from {
     opacity: 0;
-    transform: scale(0.9);
+    transform: scale(0.96);
   }
   to {
     opacity: 1;
@@ -218,150 +255,71 @@ body {
   }
 }
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-@keyframes bounce {
-  0%, 20%, 53%, 80%, 100% {
-    transform: translate3d(0, 0, 0);
-  }
-  40%, 43% {
-    transform: translate3d(0, -8px, 0);
-  }
-  70% {
-    transform: translate3d(0, -4px, 0);
-  }
-  90% {
-    transform: translate3d(0, -2px, 0);
-  }
-}
-
-@keyframes typing {
+/* The one signature motion: a stamp landing on paper */
+@keyframes stampIn {
   0% {
-    width: 0;
+    opacity: 0;
+    transform: scale(1.4) rotate(-8deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.94) rotate(-1.5deg);
   }
   100% {
-    width: 100%;
+    opacity: 1;
+    transform: scale(1) rotate(-1.5deg);
   }
 }
 
-/* Animation Utilities */
 .animate-fadeIn {
-  animation: fadeIn 0.5s ease-out;
+  animation: fadeIn 0.4s ease-out;
 }
 
 .animate-slideInLeft {
-  animation: slideInLeft 0.5s ease-out;
+  animation: slideInLeft 0.4s ease-out;
 }
 
 .animate-slideInRight {
-  animation: slideInRight 0.5s ease-out;
+  animation: slideInRight 0.4s ease-out;
 }
 
 .animate-scaleIn {
-  animation: scaleIn 0.3s ease-out;
+  animation: scaleIn 0.25s ease-out;
 }
 
-.animate-pulse-slow {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+.animate-stampIn {
+  animation: stampIn 0.35s cubic-bezier(0.2, 0.8, 0.3, 1);
 }
 
-.animate-bounce-slow {
-  animation: bounce 2s infinite;
-}
-
-.animate-typing {
-  overflow: hidden;
-  white-space: nowrap;
-  animation: typing 2s steps(40, end);
-}
-
-/* Chat Message Bubble Effects */
-.chat-bubble-user {
-  position: relative;
-}
-
-.chat-bubble-user::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  right: -8px;
-  width: 0;
-  height: 0;
-  border: 8px solid transparent;
-  border-left-color: #2563eb;
-  border-bottom: 0;
-  border-right: 0;
-  margin-top: -4px;
-  margin-right: -8px;
-}
-
-.chat-bubble-assistant {
-  position: relative;
-}
-
-.chat-bubble-assistant::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: -8px;
-  width: 0;
-  height: 0;
-  border: 8px solid transparent;
-  border-right-color: #ffffff;
-  border-bottom: 0;
-  border-left: 0;
-  margin-top: -4px;
-  margin-left: -8px;
-}
-
-/* Glass morphism effect */
-.glass-morphism {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-}
-
-/* Gradient text utilities */
-.gradient-text-blue {
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.gradient-text-green {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+@media (prefers-reduced-motion: reduce) {
+  .animate-fadeIn,
+  .animate-slideInLeft,
+  .animate-slideInRight,
+  .animate-scaleIn,
+  .animate-stampIn,
+  .card-enhanced {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 /* Hover Effects */
 .hover-lift {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .hover-lift:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 2px 2px 0 0 var(--color-border);
 }
 
 /* Focus Ring Enhancement */
 .focus-ring-enhanced {
-  transition: all 0.2s ease;
+  transition: outline-color 0.15s ease;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
 }
 
-.focus-ring-enhanced:focus {
-  outline: none;
-  ring: 2px;
-  ring-color: #3b82f6;
-  ring-opacity: 0.5;
-  border-color: #3b82f6;
+.focus-ring-enhanced:focus-visible {
+  outline-color: var(--color-ring);
 }

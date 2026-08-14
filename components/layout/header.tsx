@@ -30,13 +30,13 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
   const { signOut, openUserProfile } = useAuthActions();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/90 shadow-sm">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90">
       <div className="container flex h-16 max-w-screen-2xl items-center px-6 mx-auto">
         {/* Mobile menu button */}
         <Button
           variant="ghost"
           size="icon"
-          className="mr-2 px-0 text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus-visible:bg-gray-100 focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-0 md:hidden"
+          className="mr-2 px-0 md:hidden"
           onClick={onMobileMenuToggle}
         >
           <Menu className="h-6 w-6" />
@@ -44,34 +44,36 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
         </Button>
 
         {/* Logo */}
-        <Link href="/" className="mr-4 flex items-center space-x-2 lg:mr-6 group">
-          <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-100 group-hover:from-blue-100 group-hover:to-indigo-200 transition-all duration-300">
-            <FileText className="h-6 w-6 icon-blue" />
+        <Link href="/" className="mr-6 flex items-center space-x-2 lg:mr-8 group">
+          <div className="flex h-8 w-8 items-center justify-center rounded-sm border border-border bg-primary text-primary-foreground transition-colors group-hover:bg-primary/85">
+            <FileText className="h-4 w-4" />
           </div>
-          <span className="hidden font-bold sm:inline-block text-enhanced group-hover:text-blue-700 transition-colors">Documind</span>
+          <span className="hidden font-display font-semibold text-lg sm:inline-block text-enhanced tracking-tight">
+            Documind
+          </span>
         </Link>
 
-        {/* Navigation */}
-        <nav className="flex items-center gap-4 text-sm lg:gap-6">
+        {/* Navigation — folder-tab style: underline on hover/active, no pill backgrounds */}
+        <nav className="flex items-center gap-1 text-sm lg:gap-2">
           <Link
             href="/dashboard"
-            className="hidden md:flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 text-gray-700 hover:text-blue-700 font-semibold"
+            className="hidden md:flex items-center space-x-2 px-3 py-2 border-b-2 border-transparent hover:border-ledger text-muted-foreground hover:text-foreground font-medium transition-colors"
           >
-            <BarChart3 className="h-4 w-4 text-gray-600 hover:text-blue-600" />
+            <BarChart3 className="h-4 w-4" />
             <span>Dashboard</span>
           </Link>
           <Link
             href="/chat"
-            className="hidden md:flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 text-gray-700 hover:text-green-700 font-semibold"
+            className="hidden md:flex items-center space-x-2 px-3 py-2 border-b-2 border-transparent hover:border-ledger text-muted-foreground hover:text-foreground font-medium transition-colors"
           >
-            <MessageSquare className="h-4 w-4 text-gray-600 hover:text-green-600" />
+            <MessageSquare className="h-4 w-4" />
             <span>Chat</span>
           </Link>
           <Link
             href="/graph"
-            className="hidden md:flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-violet-50 text-gray-700 hover:text-purple-700 font-semibold"
+            className="hidden md:flex items-center space-x-2 px-3 py-2 border-b-2 border-transparent hover:border-ledger text-muted-foreground hover:text-foreground font-medium transition-colors"
           >
-            <BarChart3 className="h-4 w-4 text-gray-600 hover:text-purple-600" />
+            <BarChart3 className="h-4 w-4" />
             <span>Graph</span>
           </Link>
         </nav>
@@ -105,26 +107,26 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
                       <p className="text-sm font-semibold leading-none text-enhanced">
                         {user.firstName} {user.lastName}
                       </p>
-                      <p className="text-xs leading-none text-muted-enhanced">
+                      <p className="catalog-number leading-none">
                         {user.emailAddresses[0]?.emailAddress}
                       </p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="flex items-center hover:bg-blue-50 transition-colors">
+                    <Link href="/dashboard" className="flex items-center">
                       <BarChart3 className="mr-2 h-4 w-4 icon-blue" />
                       Dashboard
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/chat" className="flex items-center hover:bg-green-50 transition-colors">
+                    <Link href="/chat" className="flex items-center">
                       <MessageSquare className="mr-2 h-4 w-4 icon-green" />
                       Chat
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/graph" className="flex items-center hover:bg-purple-50 transition-colors">
+                    <Link href="/graph" className="flex items-center">
                       <BarChart3 className="mr-2 h-4 w-4 icon-purple" />
                       Knowledge Graph
                     </Link>
@@ -133,17 +135,17 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        className="cursor-pointer hover:bg-gray-50 transition-colors"
+                        className="cursor-pointer"
                         onClick={() => openUserProfile()}
                       >
-                        <Settings className="mr-2 h-4 w-4 text-gray-600" />
+                        <Settings className="mr-2 h-4 w-4 text-muted-foreground" />
                         Manage Account
                       </DropdownMenuItem>
                     </>
                   )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    className="cursor-pointer text-red-600 hover:text-red-700 focus:text-red-600 focus:bg-red-50 hover:bg-red-50 transition-colors dark:focus:bg-red-950"
+                    className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
                     onClick={() => signOut()}
                   >
                     <LogOut className="mr-2 h-4 w-4" />

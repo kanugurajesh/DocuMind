@@ -8,7 +8,6 @@ import { v4 as uuidv4 } from "uuid";
 import { ChatInterface } from "@/components/chat/ChatInterface";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { useAuthUser } from "@/lib/auth/client";
 import { showToast } from "@/lib/toast";
 import type { ChatMessage } from "@/types";
@@ -138,16 +137,18 @@ export default function ChatPage() {
     return (
       <AppLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <Card className="p-8 text-center max-w-md mx-auto">
-            <h1 className="text-2xl font-bold mb-4">Sign In Required</h1>
+          <div className="card-index p-8 text-center max-w-md mx-auto">
+            <h1 className="font-display text-2xl font-semibold mb-4 text-foreground">
+              Sign in required
+            </h1>
             <p className="text-muted-foreground mb-6">
-              Please sign in to access the chat interface and interact with your
+              Sign in to reach the chat interface and ask questions of your
               documents.
             </p>
             <Button asChild>
-              <Link href="/sign-in">Sign In</Link>
+              <Link href="/sign-in">Sign in</Link>
             </Button>
-          </Card>
+          </div>
         </div>
       </AppLayout>
     );
@@ -155,33 +156,29 @@ export default function ChatPage() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/50 to-purple-50/30">
+      <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-4 h-[calc(100vh-4rem)]">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <p className="catalog-number mb-1">READING ROOM</p>
+              <h1 className="font-display text-3xl font-semibold mb-1 text-foreground">
                 Document Chat
               </h1>
-              <p className="text-gray-600 text-lg font-medium">
-                Ask questions about your documents and get intelligent answers
-                with sources
+              <p className="text-muted-foreground">
+                Ask a question in plain language and get an answer with its
+                source attached.
               </p>
             </div>
 
             <div className="flex items-center space-x-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={clearChat}
-                className="flex items-center gap-2 bg-white border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-all duration-300 shadow-sm hover:shadow-md font-medium"
-              >
+              <Button variant="outline" size="sm" onClick={clearChat}>
                 <Trash2 className="h-4 w-4" />
-                Clear Chat
+                Clear chat
               </Button>
 
               <Button variant="outline" size="sm" asChild>
-                <Link href="/dashboard" className="flex items-center gap-2 bg-white border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-all duration-300 shadow-sm hover:shadow-md font-medium">
+                <Link href="/dashboard">
                   <ArrowLeft className="h-4 w-4" />
                   Dashboard
                 </Link>
@@ -191,22 +188,22 @@ export default function ChatPage() {
 
           {/* Error Alert */}
           {error && (
-            <Card className="mb-6 card-enhanced border-l-4 border-l-red-500 bg-gradient-to-r from-red-50 to-pink-50 border-red-200 shadow-lg">
+            <div className="mb-6 border border-destructive/50 bg-stamp-tint">
               <div className="flex items-start gap-3 p-4">
                 <div className="flex-1">
-                  <h3 className="font-medium text-red-700">Chat Error</h3>
-                  <p className="text-sm text-red-600 mt-1">{error}</p>
+                  <h3 className="font-medium text-destructive">Chat error</h3>
+                  <p className="text-sm text-destructive/90 mt-1">{error}</p>
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setError(null)}
-                  className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-100 transition-colors"
+                  className="h-8 w-8 text-destructive hover:text-destructive/80"
                 >
                   ×
                 </Button>
               </div>
-            </Card>
+            </div>
           )}
 
           {/* Chat Interface */}
