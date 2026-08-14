@@ -1,4 +1,4 @@
-import { type Db, MongoClient } from "mongodb";
+import { type Db, MongoClient, type ObjectId } from "mongodb";
 
 declare global {
   var _mongoClientPromise: Promise<MongoClient> | undefined;
@@ -50,9 +50,20 @@ export async function getDocumentsCollection() {
   return db.collection("documents");
 }
 
+// User record for AUTH_MODE=local (email/password stored via Auth.js Credentials provider)
+export interface LocalUserDoc {
+  _id?: ObjectId;
+  email: string;
+  passwordHash: string;
+  firstName?: string;
+  lastName?: string;
+  imageUrl?: string | null;
+  createdAt: Date;
+}
+
 export async function getUsersCollection() {
   const { db } = await connectToDatabase();
-  return db.collection("users");
+  return db.collection<LocalUserDoc>("users");
 }
 
 // Helper function to ensure indexes are created

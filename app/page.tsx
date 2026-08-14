@@ -1,5 +1,4 @@
 import { SignInButton, SignUpButton } from "@clerk/nextjs";
-import { currentUser } from "@clerk/nextjs/server";
 import {
   ArrowRight,
   BarChart3,
@@ -10,10 +9,14 @@ import {
   Upload,
   Zap,
 } from "lucide-react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { currentUser } from "@/lib/auth";
+
+const isLocalAuth = process.env.NEXT_PUBLIC_AUTH_MODE === "local";
 
 export default async function Home() {
   const user = await currentUser();
@@ -46,17 +49,41 @@ export default async function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <SignUpButton mode="modal">
-              <Button size="lg" className="text-base px-8 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200">
-                Get Started Free
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </SignUpButton>
-            <SignInButton mode="modal">
-              <Button size="lg" className="text-base px-8 bg-gradient-to-r from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 text-slate-800 border border-slate-300 shadow-lg hover:shadow-xl transition-all duration-200 dark:from-slate-700 dark:to-slate-800 dark:hover:from-slate-600 dark:hover:to-slate-700 dark:text-white dark:border-slate-600">
-                Sign In
-              </Button>
-            </SignInButton>
+            {isLocalAuth ? (
+              <>
+                <Button
+                  asChild
+                  size="lg"
+                  className="text-base px-8 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  <Link href="/sign-up">
+                    Get Started Free
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
+                  className="text-base px-8 bg-gradient-to-r from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 text-slate-800 border border-slate-300 shadow-lg hover:shadow-xl transition-all duration-200 dark:from-slate-700 dark:to-slate-800 dark:hover:from-slate-600 dark:hover:to-slate-700 dark:text-white dark:border-slate-600"
+                >
+                  <Link href="/sign-in">Sign In</Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                <SignUpButton mode="modal">
+                  <Button size="lg" className="text-base px-8 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200">
+                    Get Started Free
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </SignUpButton>
+                <SignInButton mode="modal">
+                  <Button size="lg" className="text-base px-8 bg-gradient-to-r from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 text-slate-800 border border-slate-300 shadow-lg hover:shadow-xl transition-all duration-200 dark:from-slate-700 dark:to-slate-800 dark:hover:from-slate-600 dark:hover:to-slate-700 dark:text-white dark:border-slate-600">
+                    Sign In
+                  </Button>
+                </SignInButton>
+              </>
+            )}
           </div>
 
           <div className="text-sm text-slate-500 dark:text-slate-400">
@@ -227,12 +254,21 @@ export default async function Home() {
             Join thousands of users who have unlocked the power of their
             documents with Documind.
           </p>
-          <SignUpButton mode="modal">
-            <Button size="lg" className="text-base px-8">
-              Start Your Free Trial
-              <ArrowRight className="ml-2 h-4 w-4" />
+          {isLocalAuth ? (
+            <Button asChild size="lg" className="text-base px-8">
+              <Link href="/sign-up">
+                Start Your Free Trial
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
             </Button>
-          </SignUpButton>
+          ) : (
+            <SignUpButton mode="modal">
+              <Button size="lg" className="text-base px-8">
+                Start Your Free Trial
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </SignUpButton>
+          )}
         </div>
       </section>
     </div>

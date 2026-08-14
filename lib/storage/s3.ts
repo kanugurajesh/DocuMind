@@ -12,6 +12,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 let s3Client: S3Client | null = null;
+let bucketReady: Promise<void> | null = null;
 
 function getStorageMode(): "local" | "cloud" {
   return process.env.STORAGE_MODE === "local" ? "local" : "cloud";
@@ -86,6 +87,15 @@ export async function uploadFileBuffer(
   userId: string,
   docId: string,
 ): Promise<{ blobUrl: string; uploadResponse: PutObjectCommandOutput }> {
+  // MinIO doesn't pre-provision buckets; ensure it exists before the first upload.
+  if (!bucketReady) {
+    bucketReady = initializeBucket().catch((error) => {
+      bucketReady = null;
+      throw error;
+    });
+  }
+  await bucketReady;
+
   const s3 = getS3Client();
   const bucketName = getBucketName();
 

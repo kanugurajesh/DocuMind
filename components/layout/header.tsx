@@ -1,6 +1,5 @@
 "use client";
 
-import { useClerk, useUser } from "@clerk/nextjs";
 import {
   BarChart3,
   FileText,
@@ -20,14 +19,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { isLocalAuth, useAuthActions, useAuthUser } from "@/lib/auth/client";
 
 interface HeaderProps {
   onMobileMenuToggle?: () => void;
 }
 
 export function Header({ onMobileMenuToggle }: HeaderProps) {
-  const { user, isLoaded } = useUser();
-  const { signOut, openUserProfile } = useClerk();
+  const { user, isLoaded } = useAuthUser();
+  const { signOut, openUserProfile } = useAuthActions();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/90 shadow-sm">
@@ -88,7 +88,7 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
                   >
                     <Avatar className="h-8 w-8">
                       <AvatarImage
-                        src={user.imageUrl}
+                        src={user.imageUrl ?? undefined}
                         alt={user.firstName || ""}
                       />
                       <AvatarFallback>
@@ -129,18 +129,22 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
                       Knowledge Graph
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    className="cursor-pointer hover:bg-gray-50 transition-colors"
-                    onClick={() => openUserProfile()}
-                  >
-                    <Settings className="mr-2 h-4 w-4 text-gray-600" />
-                    Manage Account
-                  </DropdownMenuItem>
+                  {!isLocalAuth && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        className="cursor-pointer hover:bg-gray-50 transition-colors"
+                        onClick={() => openUserProfile()}
+                      >
+                        <Settings className="mr-2 h-4 w-4 text-gray-600" />
+                        Manage Account
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     className="cursor-pointer text-red-600 hover:text-red-700 focus:text-red-600 focus:bg-red-50 hover:bg-red-50 transition-colors dark:focus:bg-red-950"
-                    onClick={() => signOut({ redirectUrl: "/" })}
+                    onClick={() => signOut()}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign Out

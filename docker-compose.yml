@@ -31,7 +31,7 @@ services:
       - neo4j_data:/data
       - neo4j_logs:/logs
     environment:
-      - NEO4J_AUTH=neo4j/neo4j # username/password — change NEO4J_LOCAL_PASSWORD in .env.local to match
+      - NEO4J_AUTH=neo4j/documind_local_dev # username/password — must match NEO4J_LOCAL_PASSWORD in .env.local
     restart: unless-stopped
 
   minio:

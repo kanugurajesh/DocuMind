@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth";
 import { type NextRequest, NextResponse } from "next/server";
 import { processDocumentSimilarity } from "@/lib/ai/document-similarity";
 

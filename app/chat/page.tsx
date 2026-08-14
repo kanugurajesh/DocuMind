@@ -1,6 +1,5 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import Link from "next/link";
@@ -10,11 +9,12 @@ import { ChatInterface } from "@/components/chat/ChatInterface";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useAuthUser } from "@/lib/auth/client";
 import { showToast } from "@/lib/toast";
 import type { ChatMessage } from "@/types";
 
 export default function ChatPage() {
-  const { user, isLoaded } = useUser();
+  const { user, isLoaded } = useAuthUser();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

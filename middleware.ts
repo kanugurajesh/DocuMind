@@ -1,4 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import NextAuth from "next-auth";
+import { authConfig } from "./auth.config";
 
 const isProtectedRoute = createRouteMatcher([
   "/dashboard(.*)",
@@ -8,11 +10,22 @@ const isProtectedRoute = createRouteMatcher([
   "/graph(.*)",
 ]);
 
-export default clerkMiddleware(async (auth, req) => {
+const clerkAuthMiddleware = clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
     await auth.protect();
   }
 });
+
+// Built only from the Edge-safe auth.config.ts (no providers, no DB imports)
+// — its authorized() callback already replicates the redirect-vs-401 split
+// that auth.protect() gives Clerk above. Never import ./auth.ts here: its
+// Credentials provider pulls in the mongodb driver, which breaks the Edge
+// build.
+const { auth: localAuthMiddleware } = NextAuth(authConfig);
+
+export default process.env.AUTH_MODE === "local"
+  ? localAuthMiddleware
+  : clerkAuthMiddleware;
 
 export const config = {
   matcher: [

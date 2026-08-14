@@ -1,15 +1,15 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GraphVisualization } from "@/components/graph/GraphVisualization";
 import { AppLayout } from "@/components/layout/app-layout";
+import { useAuthUser } from "@/lib/auth/client";
 import { showToast } from "@/lib/toast";
 import type { GraphData } from "@/types";
 
 export default function GraphPage() {
-  const { user, isLoaded } = useUser();
+  const { user, isLoaded } = useAuthUser();
   const [graphData, setGraphData] = useState<GraphData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

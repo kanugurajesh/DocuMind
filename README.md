@@ -198,7 +198,7 @@ Before running Documind, ensure you have:
 - **Neo4j** graph database (local Docker or Neo4j Aura)
 - **File storage** (local Docker MinIO or AWS S3)
 - **AI provider** (local Docker Ollama or OpenAI API key)
-- **Clerk** account for authentication
+- **Authentication** (self-hosted email/password — no external account needed, or a Clerk account for cloud mode)
 
 ### 🐳 One Compose File, Only What You Need
 
@@ -212,6 +212,8 @@ npm run docker:down   # stops the same set
 ```
 
 For example, with `QDRANT_MODE=local` and everything else `cloud`, `npm run docker:up` runs the equivalent of `docker compose --profile qdrant up -d` — only the Qdrant container starts. You can still target profiles manually if you prefer: `docker compose --profile mongodb --profile qdrant up -d`.
+
+`AUTH_MODE` is a sixth toggle following the same `local`/`cloud` convention, but it has **no Compose profile** — local auth is a library (Auth.js), not a service, so `npm run docker:up` never starts a container for it.
 
 ## 🚀 Quick Start
 
@@ -241,7 +243,14 @@ cp .env.example .env.local
 Update `.env.local` with your service credentials:
 
 ```env
-# Clerk Authentication
+# Authentication
+# Mode: "local" (self-hosted email/password via Auth.js, stored in MongoDB) | "cloud" (uses Clerk)
+AUTH_MODE=local
+NEXT_PUBLIC_AUTH_MODE=local
+# Generate with: npx auth secret
+AUTH_SECRET=generate_with_npx_auth_secret
+
+# Clerk Authentication (used when AUTH_MODE=cloud)
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_key
 CLERK_SECRET_KEY=sk_test_your_key
 NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
@@ -468,6 +477,41 @@ EMBEDDING_DIMENSIONS=1536
 
 > **Note:** `EMBEDDING_DIMENSIONS` must match the active embedding model's output size and is only applied when the Qdrant collection (`documind_chunks`) is first created — it does **not** resize an existing collection. If you switch `AI_MODE` after documents have already been embedded, delete the `documind_chunks` collection in Qdrant and re-upload documents so vector dimensions stay consistent.
 
+#### Authentication — Local or Cloud
+
+Authentication supports two modes controlled by `AUTH_MODE` (and its client-visible twin, `NEXT_PUBLIC_AUTH_MODE`) in `.env.local`. Unlike the other four toggles, local mode here is a **library, not a container** — [Auth.js](https://authjs.dev) (NextAuth v5) with a Credentials provider stores email/password accounts (bcrypt-hashed) in whichever MongoDB is already configured, so `npm run docker:up` has nothing extra to start for this one.
+
+**Local (self-hosted email/password) — recommended for development, no external account needed:**
+
+Generate a session secret once:
+```bash
+npx auth secret
+```
+This writes `AUTH_SECRET` into `.env.local` for you (or copy the printed value in manually).
+
+Set in `.env.local`:
+```env
+AUTH_MODE=local
+NEXT_PUBLIC_AUTH_MODE=local
+AUTH_SECRET=your_generated_secret
+```
+Then visit `/sign-up` to create the first account — no email verification or password reset flow in local mode (matching the other local modes' zero-external-service approach). Accounts are stored in the `users` collection of the active MongoDB instance.
+
+**Cloud (Clerk):**
+
+1. Create a free application at [clerk.com](https://clerk.com)
+2. Copy the publishable and secret keys
+
+Set in `.env.local`:
+```env
+AUTH_MODE=cloud
+NEXT_PUBLIC_AUTH_MODE=cloud
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_key
+CLERK_SECRET_KEY=sk_test_your_key
+```
+
+> **Note:** `AUTH_MODE` changes what gets rendered client-side (sign-in/up forms, the header's account menu), so switching it requires a full rebuild/restart of the dev server — not just an env var reload — since `NEXT_PUBLIC_*` values are inlined into the client bundle at build time.
+
 ### 5. Run the Application
 
 ```bash
@@ -492,18 +536,24 @@ documind/
 │   │   ├── graph/                # Graph operations
 │   │   ├── search/               # Search functionality
 │   │   └── upload/               # File upload
+│   ├── api/
+│   │   └── auth/
+│   │       ├── [...nextauth]/    # Auth.js route handler (local mode)
+│   │       └── register/         # Local-mode sign-up endpoint
 │   ├── chat/                     # Chat interface page
 │   ├── dashboard/                # Main dashboard
 │   ├── graph/                    # Knowledge graph view
-│   ├── sign-in/                  # Authentication pages
+│   ├── sign-in/                  # Authentication pages (mode-conditional UI)
 │   ├── sign-up/
 │   ├── layout.tsx                # Root layout
 │   └── page.tsx                  # Landing page
 ├── components/                   # React components
+│   ├── auth/                     # Local-mode sign-in/sign-up forms
 │   ├── chat/                     # Chat interface components
 │   ├── documents/                # Document management
 │   ├── graph/                    # Graph visualization
 │   ├── layout/                   # Layout components
+│   ├── providers/                # AuthProvider (Clerk vs Auth.js SessionProvider)
 │   └── ui/                       # Reusable UI components
 ├── lib/                          # Utilities and configurations
 │   ├── ai/                       # AI processing modules
@@ -513,23 +563,27 @@ documind/
 │   │   ├── pipeline.ts           # Processing pipeline
 │   │   └── processing.ts         # Text processing
 │   ├── api/                      # API utilities
+│   ├── auth/                     # Unified auth: server (index.ts) + client (client.tsx) hooks
 │   ├── db/                       # Database connections
 │   │   ├── mongodb.ts            # MongoDB client
 │   │   ├── neo4j.ts              # Neo4j client
 │   │   └── qdrant.ts             # Qdrant client
 │   └── storage/                  # File storage
 ├── types/                        # TypeScript definitions
+│   └── next-auth.d.ts            # Auth.js session/user type augmentation
 ├── scripts/
 │   └── docker-services.js        # Starts/stops only the services set to "local" mode
+├── auth.config.ts                # Edge-safe Auth.js config (used by middleware.ts)
+├── auth.ts                       # Full Auth.js config (Credentials provider, Node runtime only)
 ├── docker-compose.yml            # MongoDB/Qdrant/Neo4j/MinIO/Ollama, one profile per service
-├── middleware.ts                 # Clerk middleware
+├── middleware.ts                 # Clerk or Auth.js middleware, chosen by AUTH_MODE
 └── next.config.ts               # Next.js configuration
 ```
 
 ## 🔄 Document Processing Pipeline
 
 ### 1. Upload Phase
-- **Authentication**: Verify user via Clerk
+- **Authentication**: Verify user session (local Auth.js or Clerk, depending on `AUTH_MODE`)
 - **Storage**: Save file to local MinIO or AWS S3
 - **Metadata**: Create document record in MongoDB
 - **Queue**: Initiate background processing
@@ -576,9 +630,10 @@ documind/
 ## 🔐 Security & Privacy
 
 ### Authentication
-- **Clerk Integration**: Secure sign-up/sign-in flows
-- **Session Management**: Automatic token handling
-- **Route Protection**: Middleware-based access control
+- **Local mode**: Self-hosted email/password via Auth.js — bcrypt-hashed passwords, JWT sessions, no external account needed
+- **Cloud mode**: Clerk-managed sign-up/sign-in flows
+- **Session Management**: Automatic token handling (JWT locally, Clerk-managed in cloud mode)
+- **Route Protection**: Middleware-based access control (Auth.js or Clerk, depending on `AUTH_MODE`)
 
 ### Data Isolation
 - **User Scoping**: Complete isolation of user data
@@ -632,7 +687,7 @@ npm run docker:down
 2. **Environment Variables**: Configure production credentials
 3. **File Storage**: Set up AWS S3 bucket (or self-host MinIO with `STORAGE_MODE=local`)
 4. **AI Provider**: Configure OpenAI API access (or self-host Ollama with `AI_MODE=local`)
-5. **Authentication**: Configure Clerk for production
+5. **Authentication**: Configure Clerk for production (or self-host with `AUTH_MODE=local` + a strong `AUTH_SECRET` — note that local mode has no email verification or password reset flow, by design; add those yourself before relying on it in production)
 
 ### Recommended Platforms
 
@@ -653,6 +708,16 @@ npm run docker:down
 ## 🔧 Troubleshooting
 
 ### Common Issues
+
+#### Authentication Errors
+
+If sign-in/sign-up fails or protected routes won't load:
+
+1. **"Configuration" error page or middleware crash on startup** — `AUTH_SECRET` is missing or empty. Generate one with `npx auth secret` and set it in `.env.local`, then restart the dev server.
+2. **Signed in but immediately redirected to `/sign-in`** — usually a mismatch between the cookie the session was issued with and the current `AUTH_SECRET`/`AUTH_MODE`; sign out, clear cookies for `localhost:3000`, and sign in again.
+3. **"An account with this email already exists" on sign-up** — expected; go to `/sign-in` instead. Local mode has no password reset flow (by design — see the Authentication setup section above), so a forgotten password currently means creating a new account or manually updating the `users` collection in MongoDB.
+4. **Switched `AUTH_MODE` but UI didn't change** — `NEXT_PUBLIC_AUTH_MODE` is inlined into the client bundle at build time; a dev-server restart (or rebuild in production) is required, not just an env var edit.
+5. **`next build` fails mentioning the Edge Runtime** — something in `middleware.ts`'s local-mode branch is reaching `auth.ts` instead of `auth.config.ts` (e.g. through an accidental import). `auth.ts`'s Credentials provider pulls in the MongoDB driver, which isn't Edge-compatible; `middleware.ts` must only ever import `auth.config.ts`.
 
 #### MongoDB Connection Errors
 
@@ -751,11 +816,17 @@ If chat, embedding, or entity/topic extraction requests fail:
 # NEO4J_MODE=local
 # STORAGE_MODE=local
 # AI_MODE=local
+# AUTH_MODE=local
+# NEXT_PUBLIC_AUTH_MODE=local
+
+# Generate an auth session secret (writes AUTH_SECRET into .env.local)
+npx auth secret
 
 # Install dependencies
 npm install
 
 # Start only the services set to "local" above (reads .env.local automatically)
+# — note there's no container for AUTH_MODE, it's a library, not a service
 npm run docker:up
 
 # Pull the local chat and embedding models (one-time setup)
@@ -768,7 +839,7 @@ npm run dev
 
 #### Switching Between Local and Cloud
 
-To switch MongoDB, Qdrant, Neo4j, file storage, or the AI provider between local Docker and cloud, update the mode variable in `.env.local`, re-run `npm run docker:up` (it starts newly-local services and leaves the rest alone — run `npm run docker:down` first if you want to stop a container you just switched away from), and restart the dev server:
+To switch MongoDB, Qdrant, Neo4j, file storage, the AI provider, or authentication between local and cloud, update the mode variable(s) in `.env.local`, re-run `npm run docker:up` (it starts newly-local services and leaves the rest alone — run `npm run docker:down` first if you want to stop a container you just switched away from), and restart the dev server:
 
 | Variable | `local` | `cloud` |
 |---|---|---|
@@ -777,8 +848,9 @@ To switch MongoDB, Qdrant, Neo4j, file storage, or the AI provider between local
 | `NEO4J_MODE` | Docker Desktop (`bolt://localhost:7687`) | Neo4j Aura (`NEO4J_URI` + credentials) |
 | `STORAGE_MODE` | Docker Desktop MinIO (`http://localhost:9000`) | AWS S3 (`AWS_S3_BUCKET_NAME` + credentials) |
 | `AI_MODE` | Docker Desktop Ollama (`http://localhost:11434`) | OpenAI (`OPENAI_API_KEY`) |
+| `AUTH_MODE` (+ `NEXT_PUBLIC_AUTH_MODE`) | Self-hosted Auth.js (`AUTH_SECRET`, no container) | Clerk (`CLERK_SECRET_KEY` + publishable key) |
 
-The default for all five is `cloud` when the variable is unset in code — the shipped `.env.example` sets each to `local` for a zero-config dev setup. Switching `AI_MODE` also changes the embedding model, so `EMBEDDING_DIMENSIONS` and the Qdrant collection must be kept in sync (see the AI Provider setup section above).
+The default for all six is `cloud` when the variable is unset in code — the shipped `.env.example` sets each to `local` for a zero-config dev setup. Switching `AI_MODE` also changes the embedding model, so `EMBEDDING_DIMENSIONS` and the Qdrant collection must be kept in sync (see the AI Provider setup section above). `AUTH_MODE` is the only one of the six needing its `NEXT_PUBLIC_` twin kept in sync too, and the only one requiring a full restart rather than a hot env reload, since it changes what renders client-side.
 
 #### Environment Validation
 The application includes built-in connection testing and will provide clear error messages for misconfigured services.

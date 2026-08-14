@@ -1,11 +1,11 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
 import { BarChart3, FileText, MessageSquare, X } from "lucide-react";
 import Link from "next/link";
 import type React from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useAuthUser } from "@/lib/auth/client";
 import { Header } from "./header";
 
 interface AppLayoutProps {
@@ -14,7 +14,7 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, isLoaded } = useUser();
+  const { user, isLoaded } = useAuthUser();
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
 

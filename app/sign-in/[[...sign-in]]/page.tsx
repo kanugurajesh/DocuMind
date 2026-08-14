@@ -1,4 +1,7 @@
 import { SignIn } from "@clerk/nextjs";
+import { LocalSignInForm } from "@/components/auth/local-sign-in-form";
+
+const isLocalAuth = process.env.NEXT_PUBLIC_AUTH_MODE === "local";
 
 export default function Page() {
   return (
@@ -13,24 +16,28 @@ export default function Page() {
           </p>
         </div>
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 p-8">
-          <SignIn
-            appearance={{
-              elements: {
-                rootBox: "mx-auto",
-                card: "shadow-none border-0 bg-transparent",
-                headerTitle: "text-slate-900 dark:text-white",
-                headerSubtitle: "text-slate-600 dark:text-slate-300",
-                socialButtonsBlockButton: "border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700",
-                dividerLine: "bg-slate-200 dark:bg-slate-600",
-                dividerText: "text-slate-500 dark:text-slate-400",
-                formFieldLabel: "text-slate-700 dark:text-slate-200",
-                formFieldInput: "border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white",
-                footerActionLink: "text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300",
-                identityPreviewText: "text-slate-700 dark:text-slate-200",
-                identityPreviewEditButton: "text-indigo-600 dark:text-indigo-400"
-              }
-            }}
-          />
+          {isLocalAuth ? (
+            <LocalSignInForm />
+          ) : (
+            <SignIn
+              appearance={{
+                elements: {
+                  rootBox: "mx-auto",
+                  card: "shadow-none border-0 bg-transparent",
+                  headerTitle: "text-slate-900 dark:text-white",
+                  headerSubtitle: "text-slate-600 dark:text-slate-300",
+                  socialButtonsBlockButton: "border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700",
+                  dividerLine: "bg-slate-200 dark:bg-slate-600",
+                  dividerText: "text-slate-500 dark:text-slate-400",
+                  formFieldLabel: "text-slate-700 dark:text-slate-200",
+                  formFieldInput: "border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white",
+                  footerActionLink: "text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300",
+                  identityPreviewText: "text-slate-700 dark:text-slate-200",
+                  identityPreviewEditButton: "text-indigo-600 dark:text-indigo-400"
+                }
+              }}
+            />
+          )}
         </div>
       </div>
     </div>

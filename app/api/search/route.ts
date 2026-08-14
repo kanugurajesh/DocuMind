@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth";
 import { type NextRequest, NextResponse } from "next/server";
 import { performDocumentSearch } from "@/lib/ai/chat";
 import type { SearchApiResponse, SearchRequest } from "@/types";

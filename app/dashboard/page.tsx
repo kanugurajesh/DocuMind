@@ -1,6 +1,5 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import {
   AlertCircle,
@@ -30,11 +29,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useAuthUser } from "@/lib/auth/client";
 import { showToast } from "@/lib/toast";
 import type { Document, SearchResult } from "@/types";
 
 export default function DashboardPage() {
-  const { user, isLoaded } = useUser();
+  const { user, isLoaded } = useAuthUser();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [showUpload, setShowUpload] = useState(false);
