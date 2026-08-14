@@ -7,14 +7,27 @@
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.3-black.svg)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.0-06B6D4.svg)](https://tailwindcss.com/)
-[![Clerk](https://img.shields.io/badge/Clerk-Auth-9333EA.svg)](https://clerk.com/)
+[![Qdrant](https://img.shields.io/badge/Qdrant-Vector%20DB-DC244C.svg)](https://qdrant.tech/)
+[![Neo4j](https://img.shields.io/badge/Neo4j-Knowledge%20Graph-008CC1.svg)](https://neo4j.com/)
+[![OpenAI](https://img.shields.io/badge/OpenAI%20%2F%20Ollama-LLM-412991.svg)](https://platform.openai.com/)
 
 
 </div>
 
 ## 🚀 Overview
 
-Documind is a cutting-edge document intelligence platform that transforms your documents into an interactive, searchable knowledge base. Upload documents, extract insights, and interact using natural language queries powered by advanced AI technologies.
+Documind is a document intelligence platform that transforms uploaded files into an interactive, searchable knowledge base. Upload documents, ask questions in natural language, and get answers grounded in — and cited to — your own files, while a second AI pipeline builds a queryable knowledge graph of the entities and relationships hiding across the whole collection.
+
+### The problem
+
+Most "chat with your PDF" tools stop at naive RAG: embed some chunks, retrieve the nearest neighbors, paste them into a prompt. That falls apart the moment a question spans multiple documents or depends on how entities relate to each other — a plain vector search has no notion of "this person also appears in that other contract" or "these two reports are about the same acquisition."
+
+Documind exists to answer a narrower, harder question: **can a RAG system also understand the *structure* connecting a document collection, not just its text?** That meant building two AI subsystems on top of the same ingestion pipeline:
+
+1. A **retrieval-augmented generation pipeline** for grounded, cited natural-language Q&A over a user's documents.
+2. A **knowledge-graph extraction pipeline** that runs entity recognition, cross-document entity resolution, semantic clustering, document similarity, and topic modeling on the same chunks — turning a flat pile of files into a queryable graph of who/what/where and how they connect, rendered as an interactive visualization.
+
+Both pipelines had to run identically against a hosted LLM (OpenAI) or a fully local one (Ollama) with zero code branching at the call sites, and the whole stack had to run for free on a laptop via Docker — so the project doubled as an exercise in designing backend-agnostic infrastructure abstractions (AI client, storage client, database clients) that don't leak their provider into application code. See **AI Systems Deep Dive** below for how each pipeline actually works, with the real thresholds and models involved.
 
 ### ✨ Key Features
 
@@ -27,75 +40,119 @@ Documind is a cutting-edge document intelligence platform that transforms your d
 - **🎛️ Smart Filtering**: Customizable graph views with entity type filters and confidence thresholds
 - **🔧 Resilient Architecture**: Graceful error handling with fallback options for all services
 
-## Photos
+## 🧠 AI Systems Deep Dive
 
-<img width="1920" height="1080" alt="Screenshot 2025-09-25 093745" src="https://github.com/user-attachments/assets/4a6d220b-0bc1-4d93-a77a-e60374474ffa" />
+This is the section worth reading closely if you're evaluating the AI/ML engineering rather than the product. Every claim below is backed by code — file paths point to the actual implementation, not a design doc.
 
-<img width="1920" height="1080" alt="Screenshot 2025-09-25 093751" src="https://github.com/user-attachments/assets/776bd593-a3b0-4f45-b173-4111570ac0b4" />
+### 1. Retrieval-Augmented Generation (RAG) pipeline
 
-<img width="1920" height="1080" alt="Screenshot 2025-09-25 093821" src="https://github.com/user-attachments/assets/21932850-baec-4bf3-8083-78458e2c38fc" />
+**Ingestion — runs once per uploaded document:**
 
-<img width="1920" height="1080" alt="Screenshot 2025-09-25 093828" src="https://github.com/user-attachments/assets/50526ec3-7969-4bb4-aa15-fad8a3c75fb6" />
+```mermaid
+flowchart TD
+    A["Raw file (PDF / DOCX / TXT)"] -->|"LangChain PDFLoader · mammoth.js · plain text"| B["Extracted text + metadata<br/>title, author, page count"]
+    B -->|"whitespace normalization<br/>control-char stripping"| C["Preprocessed text"]
+    C -->|"lib/ai/processing.ts :: chunkText()"| D["Sliding-window chunks<br/>500 words/chunk, 50-word overlap"]
+    D -->|"batched, 100 chunks/call<br/>rate-limit delay"| E["Embeddings<br/>Ollama nomic-embed-text (768-dim)<br/>or OpenAI text-embedding-3-small (1536-dim)"]
+    E --> F[("Qdrant upsert<br/>cosine distance<br/>indexed on userId + docId")]
+```
 
-<img width="1920" height="1080" alt="Screenshot 2025-09-25 094350" src="https://github.com/user-attachments/assets/feec26ab-4e05-4bb1-b4cb-c1e6843970d7" />
+**Query — runs on every chat message:**
 
-<img width="1920" height="1080" alt="Screenshot 2025-09-25 094401" src="https://github.com/user-attachments/assets/9b0a2f27-3dd3-4398-9d40-1e9878321a70" />
+```mermaid
+flowchart TD
+    A["User question"] -->|"embedded with the ingestion-time model"| B["Query embedding"]
+    B --> C[("Qdrant ANN search<br/>filtered to userId (+ docId)<br/>score ≥ 0.2, top-k = 10")]
+    C --> D["Prompt assembly<br/>numbered, source-labeled context blocks<br/>'[Source 1 - filename.pdf]: chunk text'"]
+    D -->|"temperature 0.3"| E["LLM completion<br/>answers only from context, cites sources,<br/>admits when context is insufficient"]
+    E --> F["Answer + ranked sources + confidence score<br/>0.8 × avg retrieval score + 0.2 if answer > 50 chars, capped at 1.0"]
+```
 
-<img width="1920" height="1080" alt="Screenshot 2025-09-25 093908" src="https://github.com/user-attachments/assets/f0088bc2-50aa-48f1-ba90-8f9caeaaa4c9" />
+The user-scoping filter is applied **inside the Qdrant query** (`lib/db/qdrant.ts :: searchVectors`) via a payload-indexed `must` clause on `userId`, not as a post-fetch filter in application code — one user's documents are never in another user's candidate set, even before a similarity score is computed. See `lib/ai/chat.ts` for the full retrieval → prompt → generation flow.
+
+### 2. Knowledge-graph extraction pipeline
+
+The same chunks feed a second, independent pipeline that builds a Neo4j graph instead of (or alongside) the vector index. It runs as five stages, implemented in `lib/ai/entities.ts`, `lib/ai/document-similarity.ts`, and `lib/ai/topic-modeling.ts`:
+
+```mermaid
+flowchart LR
+    A["1. Entity extraction<br/>LLM NER per chunk"] --> B["2. Co-occurrence linking<br/>COOCCURS_WITH edges"]
+    B --> C["3. Cross-document resolution<br/>SAME_AS / SIMILAR_TO"]
+    C --> D["4. Semantic clustering<br/>category-specific heuristics"]
+    D --> E["5. Similarity & topics<br/>DOCUMENT_SIMILAR_TO + LLM topic modeling"]
+```
+
+| Stage | What it does | Signal / threshold |
+|---|---|---|
+| **1. Entity extraction** | Per-chunk LLM call (temperature 0.1) returns structured JSON: named entities (`PERSON` / `ORGANIZATION` / `LOCATION` / `DATE` / `MONEY` / `OTHER`) with confidence scores, plus explicit relationships between them | LLM structured output, capped at 10 entities/chunk |
+| **2. Co-occurrence linking** | Every entity pair found in the same chunk gets a `COOCCURS_WITH` edge, weighted by combined entity confidence and how close together the two mentions appear in the raw text | Character-distance proximity bonus |
+| **3. Cross-document resolution** | New entities are compared against a user's *existing* entities of the same category: exact-name match, Jaccard word overlap, person-name subset matching ("J. Smith" ⊂ "John Smith"), organization-abbreviation containment | `SAME_AS` above 0.8 similarity, `SIMILAR_TO` between 0.6–0.8 |
+| **4. Semantic clustering** | Category-specific heuristics group related entities — shared professional titles for people, shared industry terms for organizations, geographic containment for locations — plus cross-category inference (`WORKS_AT`, `LOCATED_IN`) derived from co-occurrence | `SIMILAR_TO` between 0.4–0.8 |
+| **5. Document similarity & topics** | Per-document embeddings (mean-pooled from that document's chunk vectors) are compared pairwise by cosine similarity for `DOCUMENT_SIMILAR_TO` edges; a separate LLM call clusters the whole collection into topics and assigns documents to them | Cosine similarity > 0.3 |
+
+Stages 3–5 are triggered on demand from the graph UI ("Cluster Entities" / "Analyze Doc Similarity" / "Extract Topics") rather than automatically on every upload, since they're collection-wide operations — re-running them after adding a new document lets the graph re-resolve entities against the *whole* corpus, not just the new file.
+
+The result renders with Cytoscape.js: node size scales with degree (how connected an entity is), edge styling varies by relationship type (structural `MENTIONS`/`CONTAINS` edges recede into the background; semantic edges stay prominent), and every relationship carries its confidence score as graph data so results can be filtered by it.
+
+### 3. One client, two inference backends
+
+Every AI call in the app — chat completion, embeddings, entity extraction, topic modeling — goes through a single factory (`lib/ai/client.ts`) built on the `openai` SDK:
+
+```ts
+export function getOpenAIClient(): OpenAI {
+  if (aiMode === "local") {
+    return new OpenAI({ baseURL: "http://localhost:11434/v1", apiKey: "ollama" });
+  }
+  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+}
+```
+
+Ollama speaks the OpenAI `/v1` API, so switching `AI_MODE` between `local` and `cloud` is a config change, not a code change — no call site knows or cares which provider it's talking to. The same pattern extends to storage (MinIO/S3), the vector DB (Qdrant local/cloud), the graph DB (Neo4j local/Aura), and auth (Auth.js/Clerk) — each independently toggleable, all through one `docker-compose.yml` with per-service [Compose profiles](https://docs.docker.com/compose/how-tos/profiles/) (see **One Compose File, Only What You Need** below). That lets the whole stack run for $0 on a laptop during development while staying a single env var away from a fully managed cloud deployment.
 
 ## 🏗️ Architecture
 
 Documind employs a sophisticated multi-database architecture designed for scalability and performance:
 
 ### 📐 High-Level Architecture Overview
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Frontend Layer                           │
-├─────────────────────────────────────────────────────────────────┤
-│  • Next.js 15 with App Router (React 19)                        │
-│  • TypeScript for type safety                                   │
-│  • Tailwind CSS v4 for styling                                  │
-│  • Radix UI components                                          │
-│  • Clerk for authentication                                     │
-│  • Cytoscape.js for graph visualization                         │
-└─────────────────────────────────────────────────────────────────┘
-                                 ║
-                                 ║ API Routes
-                                 ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                        Backend Layer                            │
-├─────────────────────────────────────────────────────────────────┤
-│  • Next.js API Routes                                           │
-│  • Middleware for authentication                                │
-│  • AI Processing Pipeline (Ollama or OpenAI)                     │
-│  • File processing (PDF via LangChain, Word, Text)              │
-└─────────────────────────────────────────────────────────────────┘
-                                 ║
-         ┌---------------────────╫────────--------------┐
-         ▼                       ║                      ▼
-┌─────────────────┐    ┌─────────╫───────┐      ┌─────────────────┐
-│   File Storage  │    │    AI Services  │      │   Databases     │
-│                 │    │                 │      │                 │
-│  • MinIO/AWS S3 │    │  • Ollama/GPT   │      │  • MongoDB      │
-│  • Presigned    │    │  • Embeddings   │      │  • Qdrant       │
-│    URLs         │    │  • Entity       │      │  • Neo4j        │
-│  • Secure       │    │    Extraction   │      │  • Multi-DB     │
-│    Storage      │    │                 │      │    Architecture │
-└─────────────────┘    └─────────────────┘      └─────────────────┘
+
+```mermaid
+flowchart TB
+    FE["Frontend<br/>Next.js 15 (App Router) · React 19 · TypeScript<br/>Tailwind CSS v4 · Radix UI · Cytoscape.js<br/>Clerk or Auth.js (AUTH_MODE)"]
+    BE["Backend<br/>Next.js API Routes · Auth middleware<br/>AI processing pipeline<br/>File processing (LangChain / mammoth.js)"]
+    ST[("File Storage<br/>MinIO / AWS S3<br/>Presigned URLs")]
+    AI["AI Services<br/>Ollama or OpenAI<br/>Embeddings · Chat · Entity Extraction"]
+    MG[("MongoDB")]
+    QD[("Qdrant")]
+    N4[("Neo4j")]
+
+    FE -->|API Routes| BE
+    BE --> ST
+    BE --> AI
+    BE --> MG
+    BE --> QD
+    BE --> N4
 ```
 
 ### 🗄️ Database Architecture
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│    MongoDB      │    │     Qdrant      │    │     Neo4j       │
-│                 │    │                 │    │                 │
-│  • Documents    │    │  • Vector       │    │  • Knowledge    │
-│    metadata     │    │    embeddings   │    │    Graph        │
-│  • User data    │    │  • Semantic     │    │  • Entities     │
-│  • Processing   │    │    search       │    │  • Relations    │
-│    status       │    │  • Similarity   │    │  • Topics       │
-│  • File refs    │    │    matching     │    │  • Clusters     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+
+```mermaid
+flowchart LR
+    subgraph MongoDB["MongoDB"]
+        M1["Documents metadata"]
+        M2["User data"]
+        M3["Processing status"]
+        M4["File references"]
+    end
+    subgraph Qdrant["Qdrant"]
+        Q1["Vector embeddings"]
+        Q2["Semantic search"]
+        Q3["Similarity matching"]
+    end
+    subgraph Neo4j["Neo4j"]
+        N1["Knowledge graph"]
+        N2["Entities & relations"]
+        N3["Topics & clusters"]
+    end
 ```
 
 ### 🔧 Technology Stack
@@ -120,70 +177,33 @@ Documind employs a sophisticated multi-database architecture designed for scalab
 - **Entity Extraction**: NER with relationship mapping
 
 ### 🌊 Data Flow Architecture
-```
-1. User Authentication (Clerk)
-   ↓
-2. File Upload to S3
-   ↓
-3. Background Processing:
-   • Text extraction
-   • AI analysis (Ollama or OpenAI)
-   • Vector generation (Qdrant)
-   • Entity extraction (Neo4j)
-   • Metadata storage (MongoDB)
-   ↓
-4. Real-time Status Updates
-   ↓
-5. Interactive Features:
-   • Semantic search
-   • AI chat
-   • Graph visualization
-   • Document management
+
+```mermaid
+flowchart TD
+    A["1. User Authentication<br/>Clerk or Auth.js"] --> B["2. File Upload<br/>MinIO / AWS S3"]
+    B --> C["3. Background Processing"]
+    C --> C1["Text extraction"]
+    C --> C2["AI analysis (Ollama / OpenAI)"]
+    C --> C3["Vector generation (Qdrant)"]
+    C --> C4["Entity extraction (Neo4j)"]
+    C --> C5["Metadata storage (MongoDB)"]
+    C1 & C2 & C3 & C4 & C5 --> D["4. Real-time Status Updates"]
+    D --> E["5. Interactive Features"]
+    E --> E1["Semantic search"]
+    E --> E2["AI chat"]
+    E --> E3["Graph visualization"]
+    E --> E4["Document management"]
 ```
 
 ### 🔄 Document Processing Flow
-```
-File Upload → Text Extraction → AI Processing → Multi-DB Storage
-     │              │               │              │
-     │              │               │              └─→ Vector embeddings (Qdrant)
-     │              │               │                 Entity extraction (Neo4j)
-     │              │               │                 Metadata storage (MongoDB)
-     │              │               │
-     │              │               └─→ Ollama/OpenAI processing
-     │              │                   Topic modeling
-     │              │                   Entity recognition
-     │              │
-     │              └─→ PDF/Word/Text extraction
-     │                  Mammoth.js for Word docs
-     │                  pdf-parse for PDFs
-     │
-     └─→ MinIO/AWS S3 secure storage
-         Presigned URLs
-```
 
-### 🏛️ Component Architecture
-```
-Frontend Structure:
-├── Pages:
-│   ├── / (Landing page)
-│   ├── /dashboard (Main interface)
-│   ├── /chat (AI Q&A interface)
-│   ├── /graph (Knowledge graph visualization)
-│   └── /sign-in & /sign-up (Authentication)
-│
-├── Components:
-│   ├── ui/ (Radix UI components)
-│   ├── chat/ (Chat interface)
-│   ├── documents/ (File management)
-│   ├── graph/ (Cytoscape visualization)
-│   └── layout/ (Navigation, headers)
-│
-└── API Routes:
-    ├── /upload (File upload & processing)
-    ├── /documents (CRUD operations)
-    ├── /search (Semantic search)
-    ├── /chat (AI Q&A)
-    └── /graph (Graph data & operations)
+```mermaid
+flowchart LR
+    A["File Upload<br/>MinIO / AWS S3<br/>Presigned URLs"] --> B["Text Extraction<br/>mammoth.js (Word)<br/>LangChain PDFLoader (PDF)"]
+    B --> C["AI Processing<br/>Ollama / OpenAI<br/>Entity recognition · Topic modeling"]
+    C --> D[("Vector embeddings<br/>Qdrant")]
+    C --> E[("Entity extraction<br/>Neo4j")]
+    C --> F[("Metadata storage<br/>MongoDB")]
 ```
 
 ## 📋 Prerequisites
@@ -582,50 +602,28 @@ documind/
 
 ## 🔄 Document Processing Pipeline
 
-### 1. Upload Phase
-- **Authentication**: Verify user session (local Auth.js or Clerk, depending on `AUTH_MODE`)
-- **Storage**: Save file to local MinIO or AWS S3
-- **Metadata**: Create document record in MongoDB
-- **Queue**: Initiate background processing
+End-to-end flow from upload to a fully indexed, graph-linked document. The AI-specific steps (chunking, embeddings, entity extraction, resolution, clustering) are covered in detail in **AI Systems Deep Dive** above — this is the operational view.
 
-### 2. Processing Phase
-- **Text Extraction**: Extract content from PDF/DOCX/TXT
-- **Chunking**: Split text into optimal segments (500 tokens)
-- **Embeddings**: Generate vector representations using Ollama or OpenAI
-- **Storage**: Store vectors in Qdrant with user scoping
+1. **Upload** — verify the user session (local Auth.js or Clerk, depending on `AUTH_MODE`), save the file to local MinIO or AWS S3, create a document record in MongoDB, and hand off to background processing
+2. **Extraction & chunking** — pull text from PDF/DOCX/TXT and split it into overlapping word-windows
+3. **Embedding & vector storage** — batch-embed every chunk and upsert into Qdrant, scoped to the uploading user
+4. **Knowledge graph construction** — extract entities per chunk, link co-occurrences, resolve entities against the user's existing graph, and store everything in Neo4j with proper indexing
+5. **Status updates** — the document's `processingStatus` moves through `pending → processing → completed`/`failed`, polled live by the dashboard, with error messages surfaced on failure
 
-### 3. Knowledge Graph Construction
-- **Entity Extraction**: Identify people, organizations, locations, dates using AI
-- **Relationship Mapping**: Create co-occurrence and semantic similarity connections
-- **Quality Filtering**: Filter relationships by confidence thresholds (>0.3 for co-occurrence, >0.5 for similarity)
-- **Cross-Document Resolution**: Link same entities across different documents
-- **Graph Storage**: Build optimized knowledge graph in Neo4j with proper indexing
-- **User Isolation**: Ensure complete data privacy with user-scoped queries
-
-### 4. Status Updates
-- **Real-time**: Live processing status updates
-- **Error Handling**: Comprehensive error reporting
-- **Completion**: Automatic notification system
+Note that resolving *duplicate* entities and clustering documents by similarity are collection-wide operations, so they're triggered on demand from the graph page rather than automatically per upload (see stage 3–5 of the knowledge-graph pipeline above).
 
 ## 🔍 Search & Q&A System
 
-### Semantic Search Flow
-
-1. **Query Processing**: Convert user query to vector embedding
-2. **Vector Search**: Find similar content in Qdrant (user-scoped)
-3. **Context Retrieval**: Gather related entities from Neo4j
-4. **LLM Integration**: Combine context with user query
-5. **Response Generation**: Provide answers with source citations
+Covered in full in **AI Systems Deep Dive → Retrieval-Augmented Generation (RAG) pipeline** above — retrieval is a straight Qdrant vector search scoped to the asking user, with Neo4j powering a *separate* graph-exploration experience rather than feeding the chat prompt directly.
 
 ### Knowledge Graph Exploration
 
 - **Interactive Visualization**: Cytoscape.js powered graphs with optimized layouts
-- **Smart Edge Rendering**: Clean visualization with hover-to-reveal labels for reduced clutter
-- **Advanced Filtering**: Filter by entity types, confidence thresholds, and relationship strengths
-- **Customizable Display**: Toggle edge labels, adjust node limits, and control visual density
-- **Entity Relationships**: Explore connections between people, organizations, locations, and concepts
-- **Document Mapping**: Visualize how documents relate through shared entities and topics
-- **Graph Statistics**: Real-time metrics showing nodes, edges, and entity distributions
+- **Real hover-driven edge labels**: connection types stay hidden until you hover the specific edge — a plain `edge:hover` CSS-style selector doesn't exist in Cytoscape core, so this is implemented with real `mouseover`/`mouseout` listeners
+- **Advanced Filtering**: filter by entity type, node cap, and structural noise (chunk nodes, co-occurrence mesh)
+- **Entity Relationships**: explore connections between people, organizations, locations, and concepts
+- **Document Mapping**: visualize how documents relate through shared entities and topics
+- **Graph Statistics**: real-time metrics showing nodes, edges, and entity distributions
 
 ## 🔐 Security & Privacy
 
@@ -795,7 +793,7 @@ If chat, embedding, or entity/topic extraction requests fail:
 #### Graph Visualization Issues
 
 - **No Connections Visible**: Check that documents have been processed and entities extracted
-- **Cluttered Graph**: Use the "Show Connection Labels" toggle to reduce visual noise
+- **Cluttered Graph**: Turn off "Show node names" for a cleaner view, or hover individual nodes/edges to reveal names on demand
 - **Performance Issues**: Reduce max nodes limit in the filters panel
 - **Layout Problems**: Use graph controls (fit to view, center, reset zoom) to optimize display
 
