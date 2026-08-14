@@ -20,10 +20,8 @@ export function GraphVisualization({
   onEdgeClick,
   height = 600,
   width,
-  showEdgeLabels = false,
   showNodeLabels = true,
 }: GraphVisualizationProps & {
-  showEdgeLabels?: boolean;
   showNodeLabels?: boolean;
 }) {
   const cyRef = useRef<HTMLDivElement>(null);
@@ -32,7 +30,6 @@ export function GraphVisualization({
   const [_selectedNode, setSelectedNode] = useState<string | null>(null);
   const [legendOpen, setLegendOpen] = useState(false);
   const showNodeLabelsRef = useRef(showNodeLabels);
-  const showEdgeLabelsRef = useRef(showEdgeLabels);
 
   const getNodeLabel = useCallback((node: any) => {
     switch (node.type) {
@@ -318,7 +315,7 @@ export function GraphVisualization({
     cy.on("mouseout", "edge", (evt) => {
       const edge = evt.target as EdgeSingular;
       edge.removeStyle("width line-color target-arrow-color opacity font-size color");
-      edge.style("label", showEdgeLabelsRef.current ? edge.data("label") : "");
+      edge.style("label", "");
     });
 
     cyInstanceRef.current = cy;
@@ -333,21 +330,6 @@ export function GraphVisualization({
       }
     };
   }, [graphData, onNodeClick, onEdgeClick, getNodeLabel]);
-
-  // Update edge labels on the live instance when the toggle changes — no need to recreate the graph
-  useEffect(() => {
-    showEdgeLabelsRef.current = showEdgeLabels;
-    if (!cyInstanceRef.current) return;
-    // Bypass styles need the resolved value, not the "data(label)" mapper
-    // syntax — that mapper form only resolves for stylesheet rules.
-    cyInstanceRef.current.edges().forEach((edge) => {
-      edge.style("label", showEdgeLabels ? edge.data("label") : "");
-    });
-    cyInstanceRef.current.edges().style("font-size", "10px");
-    cyInstanceRef.current.edges().style("color", "#1E293B");
-    cyInstanceRef.current.edges().style("text-outline-width", 2);
-    cyInstanceRef.current.edges().style("text-outline-color", "#fff");
-  }, [showEdgeLabels]);
 
   // Update Entity/Chunk node labels on the live instance when the toggle
   // changes, and keep the hover handlers in sync via the ref they read.

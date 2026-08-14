@@ -17,7 +17,6 @@ export default function GraphPage() {
   const [filters, setFilters] = useState({
     entityTypes: [] as string[],
     maxNodes: 50,
-    showEdgeLabels: false,
     showNodeLabels: true,
     minConfidence: 0.3,
     showChunks: false,
@@ -493,22 +492,6 @@ export default function GraphPage() {
                   <label className="flex items-center p-2 hover:bg-accent transition-colors cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={filters.showEdgeLabels}
-                      onChange={(e) =>
-                        setFilters((prev) => ({
-                          ...prev,
-                          showEdgeLabels: e.target.checked,
-                        }))
-                      }
-                      className="rounded-sm border-input accent-primary focus:ring-ring"
-                    />
-                    <span className="ml-3 text-sm text-foreground font-medium">
-                      Show connection labels
-                    </span>
-                  </label>
-                  <label className="flex items-center p-2 hover:bg-accent transition-colors cursor-pointer">
-                    <input
-                      type="checkbox"
                       checked={filters.showChunks}
                       onChange={(e) =>
                         setFilters((prev) => ({
@@ -672,7 +655,6 @@ export default function GraphPage() {
                   onNodeClick={handleNodeClick}
                   onEdgeClick={handleEdgeClick}
                   height={600}
-                  showEdgeLabels={filters.showEdgeLabels}
                   showNodeLabels={filters.showNodeLabels}
                 />
               )}
