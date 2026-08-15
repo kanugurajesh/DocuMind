@@ -40,6 +40,38 @@ Both pipelines had to run identically against a hosted LLM (OpenAI) or a fully l
 - **🎛️ Smart Filtering**: Customizable graph views with entity type filters and confidence thresholds
 - **🔧 Resilient Architecture**: Graceful error handling with fallback options for all services
 
+## 📸 Screenshots
+
+### Landing Page
+
+| Hero | Feature grid | Process & CTA |
+|---|---|---|
+| ![Landing page hero](images/landing-hero.png) | ![Landing page feature grid](images/landing-features.png) | ![Landing page process and call to action](images/landing-process-cta.png) |
+
+### Authentication
+
+| Sign up | Sign in |
+|---|---|
+| ![Sign up form](images/sign-up.png) | ![Sign in form](images/sign-in.png) |
+
+### Dashboard
+
+| Overview | Account menu |
+|---|---|
+| ![Dashboard overview](images/dashboard.png) | ![Dashboard account menu](images/dashboard-account-menu.png) |
+
+### Document Chat (RAG Q&A)
+
+| Empty state | Question asked | Answer with cited sources |
+|---|---|---|
+| ![Document chat empty state](images/document-chat-empty.png) | ![Document chat question asked](images/document-chat-question.png) | ![Document chat answer with cited sources](images/document-chat-answer-sources.png) |
+
+### Knowledge Graph
+
+| Overview | Legend | Filters panel | Node detail |
+|---|---|---|---|
+| ![Knowledge graph overview](images/knowledge-graph-overview.png) | ![Knowledge graph with legend](images/knowledge-graph-legend.png) | ![Knowledge graph filters panel](images/knowledge-graph-filters.png) | ![Knowledge graph node detail](images/knowledge-graph-node-detail.png) |
+
 ## 🧠 AI Systems Deep Dive
 
 This is the section worth reading closely if you're evaluating the AI/ML engineering rather than the product. Every claim below is backed by code — file paths point to the actual implementation, not a design doc.
